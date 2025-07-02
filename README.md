@@ -15,7 +15,7 @@
 ## 👥 멤버
 | 팀원 1 | 팀원 2 |
 |:------:|:------:|
-| ![image](https://github.com/user-attachments/assets/ac52bf19-7409-4028-b5bc-8cc63d036b13) | 사진2 |
+| ![image](![IMG_9272](https://github.com/user-attachments/assets/8c292a10-e568-49cf-9dce-eb22ca9f9aa9) | 사진2 |
 | FE | FE |
 | [GitHub](https://github.com/sua005) | [GitHub](깃허브 링크) |
 
@@ -26,7 +26,7 @@
 
 폰스널트레이너는 **PHONE**과 **PERSONAL TRAINER**의 합성어로,
 
-## **한 마디로 모바일에서 만나 볼 수 있는 PT쌤 이이에요🧑‍🏫**
+### **한 마디로 모바일에서 만나 볼 수 있는 PT쌤 이이에요🧑‍🏫**
 
 회원님이 하실 일은 본인에 대해 알려주는 것 딱 하나예요. 아 하나 더! 잘 따라만 오세요 ㅎㅎ 
 
