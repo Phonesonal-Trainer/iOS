@@ -15,9 +15,9 @@
 ## 👥 멤버
 | 조수아 | 팀원 2 | 팀원 3 |
 |:------:|:------:|:------:|
-| ![image](https://github.com/user-attachments/assets/8c292a10-e568-49cf-9dce-eb22ca9f9aa9) | 사진2 | 사진3 |
+| ![image](https://github.com/user-attachments/assets/8c292a10-e568-49cf-9dce-eb22ca9f9aa9) | ![image](https://github.com/rhy2301/asset/blob/ce847323d07c18d39576928b365e76f89b3f30c0/IMG_5164%202.jpg) | 사진3 |
 | FE | FE | FE |
-| [GitHub](https://github.com/sua005) | [GitHub](깃허브 링크) | [GitHub](깃허브 링크) |
+| [GitHub](https://github.com/sua005) | [GitHub](https://github.com/rhy2301) | [GitHub](깃허브 링크) |
 
 <br>
 
