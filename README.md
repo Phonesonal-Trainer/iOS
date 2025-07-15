@@ -13,11 +13,11 @@
 <br>
 
 ## 👥 멤버
-| 팀원 1 | 팀원 2 |
-|:------:|:------:|
-| ![image](https://github.com/user-attachments/assets/8c292a10-e568-49cf-9dce-eb22ca9f9aa9) | 사진2 |
-| FE | FE |
-| [GitHub](https://github.com/sua005) | [GitHub](깃허브 링크) |
+| 조수아 | 팀원 2 | 팀원 3 |
+|:------:|:------:|:------:|
+| ![image](https://github.com/user-attachments/assets/8c292a10-e568-49cf-9dce-eb22ca9f9aa9) | ![Image](https://github.com/user-attachments/assets/04642a9c-2ec1-481f-b57b-c2f705b5812f) | ![Image](https://github.com/user-attachments/assets/baf2b58e-9e3b-47ed-95d1-5008c2b0df44) |
+| FE | FE | FE |
+| [GitHub](https://github.com/sua005) | [GitHub](https://github.com/rhy2301) | [GitHub](https://github.com/sangeuncho) |
 
 <br>
 
