@@ -63,6 +63,10 @@ extension Font {
         return .pretend(type: .medium, size: 10)
     }
     
+    static var PretendardSemiBold26: Font {
+        return .pretend(type: .medium, size: 26)
+    }
+    
     static var PretendardMedium22: Font {
         return .pretend(type: .medium, size: 22)
     }
@@ -111,6 +115,9 @@ extension Font {
         return .pretend(type: .regular, size: 10)
     }
     
+    static var PretendardRegular26: Font {
+        return .pretend(type: .regular, size: 26)
+    }
 }
 
 
