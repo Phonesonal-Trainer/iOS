@@ -1,14 +1,14 @@
 //
-//  OnboradingView.swift
+//  OnboradingStart.swift
 //  PhonesonalTrainer
 //
-//  Created by Sua Cho on 7/15/25.
+//  Created by Sua Cho on 7/16/25.
 //
 
 
 import SwiftUI
 
-struct OnboardingView: View {
+struct OnboardingStartView: View {
     var body: some View {
         VStack {
             Spacer().frame(height: 60)
@@ -82,5 +82,5 @@ struct OnboardingView: View {
 }
 
 #Preview {
-    OnboardingView()
+    OnboardingStartView()
 }
