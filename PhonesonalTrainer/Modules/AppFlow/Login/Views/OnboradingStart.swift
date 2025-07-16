@@ -39,7 +39,7 @@ struct OnboardingStartView: View {
                 }
                 Spacer() // 강제 왼쪽 정렬 역할
             }
-            .padding(.leading, 30)
+            .padding(.leading, 24)
 
             Spacer()
 

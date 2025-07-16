@@ -39,6 +39,14 @@ extension Font {
         return .custom(type.value, size: size)
     }
     
+    static var PretendardSemiBold26: Font {
+        return .pretend(type: .semibold, size: 26)
+    }
+    
+    static var PretendardSemiBold24: Font {
+        return .pretend(type: .semibold, size: 24)
+    }
+    
     static var PretendardSemiBold22: Font {
         return .pretend(type: .semibold, size: 22)
     }
@@ -51,6 +59,10 @@ extension Font {
         return .pretend(type: .semibold, size: 18)
     }
     
+    static var PretendardSemiBold16: Font {
+        return .pretend(type: .semibold, size: 16)
+    }
+    
     static var PretendardSemiBold14: Font {
         return .pretend(type: .semibold, size: 14)
     }
@@ -59,12 +71,12 @@ extension Font {
         return .pretend(type: .semibold, size: 12)
     }
     
-    static var PretendardSemiBold10: Font {
-        return .pretend(type: .medium, size: 10)
+    static var PretendardMedium26: Font {
+        return .pretend(type: .medium, size: 26)
     }
     
-    static var PretendardSemiBold26: Font {
-        return .pretend(type: .medium, size: 26)
+    static var PretendardMedium24: Font {
+        return .pretend(type: .medium, size: 24)
     }
     
     static var PretendardMedium22: Font {
@@ -79,6 +91,10 @@ extension Font {
         return .pretend(type: .medium, size: 18)
     }
     
+    static var PretendardMedium16: Font {
+        return .pretend(type: .medium, size: 16)
+    }
+    
     static var PretendardMedium14: Font {
         return .pretend(type: .medium, size: 14)
     }
@@ -87,8 +103,12 @@ extension Font {
         return .pretend(type: .medium, size: 12)
     }
     
-    static var PretendardMedium10: Font {
-        return .pretend(type: .medium, size: 10)
+    static var PretendardRegular26: Font {
+        return .pretend(type: .regular, size: 26)
+    }
+    
+    static var PretendardRegular24: Font {
+        return .pretend(type: .regular, size: 24)
     }
     
     static var PretendardRegular22: Font {
@@ -103,6 +123,10 @@ extension Font {
         return .pretend(type: .regular, size: 18)
     }
     
+    static var PretendardRegular16: Font {
+        return .pretend(type: .regular, size: 16)
+    }
+    
     static var PretendardRegular14: Font {
         return .pretend(type: .regular, size: 14)
     }
@@ -111,13 +135,6 @@ extension Font {
         return .pretend(type: .regular, size: 12)
     }
     
-    static var PretendardRegular10: Font {
-        return .pretend(type: .regular, size: 10)
-    }
-    
-    static var PretendardRegular26: Font {
-        return .pretend(type: .regular, size: 26)
-    }
 }
 
 
