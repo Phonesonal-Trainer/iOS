@@ -11,7 +11,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		882090D02E27284600894C8F /* Exceptions for "PhonesonalTrainer" folder in "PhonesonalTrainer" target */ = {
+		FD8DA4A72E28388200974899 /* Exceptions for "PhonesonalTrainer" folder in "PhonesonalTrainer" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -24,7 +24,7 @@
 		88C26E322E1C1A7B001A4879 /* PhonesonalTrainer */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				882090D02E27284600894C8F /* Exceptions for "PhonesonalTrainer" folder in "PhonesonalTrainer" target */,
+				FD8DA4A72E28388200974899 /* Exceptions for "PhonesonalTrainer" folder in "PhonesonalTrainer" target */,
 			);
 			path = PhonesonalTrainer;
 			sourceTree = "<group>";
@@ -267,6 +267,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"PhonesonalTrainer/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PhonesonalTrainer/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -295,6 +296,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"PhonesonalTrainer/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PhonesonalTrainer/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
