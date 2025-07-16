@@ -4,17 +4,26 @@
 //
 //  Created by 강리현 on 7/16/25.
 //
-// 고쳐야 할 것...!
-// 1. startDate -> 그냥 무작정 0주차부터 보여주는거... => 현재 날짜에 해당하는 주차부터 보여주는 걸로 바꿔
-// 2. 날짜 선택했을 때 옆에것들이 자꾸 밀리는거.. -> RoundedRectangle 때문인 것 같은데..
 
 import SwiftUI
 
 struct WeeklyCalendarView: View {
-    @State private var currentWeekOffset: Int = 0
-    @State private var selectedDate: Date = Date()
+    @State private var currentWeekOffset: Int
     
-    private let calendar = Calendar.current
+    init() {
+        let calendar = Calendar.current
+        let startDate = Calendar.current.date(from: DateComponents(year: 2025, month: 6, day: 10))!
+        let weeks = calendar.dateComponents([.weekOfYear], from: startDate, to: Date()).weekOfYear ?? 0
+        _currentWeekOffset = State(initialValue: max(0, weeks))
+    }
+    
+    @State private var selectedDate: Date = Date()
+    // 월요일부터 시작
+    private var calendar: Calendar {
+        var cal = Calendar.current
+        cal.firstWeekday = 2
+        return cal
+    }
     
     // 기준 주의 시작일 (앱 시작 시 기준)
     // 현재 임의로 날짜 넣음. 나중에 백엔드와 연결.
@@ -63,15 +72,14 @@ struct WeeklyCalendarView: View {
     private var weekDaysView : some View {
         let weekDates = generateDatesForWeek(offset: currentWeekOffset)
         
-        return HStack(spacing : 26.5){
+        return HStack{
             ForEach(weekDates, id: \.self) { date in
                 VStack(spacing: 8){
                     ZStack{
-                        if calendar.isDate(selectedDate, inSameDayAs: date) {
-                            RoundedRectangle(cornerRadius: 30)
-                                .fill(Color.grey05)
-                                .frame(width: 43, height: 69)
-                        }
+                        RoundedRectangle(cornerRadius: 30)
+                            .fill(calendar.isDate(selectedDate, inSameDayAs: date) ? Color.grey05 : Color.clear)
+                            .frame(width: 43, height: 69)
+                        
                         VStack(spacing: 10) {
                             Text(dayName(from: date))
                                 .font(.PretendardMedium12)
@@ -99,6 +107,7 @@ struct WeeklyCalendarView: View {
                             .frame(width: 8, height: 8)
                     }
                 }
+                .frame(width: 43)
                 .onTapGesture{
                     selectedDate = date
                 }
