@@ -11,22 +11,22 @@ import SwiftUI
 struct OnboardingStartView: View {
     var body: some View {
         VStack {
-            Spacer().frame(height: 60)
+            Spacer().frame(height: 80)
 
             // 좌측 정렬 고정용 래퍼
             HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 28) {
                     // 로고
                     Image("PhonesonalTrainerLogo")
                         .resizable()
-                        .frame(width: 180, height: 180)
+                        .frame(width: 100, height: 73)
                         .clipShape(Rectangle())
                         .background(Color.white)
 
                     // 문구
                     VStack(alignment: .leading, spacing: 8) {
                         Text("핸드폰 안에서 만나는")
-                            .font(.PretendardRegular26)
+                            .font(.PretendardRegular22)
 
                         HStack(spacing: 0) {
                             Text("나만의 ")
@@ -39,7 +39,7 @@ struct OnboardingStartView: View {
                 }
                 Spacer() // 강제 왼쪽 정렬 역할
             }
-            .padding(.leading, 24)
+            .padding(.leading, 40)
 
             Spacer()
 
@@ -74,7 +74,7 @@ struct OnboardingStartView: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .padding(.bottom, 40)
+            .padding(.bottom, 92)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.white)

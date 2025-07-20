@@ -13,6 +13,41 @@ enum Goal: String, CaseIterable, Identifiable {
     case bulkUp = "벌크업"
 
     var id: String { rawValue }
+
+    // 선택된 상태 배경색
+    var selectedColor: Color {
+        switch self {
+        case .loseWeight: return .orange04
+        case .escapeSkinnyFat: return .orange04
+        case .bulkUp: return .orange04
+        }
+    }
+
+    // 비선택 상태 배경색
+    var unselectedColor: Color {
+        return .grey01
+    }
+
+    // 선택/비선택 상태 텍스트 색상
+    var selectedTextColor: Color { .grey0 }
+    var unselectedTextColor: Color { .grey03 }
+
+    // 선택/비선택 상태 폰트
+    var selectedFont: Font {
+        switch self {
+        case .loseWeight: return .PretendardRegular18
+        case .escapeSkinnyFat: return .PretendardRegular18
+        case .bulkUp: return .PretendardRegular18
+        }
+    }
+
+    var unselectedFont: Font {
+        switch self {
+        case .loseWeight: return .PretendardRegular18
+        case .escapeSkinnyFat: return .PretendardRegular18
+        case .bulkUp: return .PretendardRegular18
+        }
+    }
 }
 
 struct OnboardingGoalAndDurationView: View {
@@ -69,13 +104,13 @@ struct OnboardingGoalAndDurationView: View {
                             selectedGoal = goal
                         }) {
                             Text(goal.rawValue)
-                                .font(.PretendardMedium16)
-                                .foregroundColor(selectedGoal == goal ? .white : .black)
+                                .font(selectedGoal == goal ? goal.selectedFont : goal.unselectedFont)
+                                .foregroundColor(selectedGoal == goal ? goal.selectedTextColor : goal.unselectedTextColor)
                                 .padding(.vertical, 10)
                                 .padding(.horizontal, 16)
                                 .background(
                                     RoundedRectangle(cornerRadius: 8)
-                                        .fill(selectedGoal == goal ? Color.orange04 : Color.grey01)
+                                        .fill(selectedGoal == goal ? goal.selectedColor : goal.unselectedColor)
                                 )
                         }
                     }
@@ -109,7 +144,7 @@ struct OnboardingGoalAndDurationView: View {
                 }
             }
             .padding(.top, 20)
-            
+
             Spacer()
 
             // 다음 버튼
