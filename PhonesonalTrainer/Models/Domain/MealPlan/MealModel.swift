@@ -10,6 +10,7 @@ import Foundation
 struct MealModel : Identifiable {
     let id : UUID = UUID()
     let name : String    // ex) "소고기"
-    let amount : Int     // ex) "180g"
-    let kcal : Int       // ex) "321kcal"
+    let amount : String     // ex) "180g"
+    let kcal : String      // ex) "321kcal"
+    let imageName : String?
 }
