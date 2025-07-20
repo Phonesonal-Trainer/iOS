@@ -47,13 +47,14 @@ struct WeeklyCalendarView: View {
                 }
             }) {
                 Image(systemName: "chevron.left")
-                    .foregroundColor(canGoToPreviousWeek ? .grey05 : .grey02)
+                    .foregroundStyle(canGoToPreviousWeek ? .grey05 : .grey02)
                     .padding()
             }
             .disabled(!canGoToPreviousWeek)
             
             Text("\(currentWeekOffset)주차")
                 .font(.PretendardMedium18)
+                .foregroundStyle(.grey05)
             
             Button(action: {
                 if currentWeekOffset < maxWeekOffset {
@@ -61,7 +62,7 @@ struct WeeklyCalendarView: View {
                 }
             }) {
                 Image(systemName: "chevron.right")
-                    .foregroundColor(canGoToNextWeek ? .grey05 : .grey02)
+                    .foregroundStyle(canGoToNextWeek ? .grey05 : .grey02)
                     .padding()
             }
             .disabled(!canGoToNextWeek)
@@ -84,13 +85,13 @@ struct WeeklyCalendarView: View {
                             Text(dayName(from: date))
                                 .font(.PretendardMedium12)
                                 .frame(width: 23)
-                                .foregroundColor(
+                                .foregroundStyle(
                                     calendar.isDate(selectedDate, inSameDayAs: date) ? .grey01 : .grey02
                                 )
                             
                             Text("\(calendar.component(.day, from: date))")
                                 .frame(width: 23)
-                                .foregroundColor(
+                                .foregroundStyle(
                                     calendar.isDate(selectedDate, inSameDayAs: date) ? .grey01 : .grey05
                                 )
                         }
