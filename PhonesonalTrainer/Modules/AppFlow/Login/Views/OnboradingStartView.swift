@@ -32,7 +32,7 @@ struct OnboardingStartView: View {
                             Text("나만의 ")
                                 .font(.PretendardSemiBold26)
                             Text("퍼스널 트레이너")
-                                .foregroundColor(.orange04)
+                                .foregroundColor(.orange05)
                                 .font(.PretendardSemiBold26)
                         }
                     }
@@ -65,10 +65,10 @@ struct OnboardingStartView: View {
                         Image("KakaoTalkLogo")
                             .resizable()
                             .frame(width: 32, height: 32)
-                            .background(Color.yellow0)
+                            .background(Color.yellow01)
                             .clipShape(Circle())
                             .frame(width: 50, height: 50)
-                            .background(Color.yellow0)
+                            .background(Color.yellow01)
                             .clipShape(Circle())
                     }
                 }

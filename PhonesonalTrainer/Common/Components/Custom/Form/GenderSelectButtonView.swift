@@ -27,12 +27,12 @@ struct GenderSelectButtonView: View {
         }) {
             Text(gender.rawValue)
                 .font(.PretendardMedium18)
-                .foregroundColor(isSelected ? .orange04 : .grey02)
+                .foregroundColor(isSelected ? .orange05 : .grey02)
                 .frame(width: 75, height: 52) // ✅ 버튼 전체 사이즈 고정
                 .background(Color.white)
                 .overlay(
                     RoundedRectangle(cornerRadius: 4)
-                        .stroke(isSelected ? Color.orange04 : Color.grey02, lineWidth: 1)
+                        .stroke(isSelected ? Color.orange05 : Color.grey02, lineWidth: 1)
                 )
         }
     }

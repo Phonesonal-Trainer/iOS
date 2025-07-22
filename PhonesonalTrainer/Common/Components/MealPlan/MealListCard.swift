@@ -68,7 +68,7 @@ struct MealListCard: View {
     private var mealKcal: some View {
         Text(item.kcal)
             .font(.PretendardMedium18)
-            .foregroundStyle(.orange04)
+            .foregroundStyle(.orange05)
     }
 }
 

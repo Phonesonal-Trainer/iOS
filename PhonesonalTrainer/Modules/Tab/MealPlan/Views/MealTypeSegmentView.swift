@@ -29,7 +29,7 @@ struct MealTypeSegmentView: View {
                             ZStack {
                                 if selectedMeal == meal {
                                     Rectangle()
-                                        .fill(Color.orange04)
+                                        .fill(Color.orange05)
                                         .frame(height: 2)
                                         .matchedGeometryEffect(id: "underline", in: underlineAnimation)
                                 } else {

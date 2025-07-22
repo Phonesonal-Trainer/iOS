@@ -48,10 +48,10 @@ struct MealPlanView: View {
                                 .foregroundStyle(.grey05)
                             Text("/")
                                 .font(.PretendardMedium16)
-                                .foregroundStyle(.orange04)
+                                .foregroundStyle(.orange05)
                             Text("1111 kcal")
                                 .font(.PretendardMedium16)
-                                .foregroundStyle(.orange04)
+                                .foregroundStyle(.orange05)
                         }
                     }
                     .padding(.leading, 26)

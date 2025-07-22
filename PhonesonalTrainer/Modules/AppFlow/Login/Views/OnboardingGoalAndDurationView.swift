@@ -15,13 +15,13 @@ enum Goal: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 
     var selectedColor: Color {
-        .orange04
+        .orange05
     }
     var unselectedColor: Color {
         .grey01
     }
     var selectedTextColor: Color {
-        .grey0
+        .grey00
     }
     var unselectedTextColor: Color {
         .grey03
@@ -48,7 +48,7 @@ struct OnboardingGoalAndDurationView: View {
 
     var body: some View {
         ZStack {
-            Color.grey0.ignoresSafeArea()
+            Color.background.ignoresSafeArea()
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
@@ -61,8 +61,8 @@ struct OnboardingGoalAndDurationView: View {
 
                         // 페이지 인디케이터
                         HStack(spacing: 8) {
-                            Capsule().fill(Color.orange04).frame(width: 80, height: 3)
-                            Capsule().fill(Color.orange04).frame(width: 80, height: 3)
+                            Capsule().fill(Color.orange05).frame(width: 80, height: 3)
+                            Capsule().fill(Color.orange05).frame(width: 80, height: 3)
                             Capsule().fill(Color.grey01).frame(width: 80, height: 3)
                             Capsule().fill(Color.grey01).frame(width: 80, height: 3)
                         }
@@ -141,7 +141,7 @@ struct OnboardingGoalAndDurationView: View {
                     }) {
                         Text("다음")
                             .font(.PretendardSemiBold16)
-                            .foregroundColor(isFormValid ? .grey0 : .grey02)
+                            .foregroundColor(isFormValid ? .grey00 : .grey02)
                             .frame(maxWidth: .infinity)
                             .frame(height: 54)
                             .background(isFormValid ? Color.grey05 : Color.grey01)

@@ -28,7 +28,7 @@ struct OnboardingInfoInputView: View {
     var body: some View {
         ZStack {
             // 전체 배경색
-            Color.grey0
+            Color.background
                 .ignoresSafeArea()  // SafeArea까지 배경색 채우기
 
             ScrollView {
@@ -43,7 +43,7 @@ struct OnboardingInfoInputView: View {
 
                         // 페이지 인디케이터
                         HStack(spacing: 8) {
-                            Capsule().fill(Color.orange04).frame(width: 80, height: 3)
+                            Capsule().fill(Color.orange05).frame(width: 80, height: 3)
                             Capsule().fill(Color.grey01).frame(width: 80, height: 3)
                             Capsule().fill(Color.grey01).frame(width: 80, height: 3)
                             Capsule().fill(Color.grey01).frame(width: 80, height: 3)
@@ -106,7 +106,7 @@ struct OnboardingInfoInputView: View {
                     }) {
                         Text("다음")
                             .font(.PretendardSemiBold16)
-                            .foregroundColor(isFormValid ? .grey0 : .grey02)
+                            .foregroundColor(isFormValid ? .grey00 : .grey02)
                             .frame(maxWidth: .infinity)
                             .frame(height: 54)
                             .background(isFormValid ? Color.grey05 : Color.grey01)
