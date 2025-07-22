@@ -57,7 +57,14 @@ struct EmptyMealRecordView: View {
 struct RecordInfoView: View {
     var body: some View {
         /// 기록 상세 화면에서도 등장하는 화면
-        
+        ZStack {
+            RoundedRectangle(cornerRadius: 5)
+                .fill(Color(.grey00))
+                .frame(width: MealRecordConstants.recordSectionWidth, height: MealRecordConstants.recordInfoHeight)
+                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 0)
+            
+            NutritionInfoCard(nutrition: NutritionInfoModel(mealType: "아침", kcal: 1234, carb: 111, protein: 111, fat: 111))
+        }
     }
 }
 
@@ -69,5 +76,8 @@ struct RecordWithImageView: View {
 }
 
 #Preview {
-    MealRecordSectionView(viewModel: MealPlanViewModel())
+    let viewModel = MealPlanViewModel()
+        viewModel.mealRecordStates[.breakfast] = .noImage // 강제 설정
+
+        return MealRecordSectionView(viewModel: viewModel)
 }
