@@ -11,6 +11,8 @@ import SwiftUI
 struct MealPlanView: View {
     let screenWidth = UIScreen.main.bounds.width
     
+    @StateObject private var viewModel = MealPlanViewModel()
+    
     // MARK: - Constants
     fileprivate enum MealPlanConstants {
         static let scrollViewSpacing: CGFloat = 25
@@ -63,6 +65,7 @@ struct MealPlanView: View {
                     MealListView()
                     
                     // 식단 기록 뷰
+                    MealRecordSectionView(viewModel: MealPlanViewModel())
                 }
                 
             }
