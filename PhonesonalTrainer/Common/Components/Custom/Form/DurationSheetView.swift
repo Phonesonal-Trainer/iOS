@@ -15,37 +15,59 @@ struct DurationSheetView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            // 상단 타이틀 & 닫기 버튼
             HStack {
                 Text("목표 기간을 선택해주세요.")
-                    .font(.PretendardSemiBold18)
+                    .font(.PretendardMedium20)
                     .padding()
                 Spacer()
                 Button(action: {
                     isPresented = false
                 }) {
                     Image(systemName: "xmark")
-                        .foregroundColor(.gray)
+                        .foregroundColor(.grey06)
                         .padding()
                 }
             }
 
             Divider()
+                .background(Color.grey01) // Divider 색상 커스텀
 
-            ForEach(options, id: \.self) { option in
-                Button(action: {
-                    selected = option
-                    isPresented = false
-                }) {
-                    Text(option)
-                        .font(.PretendardRegular16)
-                        .foregroundColor(.black)
-                        .frame(maxWidth: .infinity)
-                        .padding()
+            // 옵션 리스트
+            VStack(spacing: 0) {
+                ForEach(options.indices, id: \.self) { index in
+                    Button(action: {
+                        selected = options[index]
+                        isPresented = false
+                    }) {
+                        Text(options[index])
+                            .font(.PretendardMedium18)
+                            .foregroundColor(.grey05)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                    }
+
+                    // 마지막 옵션 아래에는 Divider 없음
+                    if index < options.count - 1 {
+                        Divider()
+                            .background(Color.grey01) // Divider 색상 커스텀
+                    }
                 }
             }
-
-            Spacer()
         }
         .presentationDetents([.fraction(0.35)])
+    }
+}
+
+#Preview {
+    DurationSheetPreviewWrapper()
+}
+
+struct DurationSheetPreviewWrapper: View {
+    @State private var selected = "1개월"
+    @State private var isPresented = true
+
+    var body: some View {
+        DurationSheetView(selected: $selected, isPresented: $isPresented)
     }
 }

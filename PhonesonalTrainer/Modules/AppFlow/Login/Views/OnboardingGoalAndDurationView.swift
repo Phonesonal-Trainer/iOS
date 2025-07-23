@@ -77,6 +77,7 @@ struct OnboardingGoalAndDurationView: View {
                                 .font(.PretendardRegular20)
                                 .foregroundColor(.grey03)
                         }
+                        .padding(.top, 12)
 
                         // 앱 사용 목적
                         VStack(alignment: .leading, spacing: 20) {
@@ -148,7 +149,7 @@ struct OnboardingGoalAndDurationView: View {
                             .cornerRadius(30)
                     }
                     .disabled(!isFormValid)
-                    .padding(.top, 252)
+                    //.padding(.bottom, 128)
                 }
                 .padding(.horizontal, 28)
             }
