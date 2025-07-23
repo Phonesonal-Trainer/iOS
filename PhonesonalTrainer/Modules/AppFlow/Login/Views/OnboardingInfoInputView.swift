@@ -50,7 +50,7 @@ struct OnboardingInfoInputView: View {
                             // 뒤로가기 로직
                         }
 
-                        // 페이지 인디케이터 (컴포넌트)
+                        // 페이지 인디케이터 (공용 컴포넌트)
                         PageIndicator(
                             totalPages: totalPages,
                             currentPage: currentPage,

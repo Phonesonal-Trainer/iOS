@@ -40,16 +40,15 @@ struct InputFieldView: View {
                     if let suffix = suffixText {
                         Text(suffix)
                             .font(.PretendardRegular18)
-                            .foregroundColor(.grey05)
+                            .foregroundColor(.grey03)
                             .padding(.trailing, 12)
                     }
                 }
             }
             .frame(height: 52)
-            .background(Color.white)
             .overlay(
                 RoundedRectangle(cornerRadius: 4)
-                    .stroke(Color.grey02, lineWidth: 1)
+                    .stroke(Color.line, lineWidth: 1)
             )
         }
     }
