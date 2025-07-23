@@ -50,7 +50,6 @@ struct OnboardingGoalAndDurationView: View {
                                 .font(.PretendardRegular20)
                                 .foregroundColor(.grey03)
                         }
-                        .padding(.top, 12)
                         .padding(.horizontal)
 
                         // 앱 사용 목적

@@ -67,7 +67,6 @@ struct OnboardingInfoInputView: View {
                                 .font(.PretendardRegular20)
                                 .foregroundColor(.grey03)
                         }
-                        .padding(.top, 12)
                         .padding(.horizontal)
 
                         // (4) 닉네임 입력

@@ -49,7 +49,6 @@ struct BodyInfoInputView: View {
                                 .font(.PretendardRegular20)
                                 .foregroundColor(.grey03)
                         }
-                        .padding(.top, 12)
                         .padding(.horizontal)
 
                         // (3) 입력 폼 (2 x 2 Grid)
