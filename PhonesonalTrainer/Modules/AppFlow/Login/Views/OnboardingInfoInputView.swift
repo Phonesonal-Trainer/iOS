@@ -45,12 +45,12 @@ struct OnboardingInfoInputView: View {
             VStack(spacing: 0) {
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 24) {
-                        // 뒤로가기 헤더
+                        // (1) 뒤로가기 헤더
                         BackHeader {
                             // 뒤로가기 로직
                         }
 
-                        // 페이지 인디케이터 (공용 컴포넌트)
+                        // (2) 페이지 인디케이터 (이전 페이지까지 주황색)
                         PageIndicator(
                             totalPages: totalPages,
                             currentPage: currentPage,
@@ -58,7 +58,7 @@ struct OnboardingInfoInputView: View {
                             inactiveColor: .grey01
                         )
 
-                        // 타이틀
+                        // (3) 타이틀
                         VStack(alignment: .leading, spacing: 6) {
                             Text("만나서 반가워요 👋")
                                 .font(.PretendardSemiBold24)
@@ -70,9 +70,13 @@ struct OnboardingInfoInputView: View {
                         .padding(.top, 12)
                         .padding(.horizontal)
 
-                        // 닉네임 입력
+                        // (4) 닉네임 입력
                         InputFieldView(
-                            title: "닉네임",
+                            title: {
+                                Text("닉네임")
+                                    .font(.PretendardMedium18)
+                                    .foregroundColor(.grey06)
+                            },
                             placeholder: "닉네임을 입력하세요.",
                             text: $nickname
                         )
@@ -80,10 +84,14 @@ struct OnboardingInfoInputView: View {
                         .padding(.horizontal)
                         .focused($focusedField, equals: .nickname)
 
-                        // 나이 + 성별
+                        // (5) 나이 + 성별
                         HStack(alignment: .top, spacing: 12) {
                             InputFieldView(
-                                title: "나이",
+                                title: {
+                                    Text("나이")
+                                        .font(.PretendardMedium18)
+                                        .foregroundColor(.grey06)
+                                },
                                 placeholder: "",
                                 text: $age,
                                 keyboardType: .numberPad,
@@ -106,7 +114,7 @@ struct OnboardingInfoInputView: View {
                     }
                 }
 
-                // 하단 버튼
+                // (6) 하단 버튼
                 MainButton(
                     color: nextButtonColor,
                     text: "다음",

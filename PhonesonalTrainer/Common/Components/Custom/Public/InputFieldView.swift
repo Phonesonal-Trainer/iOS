@@ -7,15 +7,28 @@
 
 import SwiftUI
 
-struct InputFieldView: View {
-    let title: String
+struct InputFieldView<TitleView: View>: View {
+    let titleView: TitleView
     let placeholder: String
     @Binding var text: String
     var keyboardType: UIKeyboardType = .default
     var suffixText: String? = nil
 
-    // TextField 포커스 상태
-    @FocusState private var isFocused: Bool
+    @FocusState private var isFocused: Bool  // 포커스 상태 관리
+
+    init(
+        @ViewBuilder title: () -> TitleView,
+        placeholder: String,
+        text: Binding<String>,
+        keyboardType: UIKeyboardType = .default,
+        suffixText: String? = nil
+    ) {
+        self.titleView = title()
+        self.placeholder = placeholder
+        self._text = text
+        self.keyboardType = keyboardType
+        self.suffixText = suffixText
+    }
 
     var borderColor: Color {
         isFocused ? .orange05 : .line
@@ -23,9 +36,7 @@ struct InputFieldView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(title)
-                .font(.PretendardMedium18)
-                .foregroundColor(.grey06)
+            titleView
 
             ZStack(alignment: .leading) {
                 if text.isEmpty {
@@ -42,7 +53,7 @@ struct InputFieldView: View {
                         .foregroundColor(.grey05)
                         .padding(.leading, 12)
                         .padding(.vertical, 12)
-                        .focused($isFocused) // 포커스 상태 연결
+                        .focused($isFocused)  // 포커스 바인딩
 
                     if let suffix = suffixText {
                         Text(suffix)

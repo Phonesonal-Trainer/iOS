@@ -8,16 +8,16 @@
 import SwiftUI
 
 struct PageIndicator: View {
-    let totalPages: Int          // 총 페이지 수
-    let currentPage: Int         // 현재 활성 페이지
-    let activeColor: Color       // 활성 캡슐 색
-    let inactiveColor: Color     // 비활성 캡슐 색
+    let totalPages: Int
+    let currentPage: Int
+    let activeColor: Color
+    let inactiveColor: Color
 
     var body: some View {
         HStack(spacing: 8) {
             ForEach(0..<totalPages, id: \.self) { index in
                 Capsule()
-                    .fill(index == currentPage ? activeColor : inactiveColor)
+                    .fill(index <= currentPage ? activeColor : inactiveColor)
                     .frame(height: 3)
             }
         }
@@ -25,6 +25,7 @@ struct PageIndicator: View {
         .padding(.horizontal)
     }
 }
+
 
 #Preview {
     PageIndicator(
