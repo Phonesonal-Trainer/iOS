@@ -1,13 +1,16 @@
 //
-//  MealListView.swift
+//  MealCheckListView.swift
 //  PhonesonalTrainer
 //
-//  Created by 강리현 on 7/20/25.
+//  Created by 강리현 on 7/23/25.
 //
 
+/// 추후에 구현해야 하는 기능:
+/// 선택한 항목의 양과 칼로리 기억해서 합산하는데에 사용.
+/// 선택한 항목들 기억해두기. -> 나중에 사용자가 다시 해당 식단 기록 상세 뷰에 들어왔을 때 저장되어 있게.... 
 import SwiftUI
 
-struct MealListView: View {
+struct MealCheckListView: View {
     @StateObject private var mealviewModel = MealListViewModel()
     @StateObject private var viewModel = MealCheckListViewModel()
     
@@ -30,7 +33,7 @@ struct MealListView: View {
             
             VStack(spacing: 0) {
                 ForEach(Array(mealviewModel.mealItems.enumerated()), id: \.1.id) { index, meal in
-                    MealListCard(item: meal, showImage: true, viewModel: viewModel)
+                    MealListCard(item: meal, showImage: false, viewModel: viewModel)
                                 
                     if index != mealviewModel.mealItems.count - 1 {
                         Divider()
@@ -51,5 +54,5 @@ struct MealListView: View {
 }
 
 #Preview {
-    MealListView()
+    MealCheckListView()
 }

@@ -12,8 +12,8 @@ import Foundation
 
 class MealListViewModel: ObservableObject {
     @Published var mealItems: [MealModel] = [
-        MealModel(name: "소고기", amount: "180g", kcal: "321 kcal", imageName: "temp_image"),
-        MealModel(name: "소고기", amount: "180g", kcal: "321 kcal", imageName: "temp_image"),
-        MealModel(name: "소고기", amount: "180g", kcal: "321 kcal", imageName: "temp_image")
+        MealModel(name: "소고기", amount: "180g", kcal: "321 kcal", imageURL: "temp_image"),
+        MealModel(name: "소고기", amount: "180g", kcal: "321 kcal", imageURL: "temp_image"),
+        MealModel(name: "소고기", amount: "180g", kcal: "321 kcal", imageURL: "temp_image")
     ]
 }
