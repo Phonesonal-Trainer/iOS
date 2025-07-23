@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-/// 앱 전반에서 사용할 수 있는 공통 메인 버튼 컴포넌트 (테두리 둥근)
+/// 앱 전반에서 사용할 수 있는 공통 메인 버튼 컴포넌트 (모서리 둥근)
 /// 배경 색상, 텍스트, 액션을 주입받아 재사용 가능
 struct MainButton: View {
     
@@ -33,7 +33,7 @@ struct MainButton: View {
     /// 내부에서 사용하는 레이아웃 상수
     fileprivate enum MainButtonConstants {
         static let buttonHeight: CGFloat = 56      // 버튼 높이
-        static let cornerRadius: CGFloat = 60      // 버튼 모서리 둥글기
+        static let cornerRadius: CGFloat = 50      // 버튼 모서리 둥글기
     }
     
     // MARK: - Init
