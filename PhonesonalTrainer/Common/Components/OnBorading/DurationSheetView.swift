@@ -5,13 +5,26 @@
 //  Created by Sua Cho on 7/17/25.
 //
 
+
 import SwiftUI
 
-struct DurationSheetView: View {
-    @Binding var selected: String
-    @Binding var isPresented: Bool
+struct RoundedCornerShape: Shape {
+    var corners: UIRectCorner
+    var radius: CGFloat
 
-    let options = ["1개월", "3개월", "6개월"]
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(
+            roundedRect: rect,
+            byRoundingCorners: corners,
+            cornerRadii: CGSize(width: radius, height: radius)
+        )
+        return Path(path.cgPath)
+    }
+}
+
+struct DurationSheetView: View {
+    @Binding var selected: Duration
+    @Binding var isPresented: Bool
 
     var body: some View {
         VStack(spacing: 0) {
@@ -19,6 +32,7 @@ struct DurationSheetView: View {
             HStack {
                 Text("목표 기간을 선택해주세요.")
                     .font(.PretendardMedium20)
+                    .foregroundColor(.grey06)
                     .padding()
                 Spacer()
                 Button(action: {
@@ -30,32 +44,34 @@ struct DurationSheetView: View {
                 }
             }
 
-            Divider()
-                .background(Color.grey01) // Divider 색상 커스텀
-
             // 옵션 리스트
             VStack(spacing: 0) {
-                ForEach(options.indices, id: \.self) { index in
+                ForEach(Duration.allCases.indices, id: \.self) { index in
+                    let option = Duration.allCases[index]
                     Button(action: {
-                        selected = options[index]
+                        selected = option
                         isPresented = false
                     }) {
-                        Text(options[index])
+                        Text(option.rawValue)
                             .font(.PretendardMedium18)
                             .foregroundColor(.grey05)
                             .frame(maxWidth: .infinity)
                             .padding()
                     }
 
-                    // 마지막 옵션 아래에는 Divider 없음
-                    if index < options.count - 1 {
+                    if index < Duration.allCases.count - 1 {
                         Divider()
-                            .background(Color.grey01) // Divider 색상 커스텀
+                            .background(Color.grey01)
+                            .padding(.horizontal, 25)
                     }
                 }
             }
         }
-        .presentationDetents([.fraction(0.35)])
+        .padding(.top, 16)
+        .padding(.bottom, 32)
+        .padding(.horizontal, 8)
+        .background(Color.grey00)
+        .clipShape(RoundedCornerShape(corners: [.topLeft, .topRight], radius: 20))
     }
 }
 
@@ -64,7 +80,7 @@ struct DurationSheetView: View {
 }
 
 struct DurationSheetPreviewWrapper: View {
-    @State private var selected = "1개월"
+    @State private var selected: Duration = .oneMonth
     @State private var isPresented = true
 
     var body: some View {

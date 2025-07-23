@@ -12,7 +12,14 @@ struct InputFieldView: View {
     let placeholder: String
     @Binding var text: String
     var keyboardType: UIKeyboardType = .default
-    var suffixText: String? = nil // <- ✅ "세"와 같은 고정 텍스트 지원
+    var suffixText: String? = nil
+
+    // TextField 포커스 상태
+    @FocusState private var isFocused: Bool
+
+    var borderColor: Color {
+        isFocused ? .orange05 : .line
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -35,8 +42,8 @@ struct InputFieldView: View {
                         .foregroundColor(.grey05)
                         .padding(.leading, 12)
                         .padding(.vertical, 12)
+                        .focused($isFocused) // 포커스 상태 연결
 
-                    // ✅ 항상 보이는 오른쪽 텍스트
                     if let suffix = suffixText {
                         Text(suffix)
                             .font(.PretendardRegular18)
@@ -48,7 +55,7 @@ struct InputFieldView: View {
             .frame(height: 52)
             .overlay(
                 RoundedRectangle(cornerRadius: 4)
-                    .stroke(Color.line, lineWidth: 1)
+                    .stroke(borderColor, lineWidth: 1)
             )
         }
     }

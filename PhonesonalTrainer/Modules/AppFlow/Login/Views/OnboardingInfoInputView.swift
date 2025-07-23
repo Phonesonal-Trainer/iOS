@@ -62,7 +62,7 @@ struct OnboardingInfoInputView: View {
                         VStack(alignment: .leading, spacing: 6) {
                             Text("만나서 반가워요 👋")
                                 .font(.PretendardSemiBold24)
-                                .foregroundColor(.grey05)
+                                .foregroundColor(.grey06)
                             Text("회원님의 정보를 입력해주세요.")
                                 .font(.PretendardRegular20)
                                 .foregroundColor(.grey03)
