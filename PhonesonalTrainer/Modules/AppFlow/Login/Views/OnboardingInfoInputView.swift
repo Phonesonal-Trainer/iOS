@@ -19,8 +19,23 @@ struct OnboardingInfoInputView: View {
         case age
     }
 
+    // 현재 페이지 index (예: 0 ~ 3)
+    private let currentPage = 0
+    private let totalPages = 4
+
+    // 폼 유효성 검사
     var isFormValid: Bool {
         !nickname.isEmpty && !age.isEmpty && selectedGender != nil
+    }
+
+    // 버튼 색상
+    var nextButtonColor: Color {
+        isFormValid ? .grey05 : .grey01
+    }
+
+    // 버튼 텍스트 색상
+    var nextButtonTextColor: Color {
+        isFormValid ? .white : .grey02
     }
 
     var body: some View {
@@ -30,20 +45,18 @@ struct OnboardingInfoInputView: View {
             VStack(spacing: 0) {
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 24) {
-                        // 수정된 BackHeaderView 적용 (타이틀 없음)
-                        BackHeaderView {
+                        // 뒤로가기 헤더
+                        BackHeader {
                             // 뒤로가기 로직
                         }
 
-                        // 페이지 인디케이터
-                        HStack(spacing: 8) {
-                            Capsule().fill(Color.orange04).frame(height: 3)
-                            Capsule().fill(Color.grey01).frame(height: 3)
-                            Capsule().fill(Color.grey01).frame(height: 3)
-                            Capsule().fill(Color.grey01).frame(height: 3)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.horizontal)
+                        // 페이지 인디케이터 (컴포넌트)
+                        PageIndicator(
+                            totalPages: totalPages,
+                            currentPage: currentPage,
+                            activeColor: .orange04,
+                            inactiveColor: .grey01
+                        )
 
                         // 타이틀
                         VStack(alignment: .leading, spacing: 6) {
@@ -95,9 +108,9 @@ struct OnboardingInfoInputView: View {
 
                 // 하단 버튼
                 MainButton(
-                    color: isFormValid ? Color.grey05 : Color.grey01,
+                    color: nextButtonColor,
                     text: "다음",
-                    textColor: isFormValid ? .white : .grey02
+                    textColor: nextButtonTextColor
                 ) {
                     if isFormValid {
                         // 다음 화면 이동

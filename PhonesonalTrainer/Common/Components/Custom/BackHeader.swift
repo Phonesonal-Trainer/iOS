@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct BackHeaderView: View {
+struct BackHeader: View {
     var title: String? = nil         // 헤더 타이틀 (옵션)
     var onBack: () -> Void           // 뒤로가기 버튼 액션
 
@@ -40,11 +40,11 @@ struct BackHeaderView: View {
 
 #Preview {
     VStack(spacing: 20) {
-        BackHeaderView {
+        BackHeader {
             print("뒤로가기 버튼 클릭")
         }
 
-        BackHeaderView(title: "프로필") {
+        BackHeader(title: "프로필") {
             print("뒤로가기 버튼 클릭")
         }
     }

@@ -55,7 +55,7 @@ struct OnboardingGoalAndDurationView: View {
 
                     VStack(alignment: .leading, spacing: 24) {
                         
-                        BackHeaderView {
+                        BackHeader {
                             // 뒤로가기 로직
                         }
 
