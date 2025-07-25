@@ -10,6 +10,13 @@ import SwiftUI
 struct BackHeader: View {
     var title: String? = nil         // 헤더 타이틀 (옵션)
     var onBack: () -> Void           // 뒤로가기 버튼 액션
+    
+    // MARK: - 상수 정의
+    fileprivate enum BackHeaderConstants {
+        static let topPadding: CGFloat = 15
+        static let horizontalPadding: CGFloat = 25
+        static let bottomPadding: CGFloat = 20
+    }
 
     var body: some View {
         ZStack {
@@ -33,8 +40,9 @@ struct BackHeader: View {
                 Spacer()
             }
         }
-        .padding(.top, 12)
-        .padding(.horizontal, 16)
+        .padding(.top, BackHeaderConstants.topPadding)
+        .padding(.horizontal, BackHeaderConstants.horizontalPadding)
+        .padding(.bottom, BackHeaderConstants.bottomPadding)
     }
 }
 
@@ -44,7 +52,7 @@ struct BackHeader: View {
             print("뒤로가기 버튼 클릭")
         }
 
-        BackHeader(title: "프로필") {
+        BackHeader(title: "내 프로필") {
             print("뒤로가기 버튼 클릭")
         }
     }

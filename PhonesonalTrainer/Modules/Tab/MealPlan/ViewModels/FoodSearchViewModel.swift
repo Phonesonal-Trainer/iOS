@@ -13,10 +13,28 @@ class FoodSearchViewModel: ObservableObject {
     @Published var selectedSort: SortType = .frequency    // 정렬
     @Published var currentPage: Int = 1      // 식단 아이템 paging view
     
+    @Published var meals: [MealModel] = []  // API에서 받아올 예정. -> 배열에 저장
+    @Published var selectedMealIDs: Set<UUID> = []   // 사용자가 어떤 식단을 체크했는지 상태 관리
+
+    func toggleSelection(of meal: MealModel) {   // 선택/해제 토글 함수
+        if selectedMealIDs.contains(meal.id) {
+            selectedMealIDs.remove(meal.id)
+        } else {
+            selectedMealIDs.insert(meal.id)
+        }
+    }
+    
+    func isSelected(_ meal: MealModel) -> Bool {
+            selectedMealIDs.contains(meal.id)
+        }
+    
+    // 그리드에 사용
     let itemsPerPage = 8
     
     // 추후에 백엔드와 연결시 allFoods를 API 호출 결과로 대체.
-    @Published var allFoods: [MealModel] = Array(repeating: MealModel(name: "닭가슴살", amount: 100, kcal: 95, imageURL: "temp_image"), count: 18)
+    @Published var allFoods: [MealModel] = (1...18).map { i in
+        MealModel(name: "닭가슴살 \(i)", amount: 100, kcal: 95, imageURL: "temp_image")
+    }
     
     var filteredFoods: [MealModel] {
         let sorted = selectedSort == .frequency ? allFoods : allFoods.reversed() // 예시
