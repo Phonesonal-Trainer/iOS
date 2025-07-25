@@ -28,7 +28,7 @@ struct OnboardingInfoInputView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                Color.grey0.ignoresSafeArea()
+                Color.background.ignoresSafeArea()
 
                 VStack(spacing: 0) {
                     ScrollView {

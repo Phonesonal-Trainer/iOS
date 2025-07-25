@@ -6,6 +6,8 @@
 //
 
 /// 체크박스의 선택 상태를 관리
+/// 1. 식단 플랜 섹션의 리스트 부분에서 사용
+/// 2. FoodCard에서도 사용
 import Foundation
 
 class MealCheckListViewModel: ObservableObject {
@@ -19,4 +21,8 @@ class MealCheckListViewModel: ObservableObject {
             selectedMealIDs.insert(meal.id)
         }
     }
+    
+    func isSelected(_ meal: MealModel) -> Bool {
+            selectedMealIDs.contains(meal.id)
+        }
 }

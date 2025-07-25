@@ -77,14 +77,14 @@ struct MealListCard: View {
     
     /// 식단 그램 표시
     private var mealAmount: some View {
-        Text(item.amount)
+        Text("\(item.amount)g")
             .font(.PretendardMedium14)
             .foregroundStyle(.grey02)
     }
     
     /// 식단 칼로리 표시
     private var mealKcal: some View {
-        Text(item.kcal)
+        Text("\(item.kcal) kcal")
             .font(.PretendardMedium18)
             .foregroundStyle(.orange05)
     }
