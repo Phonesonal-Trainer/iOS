@@ -11,7 +11,7 @@ struct FoodCard: View {
     // MARK: - Property
     let item: MealModel
     
-    @ObservedObject var viewModel: MealCheckListViewModel
+    @ObservedObject var viewModel: FoodSearchViewModel
     
     // MARK: - 상수 정의
     fileprivate enum FoodCardConstants {
