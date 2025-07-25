@@ -1,5 +1,5 @@
 //
-//  DiagnosisView.swift
+//  OnboradingDiagnosisView.swift
 //  PhonesonalTrainer
 //
 //  Created by Sua Cho on 7/24/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct DiagnosisView: View {
+struct OnboradingDiagnosisView: View {
     let nickname: String
     let diagnosis: DiagnosisModel   // 모델 데이터 주입
 
@@ -167,7 +167,7 @@ struct DiagnosisView: View {
 }
 
 #Preview {
-    DiagnosisView(nickname: "서연", diagnosis: .dummy)
+    OnboradingDiagnosisView(nickname: "서연", diagnosis: .dummy)
 }
 
 // MARK: - MetricRow

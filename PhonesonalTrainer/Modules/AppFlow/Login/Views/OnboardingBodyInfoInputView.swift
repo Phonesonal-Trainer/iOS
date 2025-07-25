@@ -1,5 +1,5 @@
 //
-//  BodyInfoInputView.swift
+//  OnboardingBodyInfoInputView.swift
 //  PhonesonalTrainer
 //
 //  Created by Sua Cho on 7/24/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct BodyInfoInputView: View {
+struct OnboardingBodyInfoInputView: View {
     @State private var height: String = ""
     @State private var weight: String = ""
     @State private var bodyFat: String = ""
@@ -135,5 +135,5 @@ struct BodyInfoInputView: View {
 }
 
 #Preview {
-    BodyInfoInputView()
+    OnboardingBodyInfoInputView()
 }
