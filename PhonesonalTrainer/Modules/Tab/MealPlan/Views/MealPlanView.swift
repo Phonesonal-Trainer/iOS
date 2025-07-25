@@ -21,7 +21,7 @@ struct MealPlanView: View {
     
     var body: some View {
         NavigationStack(path: $path) {
-            VStack {
+            VStack(spacing: 0) {   // spacing을 0으로 주면 scrollview가 깔끔해짐.
                 VStack {
                     Text("식단 플랜")
                         .font(.PretendardMedium22)
@@ -33,6 +33,8 @@ struct MealPlanView: View {
                     /// 일단 divider 로 구현해둠
                     Divider()
                 }
+                .background(Color.grey00)
+                .zIndex(1)
                 
                 ScrollView {
                     VStack(spacing: MealPlanConstants.scrollViewSpacing) {
@@ -52,15 +54,16 @@ struct MealPlanView: View {
                     }
                 }
             }
+            .background(Color.background)
             .navigationDestination(for: MealPlanRoute.self) { route in
-                            switch route {
-                            case .mealRecordDetail(let mealType):
-                                MealRecordDetailView(mealType: mealType)
-                            }
-                        }
+                switch route {
+                case .mealRecordDetail(let mealType):
+                    MealRecordDetailView(mealType: mealType)
+                }
+            }
         }
-        
     }
+    
     private var caloriesSectionView: some View {   // 일단 더미 데이터로 구현해둠. 나중에 백엔드랑 연결.
         VStack(alignment: .leading){
             Text("총 섭취 칼로리")

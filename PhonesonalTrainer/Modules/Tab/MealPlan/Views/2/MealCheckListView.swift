@@ -47,7 +47,7 @@ struct MealCheckListView: View {
             .padding(.bottom, MealListConstants.mealCardBottomPadding)
             .background(Color.white)
             .cornerRadius(5)
-            .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 0)
+            .shadow(color: Color.black.opacity(0.1), radius: 2)
             .frame(width: MealListConstants.mealListWidth)
         }
         .frame(maxWidth: .infinity)

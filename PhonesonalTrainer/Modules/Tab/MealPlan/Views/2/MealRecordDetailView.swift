@@ -20,47 +20,33 @@ struct MealRecordDetailView: View {
     
     // MARK: - Body
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             // 상단 타이틀 부분
-            HStack {
-                BackHeader {
-                    dismiss()
-                }
-                
-                topTitle
-                
-                Spacer()
+            BackHeader(title: "\(mealType.rawValue) 식단 기록"){
+                // 뒤로 가기 로직
             }
-            .frame(width: MealRecordDetailConstant.basicWidth)
-            .navigationBarBackButtonHidden(true)  // 기본 뒤로가기 버튼 숨기기
+            .background(Color.grey00)
+            .shadow(color: Color.black.opacity(0.1), radius: 2)
+            .zIndex(1)
+            .navigationBarBackButtonHidden(true)  // 기본 뒤로가기 버튼 숨기기 
             
             ScrollView {
                 VStack(spacing: MealRecordDetailConstant.vSpacing) {
                     // 이미지 업로드 (서버에 업로드) -> 공용 컨포넌트로..?
                     ImageUpload()
+                        .padding(.top, MealRecordDetailConstant.vSpacing)
                     
                     RecordInfoView()
                     
                     MealCheckListView()
+                    
+                    // 추가 식단
                 }
                 
             }
-            
-            
-            
-            
+            .background(Color.background)
         }
-        
     }
-    
-    // MARK: - 제목
-    private var topTitle: some View {
-        Text("\(mealType.rawValue) 식단 기록")
-            .font(.PretendardMedium22)
-            .foregroundStyle(Color.grey06)
-    }
-    
-    
 }
 
 

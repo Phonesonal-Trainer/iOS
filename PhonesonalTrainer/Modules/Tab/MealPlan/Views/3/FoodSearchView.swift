@@ -16,8 +16,11 @@ struct FoodSearchView: View {
     fileprivate enum FoodSearchConstants {
         static let baseWidth: CGFloat = 340  // 기본적으로 전부 적용되는 너비
         static let VSpacing: CGFloat = 25
+        static let gridHeight: CGFloat = 317
         static let noticeHeight: CGFloat = 60 // notice 이미지 높이
         static let pageNavigationHSpacing: CGFloat = 10
+        static let addMealButtonWidth: CGFloat = 108
+        static let addMealButtonHeight: CGFloat = 28
     }
     
     /// '저장하기' 버튼 활성화 조건  ->  선택한 음식이 하나는 있어야 함.
@@ -37,30 +40,37 @@ struct FoodSearchView: View {
     
     // MARK: - Body
     var body: some View {
-        VStack {
-            topTitle  // grey00 으로 배경
-                .background(Color.grey00)
-            
-            ScrollView {
-                VStack(spacing: FoodSearchConstants.VSpacing) {
-                    /// 서치바 + 정렬 선택 세그먼트 + 음식 그리드
-                    middleContent
-                    
-                    /// notice 이미지
-                    notice
-                    
-                    // 저장 버튼
-                    MainButton(color: saveButtonColor, text: "저장하기", textColor: saveButtonTextColor) {
-                        if isValid {
-                            // 선택한 음식 정보 저장
+        NavigationStack {
+            VStack(spacing: 0) {
+                topTitle  // grey00 으로 배경
+                    .background(Color.grey00)
+                    .shadow(color: Color.black.opacity(0.1), radius: 2)
+                    .zIndex(1)
+                
+                ScrollView {
+                    VStack(spacing: FoodSearchConstants.VSpacing) {
+                        /// 서치바 + 정렬 선택 세그먼트 + 음식 그리드
+                        middleContent
+                            .padding(.top, FoodSearchConstants.VSpacing)
+                        
+                        /// notice 이미지
+                        notice
+                        
+                        // 저장 버튼
+                        MainButton(color: saveButtonColor, text: "저장하기", textColor: saveButtonTextColor) {
+                            if isValid {
+                                // 선택한 음식 정보 저장
+                            }
                         }
+                        .disabled(!isValid)
+                        .frame(width: FoodSearchConstants.baseWidth)
                     }
-                    .disabled(!isValid)
-                    .frame(width: FoodSearchConstants.baseWidth)
                 }
+                
             }
-            
+            .background(Color.background)
         }
+        
     }
     
     // MARK: - 상단 타이틀
@@ -111,12 +121,37 @@ struct FoodSearchView: View {
     
     // MARK: - 음식 아이템 그리드 뷰
     private var foodGridView: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 15) {
-            ForEach(viewModel.pagedFoods) { item in
-                FoodCard(item: item, viewModel: viewModel)
+        Group {
+            if viewModel.pagedFoods.isEmpty {
+                // 검색 결과 없음.
+                VStack {
+                    Text("검색 결과가 없습니다.")
+                        .font(.PretendardMedium16)
+                        .foregroundStyle(Color.grey03)
+                    
+                    NavigationLink(destination: ManualAddMealView()) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 30)
+                                .fill(Color.orange05)
+                                .frame(width: FoodSearchConstants.addMealButtonWidth, height: FoodSearchConstants.addMealButtonHeight)
+                            
+                            Text("+ 직접 추가하기")
+                                .font(.PretendardMedium12)
+                                .foregroundStyle(Color.grey00)
+                        }
+                    }
+                }
+                .frame(width: FoodSearchConstants.baseWidth, height: FoodSearchConstants.gridHeight)
+            } else {
+                // 식단 그리드
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 15) {
+                    ForEach(viewModel.pagedFoods) { item in
+                        FoodCard(item: item, viewModel: viewModel)
+                    }
+                }
+                .frame(width: FoodSearchConstants.baseWidth, height: FoodSearchConstants.gridHeight)
             }
         }
-        .frame(width: FoodSearchConstants.baseWidth)
     }
     
     // MARK: - 페이지네이션
@@ -124,12 +159,14 @@ struct FoodSearchView: View {
         HStack(spacing: FoodSearchConstants.pageNavigationHSpacing) {
             Button(action: { viewModel.goToPreviousPage() }) {
                 Image(systemName: "chevron.left")
+                    .foregroundStyle(viewModel.currentPage == 1 ? Color.grey02 : Color.grey05)
             }
             .disabled(viewModel.currentPage == 1)
             
             
             Button(action: { viewModel.goToNextPage() }) {
                 Image(systemName: "chevron.right")
+                    .foregroundStyle(viewModel.currentPage >= viewModel.totalPages ? Color.grey02 : Color.grey05)
             }
             .disabled(viewModel.currentPage >= viewModel.totalPages)
         }

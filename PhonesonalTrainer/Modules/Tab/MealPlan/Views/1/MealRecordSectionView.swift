@@ -77,7 +77,7 @@ struct RecordInfoView: View {
             RoundedRectangle(cornerRadius: 5)
                 .fill(Color(.grey00))
                 .frame(width: MealRecordConstants.recordSectionWidth, height: MealRecordConstants.recordInfoHeight)
-                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 0)
+                .shadow(color: Color.black.opacity(0.1), radius: 2)
             
             NutritionInfoCard(nutrition: NutritionInfoModel(mealType: "아침", kcal: 1234, carb: 111, protein: 111, fat: 111))
         }
@@ -91,7 +91,7 @@ struct RecordWithImageView: View {
             RoundedRectangle(cornerRadius: 5)
                 .fill(Color(.grey00))
                 .frame(width: MealRecordConstants.recordSectionWidth)
-                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 0)
+                .shadow(color: Color.black.opacity(0.1), radius: 2)
             
             NutritionInfoCard(nutrition: NutritionInfoModel(mealType: "아침", kcal: 1234, carb: 111, protein: 111, fat: 111))
             //nutritionInfoCard 에 이미지 추가할까 어떻게 구현하지 걍 아예 새로 해야되나
