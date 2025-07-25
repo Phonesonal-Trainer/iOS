@@ -23,7 +23,7 @@ struct MealRecordDetailView: View {
         VStack {
             // 상단 타이틀 부분
             HStack {
-                BackHeaderView {
+                BackHeader {
                     dismiss()
                 }
                 

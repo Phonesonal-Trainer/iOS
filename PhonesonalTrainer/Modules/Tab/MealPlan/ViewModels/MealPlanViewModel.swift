@@ -32,7 +32,7 @@ class MealPlanViewModel: ObservableObject {
                 mealRecordStates[type] = .noImage
             }
         } else {
-            mealRecordStates[type] = .none
+            mealRecordStates[type] = MealRecordState.none
         }
     }
     
