@@ -39,97 +39,106 @@ struct OnboardingInfoInputView: View {
     }
 
     var body: some View {
-        ZStack {
-            Color.background.ignoresSafeArea()
+        NavigationStack {
+            ZStack {
+                Color.background.ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 24) {
-                        // (1) 뒤로가기 헤더
-                        BackHeader {
-                            // 뒤로가기 로직
-                        }
+                VStack(spacing: 0) {
+                    ScrollView(showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: 24) {
+                            // (1) NavigationBar로 교체
+                            NavigationBar {
+                                Button(action: {
+                                    print("뒤로가기 버튼 클릭")
+                                }) {
+                                    Image(systemName: "chevron.left")
+                                        .font(.PretendardMedium22)
+                                        .foregroundColor(.grey05)
+                                }
+                            }
 
-                        // (2) 페이지 인디케이터 (이전 페이지까지 주황색)
-                        PageIndicator(
-                            totalPages: totalPages,
-                            currentPage: currentPage,
-                            activeColor: .orange04,
-                            inactiveColor: .grey01
-                        )
+                            // (2) 페이지 인디케이터
+                            PageIndicator(
+                                totalPages: totalPages,
+                                currentPage: currentPage,
+                                activeColor: .orange04,
+                                inactiveColor: .grey01
+                            )
 
-                        // (3) 타이틀
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("만나서 반가워요 👋")
-                                .font(.PretendardSemiBold24)
-                                .foregroundColor(.grey06)
-                            Text("회원님의 정보를 입력해주세요.")
-                                .font(.PretendardRegular20)
-                                .foregroundColor(.grey03)
-                        }
-                        .padding(.horizontal)
-
-                        // (4) 닉네임 입력
-                        InputFieldView(
-                            title: {
-                                Text("닉네임")
-                                    .font(.PretendardMedium18)
+                            // (3) 타이틀
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("만나서 반가워요 👋")
+                                    .font(.PretendardSemiBold24)
                                     .foregroundColor(.grey06)
-                            },
-                            placeholder: "닉네임을 입력하세요.",
-                            text: $nickname
-                        )
-                        .padding(.top, 16)
-                        .padding(.horizontal)
-                        .focused($focusedField, equals: .nickname)
+                                Text("회원님의 정보를 입력해주세요.")
+                                    .font(.PretendardRegular20)
+                                    .foregroundColor(.grey03)
+                            }
+                            .padding(.horizontal)
 
-                        // (5) 나이 + 성별
-                        HStack(alignment: .top, spacing: 12) {
+                            // (4) 닉네임 입력
                             InputFieldView(
                                 title: {
-                                    Text("나이")
+                                    Text("닉네임")
                                         .font(.PretendardMedium18)
                                         .foregroundColor(.grey06)
                                 },
-                                placeholder: "",
-                                text: $age,
-                                keyboardType: .numberPad,
-                                suffixText: "세"
+                                placeholder: "닉네임을 입력하세요.",
+                                text: $nickname
                             )
-                            .focused($focusedField, equals: .age)
+                            .padding(.top, 16)
+                            .padding(.horizontal)
+                            .focused($focusedField, equals: .nickname)
 
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text("성별")
-                                    .font(.PretendardMedium18)
-                                HStack(spacing: 8) {
-                                    ForEach(Gender.allCases, id: \.self) { gender in
-                                        GenderSelectButtonView(gender: gender, selectedGender: $selectedGender)
+                            // (5) 나이 + 성별
+                            HStack(alignment: .top, spacing: 12) {
+                                InputFieldView(
+                                    title: {
+                                        Text("나이")
+                                            .font(.PretendardMedium18)
+                                            .foregroundColor(.grey06)
+                                    },
+                                    placeholder: "",
+                                    text: $age,
+                                    keyboardType: .numberPad,
+                                    suffixText: "세"
+                                )
+                                .focused($focusedField, equals: .age)
+
+                                VStack(alignment: .leading, spacing: 12) {
+                                    Text("성별")
+                                        .font(.PretendardMedium18)
+                                    HStack(spacing: 8) {
+                                        ForEach(Gender.allCases, id: \.self) { gender in
+                                            GenderSelectButtonView(gender: gender, selectedGender: $selectedGender)
+                                        }
                                     }
                                 }
                             }
+                            .padding(.top, 16)
+                            .padding(.horizontal)
                         }
-                        .padding(.top, 16)
-                        .padding(.horizontal)
                     }
-                }
 
-                // (6) 하단 버튼
-                MainButton(
-                    color: nextButtonColor,
-                    text: "다음",
-                    textColor: nextButtonTextColor
-                ) {
-                    if isFormValid {
-                        // 다음 화면 이동
+                    // (6) 하단 버튼
+                    MainButton(
+                        color: nextButtonColor,
+                        text: "다음",
+                        textColor: nextButtonTextColor
+                    ) {
+                        if isFormValid {
+                            print("다음 화면 이동")
+                        }
                     }
+                    .disabled(!isFormValid)
+                    .padding(.horizontal)
+                    .padding(.bottom, 20)
                 }
-                .disabled(!isFormValid)
-                .padding(.horizontal)
-                .padding(.bottom, 20)
             }
+            .navigationBarBackButtonHidden(true)
+            .scrollDismissesKeyboard(.interactively) // iOS 15+ 자동 키보드 관리
+            .onTapGesture { hideKeyboard() }
         }
-        .scrollDismissesKeyboard(.interactively) // iOS 15+ 자동 키보드 관리
-        .onTapGesture { hideKeyboard() }
     }
 
     func hideKeyboard() {

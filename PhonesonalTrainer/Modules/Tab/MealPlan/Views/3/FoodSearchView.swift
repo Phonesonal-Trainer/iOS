@@ -11,6 +11,7 @@ struct FoodSearchView: View {
     
     // MARK: - Property
     @StateObject private var viewModel = FoodSearchViewModel()
+    @Environment(\.dismiss) private var dismiss // 뒤로가기
     
     // MARK: - 상수 정의
     fileprivate enum FoodSearchConstants {
@@ -42,10 +43,23 @@ struct FoodSearchView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                topTitle  // grey00 으로 배경
-                    .background(Color.grey00)
-                    .shadow(color: Color.black.opacity(0.1), radius: 2)
-                    .zIndex(1)
+                // NavigationBar 적용
+                NavigationBar(title: "식단 검색") {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "chevron.left")
+                            .font(.PretendardMedium22)
+                            .foregroundColor(.grey05)
+                    }
+                } trailing: {
+                    NavigationLink(destination: ManualAddMealView()) {
+                        Text("직접 추가")
+                            .font(.PretendardRegular16)
+                            .foregroundColor(.orange05)
+                    }
+                }
+                .background(Color.grey00)
+                .shadow(color: Color.black.opacity(0.1), radius: 2)
+                .zIndex(1)
                 
                 ScrollView {
                     VStack(spacing: FoodSearchConstants.VSpacing) {
@@ -57,7 +71,11 @@ struct FoodSearchView: View {
                         notice
                         
                         // 저장 버튼
-                        MainButton(color: saveButtonColor, text: "저장하기", textColor: saveButtonTextColor) {
+                        MainButton(
+                            color: saveButtonColor,
+                            text: "저장하기",
+                            textColor: saveButtonTextColor
+                        ) {
                             if isValid {
                                 // 선택한 음식 정보 저장
                             }
@@ -66,17 +84,9 @@ struct FoodSearchView: View {
                         .frame(width: FoodSearchConstants.baseWidth)
                     }
                 }
-                
             }
             .background(Color.background)
-        }
-        
-    }
-    
-    // MARK: - 상단 타이틀
-    private var topTitle: some View {
-        BackHeader(title: "식단 검색") {   // 근데 오른쪽에 '직접 추가' 버튼도 추가해야되는데..
-            // 뒤로가기 로직
+            .navigationBarBackButtonHidden(true)
         }
     }
     
@@ -99,7 +109,7 @@ struct FoodSearchView: View {
     // MARK: - 정렬 Segment
     private var sortSegment: some View {
         HStack {
-            Spacer()  // 방법이 이거밖에 없으려나
+            Spacer()
             
             Button(action: { viewModel.selectSort(.frequency) }) {
                 Text("빈도 높은 순")
@@ -162,7 +172,6 @@ struct FoodSearchView: View {
                     .foregroundStyle(viewModel.currentPage == 1 ? Color.grey02 : Color.grey05)
             }
             .disabled(viewModel.currentPage == 1)
-            
             
             Button(action: { viewModel.goToNextPage() }) {
                 Image(systemName: "chevron.right")

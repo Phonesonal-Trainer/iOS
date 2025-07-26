@@ -9,7 +9,7 @@ import SwiftUI
 
 struct MealRecordDetailView: View {
     // MARK: - Property
-    let mealType: MealType // 이거 말고 model 이나 viewmodel을 넣어야 될 것 같긴해
+    let mealType: MealType // 추후 model이나 viewModel을 넣는 것을 고려
     @Environment(\.dismiss) private var dismiss  // 뒤로가기 액션
     
     // MARK: - 상수 정의
@@ -20,35 +20,42 @@ struct MealRecordDetailView: View {
     
     // MARK: - Body
     var body: some View {
-        VStack(spacing: 0) {
-            // 상단 타이틀 부분
-            BackHeader(title: "\(mealType.rawValue) 식단 기록"){
-                // 뒤로 가기 로직
-            }
-            .background(Color.grey00)
-            .shadow(color: Color.black.opacity(0.1), radius: 2)
-            .zIndex(1)
-            .navigationBarBackButtonHidden(true)  // 기본 뒤로가기 버튼 숨기기 
-            
-            ScrollView {
-                VStack(spacing: MealRecordDetailConstant.vSpacing) {
-                    // 이미지 업로드 (서버에 업로드) -> 공용 컨포넌트로..?
-                    ImageUpload()
-                        .padding(.top, MealRecordDetailConstant.vSpacing)
-                    
-                    RecordInfoView()
-                    
-                    MealCheckListView()
-                    
-                    // 추가 식단
+        NavigationStack {
+            VStack(spacing: 0) {
+                // 상단 NavigationBar
+                NavigationBar(title: "\(mealType.rawValue) 식단 기록") {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .font(.PretendardMedium22)
+                            .foregroundColor(.grey05)
+                    }
                 }
+                .background(Color.grey00)
+                .shadow(color: Color.black.opacity(0.1), radius: 2)
+                .zIndex(1)
                 
+                ScrollView {
+                    VStack(spacing: MealRecordDetailConstant.vSpacing) {
+                        // 이미지 업로드 (서버에 업로드) -> 공용 컴포넌트 고려
+                        ImageUpload()
+                            .padding(.top, MealRecordDetailConstant.vSpacing)
+                        
+                        RecordInfoView()
+                        
+                        MealCheckListView()
+                        
+                        // 추가 식단 영역 필요 시 추가
+                    }
+                    .padding(.horizontal)
+                }
+                .background(Color.background)
             }
-            .background(Color.background)
+            .navigationBarBackButtonHidden(true) // 기본 NavigationBackButton 숨김
         }
     }
 }
-
 
 #Preview {
     MealRecordDetailView(mealType: .breakfast)
