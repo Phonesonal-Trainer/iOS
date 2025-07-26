@@ -27,19 +27,20 @@ struct OnboardingGoalAndDurationView: View {
                 Color.background.ignoresSafeArea()
 
                 VStack(spacing: 0) {
+                    // (1) NavigationBar - ScrollView 밖에 배치하여 고정
+                    NavigationBar {
+                        Button(action: {
+                            print("뒤로가기 버튼 클릭")
+                        }) {
+                            Image(systemName: "chevron.left")
+                                .font(.PretendardMedium22)
+                                .foregroundColor(.grey05)
+                        }
+                    }
+
+                    // (2) ScrollView
                     ScrollView(showsIndicators: false) {
                         VStack(alignment: .leading, spacing: 24) {
-                            // NavigationBar 적용
-                            NavigationBar {
-                                Button(action: {
-                                    print("뒤로가기 버튼 클릭")
-                                }) {
-                                    Image(systemName: "chevron.left")
-                                        .font(.PretendardMedium22)
-                                        .foregroundColor(.grey05)
-                                }
-                            }
-
                             // 페이지 인디케이터
                             PageIndicator(
                                 totalPages: totalPages,
@@ -116,9 +117,10 @@ struct OnboardingGoalAndDurationView: View {
                             .padding(.top, 16)
                             .padding(.horizontal)
                         }
+                        .padding(.bottom, 20)
                     }
 
-                    // 다음 버튼
+                    // (3) 하단 버튼
                     MainButton(
                         color: isFormValid ? Color.grey05 : Color.grey01,
                         text: "다음",
@@ -133,7 +135,7 @@ struct OnboardingGoalAndDurationView: View {
                     .padding(.bottom, 20)
                 }
 
-                // 검정 반투명 배경 + DurationSheetView
+                // (4) 검정 반투명 배경 + DurationSheetView
                 if showDurationSheet {
                     Color.black.opacity(0.5)
                         .ignoresSafeArea()

@@ -24,51 +24,43 @@ struct NavigationBar<Leading: View, Trailing: View>: View {
 
     var body: some View {
         ZStack {
-            // 타이틀을 화면 중앙에 배치 (양쪽 여백과 관계없이 항상 중앙)
+            // 타이틀 (중앙에 고정)
             if let title = title {
                 Text(title)
                     .font(.PretendardMedium22)
-                    .foregroundStyle(Color.grey06)
+                    .foregroundColor(.grey05)
                     .frame(maxWidth: .infinity, alignment: .center)
             }
 
-            // 좌우 버튼은 HStack으로 정렬
+            // 좌우 버튼
             HStack {
                 leading
                 Spacer()
                 trailing
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 16) // 좌우 여백 통일
         }
-        .padding(.vertical, 12)
+        .frame(height: 44) // NavigationBar 기본 높이
+        .padding(.bottom, 12) // 하단 여백 추가
         .background(Color.grey00)
     }
 }
 
 #Preview {
-    VStack(spacing: 30) {
+    VStack(spacing: 20) {
         NavigationBar(title: "프로필") {
-            Button(action: { print("뒤로가기") }) {
-                Image(systemName: "chevron.left")
-                    .font(.PretendardMedium22)
-                    .foregroundStyle(Color.grey06)
-            }
+            Image(systemName: "chevron.left")
+                .foregroundColor(.grey05)
         }
-
         NavigationBar(title: "설정") {
-            Button(action: { print("뒤로가기") }) {
-                Image(systemName: "chevron.left")
-                    .font(.PretendardMedium22)
-                    .foregroundStyle(Color.grey06)
-            }
+            Image(systemName: "chevron.left")
+                .foregroundColor(.grey05)
         } trailing: {
-            Button("완료") {
-                print("완료 클릭")
-            }
-            .font(.PretendardMedium16)
-            .foregroundStyle(Color.grey05)
+            Button("완료") { print("완료") }
+                .font(.PretendardRegular18)
+                .foregroundColor(.orange05)
         }
     }
     .padding()
-    .background(Color.grey00)
+    .background(Color.white)
 }

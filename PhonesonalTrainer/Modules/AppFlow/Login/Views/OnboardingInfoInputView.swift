@@ -44,28 +44,29 @@ struct OnboardingInfoInputView: View {
                 Color.background.ignoresSafeArea()
 
                 VStack(spacing: 0) {
+                    // (1) NavigationBar (스크롤 밖에서 고정)
+                    NavigationBar {
+                        Button(action: {
+                            print("뒤로가기 버튼 클릭")
+                        }) {
+                            Image(systemName: "chevron.left")
+                                .font(.PretendardMedium22)
+                                .foregroundColor(.grey05)
+                        }
+                    }
+
+                    // (2) ScrollView
                     ScrollView(showsIndicators: false) {
                         VStack(alignment: .leading, spacing: 24) {
-                            // (1) NavigationBar로 교체
-                            NavigationBar {
-                                Button(action: {
-                                    print("뒤로가기 버튼 클릭")
-                                }) {
-                                    Image(systemName: "chevron.left")
-                                        .font(.PretendardMedium22)
-                                        .foregroundColor(.grey05)
-                                }
-                            }
-
-                            // (2) 페이지 인디케이터
+                            // 페이지 인디케이터
                             PageIndicator(
                                 totalPages: totalPages,
                                 currentPage: currentPage,
-                                activeColor: .orange04,
+                                activeColor: .orange05,
                                 inactiveColor: .grey01
                             )
 
-                            // (3) 타이틀
+                            // 타이틀
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("만나서 반가워요 👋")
                                     .font(.PretendardSemiBold24)
@@ -76,7 +77,7 @@ struct OnboardingInfoInputView: View {
                             }
                             .padding(.horizontal)
 
-                            // (4) 닉네임 입력
+                            // 닉네임 입력
                             InputFieldView(
                                 title: {
                                     Text("닉네임")
@@ -90,7 +91,7 @@ struct OnboardingInfoInputView: View {
                             .padding(.horizontal)
                             .focused($focusedField, equals: .nickname)
 
-                            // (5) 나이 + 성별
+                            // 나이 + 성별
                             HStack(alignment: .top, spacing: 12) {
                                 InputFieldView(
                                     title: {
@@ -118,9 +119,10 @@ struct OnboardingInfoInputView: View {
                             .padding(.top, 16)
                             .padding(.horizontal)
                         }
+                        .padding(.bottom, 20)
                     }
 
-                    // (6) 하단 버튼
+                    // (3) 하단 버튼
                     MainButton(
                         color: nextButtonColor,
                         text: "다음",
