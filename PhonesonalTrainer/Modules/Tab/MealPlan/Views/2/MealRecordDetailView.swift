@@ -29,7 +29,7 @@ struct MealRecordDetailView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.PretendardMedium22)
-                            .foregroundColor(.grey05)
+                            .foregroundStyle(Color.grey05)
                     }
                 }
                 .background(Color.grey00)

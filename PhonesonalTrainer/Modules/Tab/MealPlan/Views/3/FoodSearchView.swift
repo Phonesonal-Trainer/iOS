@@ -41,25 +41,13 @@ struct FoodSearchView: View {
     
     // MARK: - Body
     var body: some View {
-        NavigationStack {
+        NavigationStack {  // 이거 루트뷰에다가 써야돼.. 수정해..
             VStack(spacing: 0) {
                 // NavigationBar 적용
-                NavigationBar(title: "식단 검색") {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "chevron.left")
-                            .font(.PretendardMedium22)
-                            .foregroundColor(.grey05)
-                    }
-                } trailing: {
-                    NavigationLink(destination: ManualAddMealView()) {
-                        Text("직접 추가")
-                            .font(.PretendardRegular16)
-                            .foregroundColor(.grey05)
-                    }
-                }
-                .background(Color.grey00)
-                .shadow(color: Color.black.opacity(0.1), radius: 2)
-                .zIndex(1)
+                topTitle
+                    .background(Color.grey00)
+                    .shadow(color: Color.black.opacity(0.1), radius: 2)
+                    .zIndex(1)
                 
                 ScrollView {
                     VStack(spacing: FoodSearchConstants.VSpacing) {
@@ -87,6 +75,23 @@ struct FoodSearchView: View {
             }
             .background(Color.background)
             .navigationBarBackButtonHidden(true)
+        }
+    }
+    
+    // MARK: - 상단 제목
+    private var topTitle: some View {
+        NavigationBar(title: "식단 검색") {
+            Button(action: { dismiss() }) {
+                Image(systemName: "chevron.left")
+                    .font(.PretendardMedium22)
+                    .foregroundColor(.grey05)
+            }
+        } trailing: {
+            NavigationLink(destination: ManualAddMealView()) {
+                Text("직접 추가")
+                    .font(.PretendardRegular16)
+                    .foregroundColor(.grey05)
+            }
         }
     }
     
