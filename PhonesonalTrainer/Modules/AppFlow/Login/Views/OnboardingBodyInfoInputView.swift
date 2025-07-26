@@ -26,19 +26,20 @@ struct OnboardingBodyInfoInputView: View {
                 Color.grey00.ignoresSafeArea()
 
                 VStack(spacing: 0) {
+                    // (1) NavigationBar
+                    NavigationBar {
+                        Button(action: {
+                            print("뒤로가기 버튼 클릭")
+                        }) {
+                            Image(systemName: "chevron.left")
+                                .font(.PretendardMedium22)
+                                .foregroundColor(.grey05)
+                        }
+                    }
+
+                    // (2) ScrollView
                     ScrollView(showsIndicators: false) {
                         VStack(alignment: .leading, spacing: 24) {
-                            // (1) NavigationBar
-                            NavigationBar {
-                                Button(action: {
-                                    print("뒤로가기 버튼 클릭")
-                                }) {
-                                    Image(systemName: "chevron.left")
-                                        .font(.PretendardMedium22)
-                                        .foregroundColor(.grey05)
-                                }
-                            }
-
                             // 페이지 인디케이터
                             PageIndicator(
                                 totalPages: totalPages,
@@ -47,7 +48,7 @@ struct OnboardingBodyInfoInputView: View {
                                 inactiveColor: .grey01
                             )
 
-                            // (2) 타이틀
+                            // 타이틀
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("체형 정보를 입력해주세요.")
                                     .font(.PretendardSemiBold24)
@@ -58,7 +59,7 @@ struct OnboardingBodyInfoInputView: View {
                             }
                             .padding(.horizontal)
 
-                            // (3) 입력 폼 (2 x 2 Grid)
+                            // 입력 폼 (2 x 2 Grid)
                             VStack(spacing: 48) {
                                 HStack(spacing: 12) {
                                     InputFieldView(
@@ -121,9 +122,10 @@ struct OnboardingBodyInfoInputView: View {
                             .padding(.top, 24)
                             .padding(.horizontal)
                         }
+                        .padding(.bottom, 20) // 하단 여백 추가
                     }
 
-                    // (4) 하단 버튼
+                    // (3) 하단 버튼
                     MainButton(
                         color: isFormValid ? Color.grey05 : Color.grey01,
                         text: "다음",
@@ -138,7 +140,7 @@ struct OnboardingBodyInfoInputView: View {
                     .padding(.bottom, 20)
                 }
             }
-            .navigationBarBackButtonHidden(true) // 기본 NavigationBar의 back 버튼 숨김
+            .navigationBarBackButtonHidden(true)
         }
     }
 }

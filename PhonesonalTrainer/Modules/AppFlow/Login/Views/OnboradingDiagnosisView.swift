@@ -26,147 +26,150 @@ struct OnboradingDiagnosisView: View {
             ZStack {
                 Color.grey00.ignoresSafeArea()
 
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 24) {
-                        // NavigationBar 적용
-                        NavigationBar {
-                            Button(action: {
-                                print("뒤로가기 버튼 클릭")
-                            }) {
-                                Image(systemName: "chevron.left")
-                                    .font(.PretendardMedium22)
-                                    .foregroundColor(.grey05)
-                            }
-                        }
-
-                        // 페이지 인디케이터
-                        PageIndicator(
-                            totalPages: 4,
-                            currentPage: 3,
-                            activeColor: .orange05,
-                            inactiveColor: .grey01
-                        )
-
-                        // 타이틀
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("폰스널 트레이너의 진단")
-                                .font(.PretendardSemiBold24)
-                                .foregroundColor(.grey06)
-                            Text("\(nickname)님 맞춤형 진단이에요.")
-                                .font(.PretendardRegular20)
-                                .foregroundColor(.grey03)
-                        }
-                        .padding(.horizontal)
-
-                        // 진단 코멘트
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack(alignment: .center, spacing: 6) {
-                                Image("코멘트아이콘")
-                                    .resizable()
-                                    .frame(width: 16, height: 16)
-                                Text("폰스널 트레이너의 진단")
-                                    .font(.PretendardMedium14)
-                                    .foregroundColor(.orange05)
-                            }
-                            Text(diagnosis.comment)
-                                .font(.PretendardMedium12)
+                VStack(spacing: 0) {
+                    // (1) NavigationBar (상단 고정)
+                    NavigationBar {
+                        Button(action: {
+                            print("뒤로가기 버튼 클릭")
+                        }) {
+                            Image(systemName: "chevron.left")
+                                .font(.PretendardMedium22)
                                 .foregroundColor(.grey05)
-                                .padding(.top, 2)
                         }
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.orange01)
-                        .cornerRadius(5)
-                        .padding(.horizontal)
-                        .padding(.bottom, 8)
+                    }
 
-                        // 추천 목표 수치
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("추천 목표 수치")
-                                .font(.PretendardMedium18)
-                                .foregroundColor(.grey06)
-                                .padding(.bottom, 12)
+                    // (2) ScrollView
+                    ScrollView(showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: 24) {
+                            // 페이지 인디케이터
+                            PageIndicator(
+                                totalPages: 4,
+                                currentPage: 3,
+                                activeColor: .orange05,
+                                inactiveColor: .grey01
+                            )
 
-                            VStack(spacing: 16) {
-                                ForEach(Array(metrics.enumerated()), id: \.offset) { index, metric in
-                                    MetricRow(title: metric.0, change: metric.1)
-                                    if index < metrics.count - 1 { Divider() } // 마지막 항목에는 Divider 없음
-                                }
+                            // 타이틀
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("폰스널 트레이너의 진단")
+                                    .font(.PretendardSemiBold24)
+                                    .foregroundColor(.grey06)
+                                Text("\(nickname)님 맞춤형 진단이에요.")
+                                    .font(.PretendardRegular20)
+                                    .foregroundColor(.grey03)
                             }
-                            .padding(.horizontal, 28)
-                        }
-                        .padding(.horizontal)
-                        .padding(.bottom, 16)
+                            .padding(.horizontal)
 
-                        // 운동 목표
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("운동 목표")
-                                .font(.PretendardMedium18)
-                                .foregroundColor(.grey06)
-                                .padding(.bottom, 12)
+                            // 진단 코멘트
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack(alignment: .center, spacing: 6) {
+                                    Image("코멘트아이콘")
+                                        .resizable()
+                                        .frame(width: 16, height: 16)
+                                    Text("폰스널 트레이너의 진단")
+                                        .font(.PretendardMedium14)
+                                        .foregroundColor(.orange05)
+                                }
+                                Text(diagnosis.comment)
+                                    .font(.PretendardMedium12)
+                                    .foregroundColor(.grey05)
+                                    .padding(.top, 2)
+                            }
+                            .padding()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color.orange01)
+                            .cornerRadius(5)
+                            .padding(.horizontal)
+                            .padding(.bottom, 8)
 
-                            ForEach(Array(diagnosis.exerciseGoals.enumerated()), id: \.element.id) { index, goal in
-                                VStack(alignment: .leading, spacing: 4) {
+                            // 추천 목표 수치
+                            VStack(alignment: .leading, spacing: 16) {
+                                Text("추천 목표 수치")
+                                    .font(.PretendardMedium18)
+                                    .foregroundColor(.grey06)
+                                    .padding(.bottom, 12)
+
+                                VStack(spacing: 16) {
+                                    ForEach(Array(metrics.enumerated()), id: \.offset) { index, metric in
+                                        MetricRow(title: metric.0, change: metric.1)
+                                        if index < metrics.count - 1 { Divider() }
+                                    }
+                                }
+                                .padding(.horizontal, 28)
+                            }
+                            .padding(.horizontal)
+                            .padding(.bottom, 16)
+
+                            // 운동 목표
+                            VStack(alignment: .leading, spacing: 16) {
+                                Text("운동 목표")
+                                    .font(.PretendardMedium18)
+                                    .foregroundColor(.grey06)
+                                    .padding(.bottom, 12)
+
+                                ForEach(Array(diagnosis.exerciseGoals.enumerated()), id: \.element.id) { index, goal in
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        HStack {
+                                            Text(goal.type)
+                                                .font(.PretendardMedium16)
+                                                .foregroundColor(.grey05)
+                                            Spacer()
+                                            Text(goal.mainInfo)
+                                                .font(.PretendardMedium16)
+                                                .foregroundColor(.grey05)
+                                        }
+                                        if let detail = goal.detail {
+                                            Text(detail)
+                                                .font(.PretendardRegular14)
+                                                .foregroundColor(.grey03)
+                                        }
+                                    }
+                                    if index < diagnosis.exerciseGoals.count - 1 { Divider() }
+                                }
+                                .padding(.horizontal, 28)
+                            }
+                            .padding(.horizontal)
+                            .padding(.bottom, 16)
+
+                            // 식단 목표
+                            VStack(alignment: .leading, spacing: 16) {
+                                Text("식단 목표")
+                                    .font(.PretendardMedium18)
+                                    .foregroundColor(.grey06)
+                                    .padding(.bottom, 12)
+
+                                ForEach(Array(diagnosis.dietGoals.enumerated()), id: \.element.id) { index, goal in
                                     HStack {
-                                        Text(goal.type)
+                                        Text(goal.key)
                                             .font(.PretendardMedium16)
                                             .foregroundColor(.grey05)
                                         Spacer()
-                                        Text(goal.mainInfo)
+                                        Text(goal.value)
                                             .font(.PretendardMedium16)
                                             .foregroundColor(.grey05)
                                     }
-                                    if let detail = goal.detail {
-                                        Text(detail)
-                                            .font(.PretendardRegular14)
-                                            .foregroundColor(.grey03)
-                                    }
+                                    if index < diagnosis.dietGoals.count - 1 { Divider() }
                                 }
-                                if index < diagnosis.exerciseGoals.count - 1 { Divider() }
+                                .padding(.horizontal, 28)
                             }
-                            .padding(.horizontal, 28)
-                        }
-                        .padding(.horizontal)
-                        .padding(.bottom, 16)
+                            .padding(.horizontal, 20)
 
-                        // 식단 목표
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("식단 목표")
-                                .font(.PretendardMedium18)
-                                .foregroundColor(.grey06)
-                                .padding(.bottom, 12)
-
-                            ForEach(Array(diagnosis.dietGoals.enumerated()), id: \.element.id) { index, goal in
-                                HStack {
-                                    Text(goal.key)
-                                        .font(.PretendardMedium16)
-                                        .foregroundColor(.grey05)
-                                    Spacer()
-                                    Text(goal.value)
-                                        .font(.PretendardMedium16)
-                                        .foregroundColor(.grey05)
-                                }
-                                if index < diagnosis.dietGoals.count - 1 { Divider() }
+                            // 시작하기 버튼
+                            Button(action: {
+                                print("시작하기 버튼 클릭")
+                            }) {
+                                Text("시작하기")
+                                    .font(.PretendardSemiBold18)
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 56)
+                                    .background(Color.orange05)
+                                    .cornerRadius(30)
                             }
-                            .padding(.horizontal, 28)
+                            .padding(.horizontal)
+                            .padding(.top, 20)
+                            .padding(.bottom, 16)
                         }
-                        .padding(.horizontal, 20)
-
-                        // 시작하기 버튼
-                        Button(action: {
-                            print("시작하기 버튼 클릭")
-                        }) {
-                            Text("시작하기")
-                                .font(.PretendardSemiBold18)
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 56)
-                                .background(Color.orange05)
-                                .cornerRadius(30)
-                        }
-                        .padding(.horizontal)
-                        .padding(.top, 20)
-                        .padding(.bottom, 16)
                     }
                 }
             }
