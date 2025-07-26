@@ -19,7 +19,7 @@ struct OnboardingBodyRecordView: View {
                 Color.grey00.ignoresSafeArea()
 
                 VStack(spacing: 24) {
-                    // NavigationBar
+                    // NavigationBar 적용
                     NavigationBar {
                         Button(action: {
                             print("뒤로가기 버튼 클릭")
@@ -47,16 +47,14 @@ struct OnboardingBodyRecordView: View {
                                 .stroke(Color.orange05, lineWidth: 1)
                         )
 
-                    // 안내 문구
+                    // 안내 문구 (VStack 분리)
                     VStack(spacing: 4) {
                         Text("\(goalDuration.rawValue) 간의 여정에 앞서")
                             .font(.PretendardRegular22)
                             .foregroundColor(.grey06)
-
                         Text("BEFORE 눈바디 기록")
                             .font(.PretendardSemiBold22)
                             .foregroundColor(.grey06)
-
                         Text("을 남겨볼까요?")
                             .font(.PretendardRegular22)
                             .foregroundColor(.grey06)
@@ -96,7 +94,7 @@ struct OnboardingBodyRecordView: View {
                     .padding(.bottom, 20)
                 }
             }
-            .navigationBarBackButtonHidden(true) // 기본 뒤로가기 버튼 제거
+            .navigationBarBackButtonHidden(true) // 기본 Navigation Back 제거
         }
     }
 }

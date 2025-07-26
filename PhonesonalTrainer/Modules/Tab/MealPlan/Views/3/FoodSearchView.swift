@@ -54,7 +54,7 @@ struct FoodSearchView: View {
                     NavigationLink(destination: ManualAddMealView()) {
                         Text("직접 추가")
                             .font(.PretendardRegular16)
-                            .foregroundColor(.orange05)
+                            .foregroundColor(.grey05)
                     }
                 }
                 .background(Color.grey00)

@@ -23,25 +23,23 @@ struct NavigationBar<Leading: View, Trailing: View>: View {
     }
 
     var body: some View {
-        HStack {
-            // 왼쪽 버튼
-            leading
-
-            Spacer()
-
-            // 타이틀이 있으면 가운데
+        ZStack {
+            // 타이틀을 화면 중앙에 배치 (양쪽 여백과 관계없이 항상 중앙)
             if let title = title {
                 Text(title)
                     .font(.PretendardMedium22)
-                    .foregroundColor(.grey05)
+                    .foregroundStyle(Color.grey06)
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
 
-            Spacer()
-
-            // 오른쪽 버튼
-            trailing
+            // 좌우 버튼은 HStack으로 정렬
+            HStack {
+                leading
+                Spacer()
+                trailing
+            }
+            .padding(.horizontal, 16)
         }
-        .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(Color.grey00)
     }
@@ -53,7 +51,7 @@ struct NavigationBar<Leading: View, Trailing: View>: View {
             Button(action: { print("뒤로가기") }) {
                 Image(systemName: "chevron.left")
                     .font(.PretendardMedium22)
-                    .foregroundColor(.grey05)
+                    .foregroundStyle(Color.grey06)
             }
         }
 
@@ -61,16 +59,16 @@ struct NavigationBar<Leading: View, Trailing: View>: View {
             Button(action: { print("뒤로가기") }) {
                 Image(systemName: "chevron.left")
                     .font(.PretendardMedium22)
-                    .foregroundColor(.grey05)
+                    .foregroundStyle(Color.grey06)
             }
         } trailing: {
             Button("완료") {
                 print("완료 클릭")
             }
-            .font(.PretendardRegular18)
-            .foregroundColor(.orange05)
+            .font(.PretendardMedium16)
+            .foregroundStyle(Color.grey05)
         }
     }
     .padding()
-    .background(Color.white)
+    .background(Color.grey00)
 }
