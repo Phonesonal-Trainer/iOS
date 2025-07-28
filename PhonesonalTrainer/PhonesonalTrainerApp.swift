@@ -11,7 +11,7 @@ import SwiftUI
 struct PhonesonalTrainerApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            OnboardingInfoInputView()  // 첫 화면으로 표시할 뷰
         }
     }
 }
