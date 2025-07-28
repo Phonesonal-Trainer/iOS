@@ -13,6 +13,7 @@ struct OnboardingGoalAndDurationView: View {
     @State private var selectedGoal: Goal? = nil
     @State private var selectedDuration: Duration = .oneMonth
     @State private var showDurationSheet = false
+    @State private var navigateToNext = false // 다음 화면 이동 상태
 
     var isFormValid: Bool {
         selectedGoal != nil
@@ -27,7 +28,7 @@ struct OnboardingGoalAndDurationView: View {
                 Color.background.ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    // (1) NavigationBar - ScrollView 밖에 배치하여 고정
+                    // NavigationBar
                     NavigationBar {
                         Button(action: {
                             print("뒤로가기 버튼 클릭")
@@ -38,10 +39,8 @@ struct OnboardingGoalAndDurationView: View {
                         }
                     }
 
-                    // (2) ScrollView
                     ScrollView(showsIndicators: false) {
                         VStack(alignment: .leading, spacing: 24) {
-                            // 페이지 인디케이터
                             PageIndicator(
                                 totalPages: totalPages,
                                 currentPage: currentPage,
@@ -120,14 +119,14 @@ struct OnboardingGoalAndDurationView: View {
                         .padding(.bottom, 20)
                     }
 
-                    // (3) 하단 버튼
+                    // 다음 버튼
                     MainButton(
                         color: isFormValid ? Color.grey05 : Color.grey01,
                         text: "다음",
                         textColor: isFormValid ? .white : .grey02
                     ) {
                         if isFormValid {
-                            print("다음 화면 이동")
+                            navigateToNext = true
                         }
                     }
                     .disabled(!isFormValid)
@@ -135,7 +134,7 @@ struct OnboardingGoalAndDurationView: View {
                     .padding(.bottom, 20)
                 }
 
-                // (4) 검정 반투명 배경 + DurationSheetView
+                // DurationSheetView
                 if showDurationSheet {
                     Color.black.opacity(0.5)
                         .ignoresSafeArea()
@@ -154,6 +153,9 @@ struct OnboardingGoalAndDurationView: View {
                     }
                     .ignoresSafeArea(edges: .bottom)
                 }
+            }
+            .navigationDestination(isPresented: $navigateToNext) {
+                OnboardingBodyInfoInputView()
             }
             .navigationBarBackButtonHidden(true)
         }

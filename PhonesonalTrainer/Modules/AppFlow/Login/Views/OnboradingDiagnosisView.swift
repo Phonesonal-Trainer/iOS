@@ -9,9 +9,10 @@ import SwiftUI
 
 struct OnboradingDiagnosisView: View {
     let nickname: String
-    let diagnosis: DiagnosisModel   // 모델 데이터 주입
+    let diagnosis: DiagnosisModel
 
-    // 추천 목표 수치를 배열로 구성
+    @State private var goToBodyRecord = false // 다음 화면 전환 상태
+
     private var metrics: [(String, MetricChange)] {
         [
             ("몸무게", diagnosis.weightChange),
@@ -27,7 +28,7 @@ struct OnboradingDiagnosisView: View {
                 Color.grey00.ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    // (1) NavigationBar (상단 고정)
+                    // (1) NavigationBar
                     NavigationBar {
                         Button(action: {
                             print("뒤로가기 버튼 클릭")
@@ -41,7 +42,6 @@ struct OnboradingDiagnosisView: View {
                     // (2) ScrollView
                     ScrollView(showsIndicators: false) {
                         VStack(alignment: .leading, spacing: 24) {
-                            // 페이지 인디케이터
                             PageIndicator(
                                 totalPages: 4,
                                 currentPage: 3,
@@ -49,7 +49,6 @@ struct OnboradingDiagnosisView: View {
                                 inactiveColor: .grey01
                             )
 
-                            // 타이틀
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("폰스널 트레이너의 진단")
                                     .font(.PretendardSemiBold24)
@@ -60,7 +59,7 @@ struct OnboradingDiagnosisView: View {
                             }
                             .padding(.horizontal)
 
-                            // 진단 코멘트
+                            // 코멘트
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack(alignment: .center, spacing: 6) {
                                     Image("코멘트아이콘")
@@ -156,7 +155,7 @@ struct OnboradingDiagnosisView: View {
 
                             // 시작하기 버튼
                             Button(action: {
-                                print("시작하기 버튼 클릭")
+                                goToBodyRecord = true
                             }) {
                                 Text("시작하기")
                                     .font(.PretendardSemiBold18)
@@ -172,14 +171,15 @@ struct OnboradingDiagnosisView: View {
                         }
                     }
                 }
+
+                // Navigation Destination
+                .navigationDestination(isPresented: $goToBodyRecord) {
+                    OnboardingBodyRecordView()
+                }
             }
             .navigationBarBackButtonHidden(true)
         }
     }
-}
-
-#Preview {
-    OnboradingDiagnosisView(nickname: "서연", diagnosis: .dummy)
 }
 
 // MARK: - MetricRow
@@ -217,4 +217,9 @@ struct MetricRow: View {
             }
         }
     }
+}
+
+
+#Preview {
+    OnboradingDiagnosisView(nickname: "서연", diagnosis: .dummy)
 }

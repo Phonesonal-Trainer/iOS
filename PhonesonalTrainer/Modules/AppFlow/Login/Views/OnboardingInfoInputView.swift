@@ -14,26 +14,25 @@ struct OnboardingInfoInputView: View {
     @State private var selectedGender: Gender? = nil
     @FocusState private var focusedField: Field?
 
+    @State private var navigateToNext = false // 다음 화면 이동 상태
+
     enum Field {
         case nickname
         case age
     }
 
-    // 현재 페이지 index (예: 0 ~ 3)
     private let currentPage = 0
     private let totalPages = 4
 
-    // 폼 유효성 검사
+    // MARK: - 유효성 검사
     var isFormValid: Bool {
         !nickname.isEmpty && !age.isEmpty && selectedGender != nil
     }
 
-    // 버튼 색상
     var nextButtonColor: Color {
         isFormValid ? .grey05 : .grey01
     }
 
-    // 버튼 텍스트 색상
     var nextButtonTextColor: Color {
         isFormValid ? .white : .grey02
     }
@@ -41,10 +40,10 @@ struct OnboardingInfoInputView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.background.ignoresSafeArea()
+                Color.grey00.ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    // (1) NavigationBar (스크롤 밖에서 고정)
+                    // MARK: - NavigationBar
                     NavigationBar {
                         Button(action: {
                             print("뒤로가기 버튼 클릭")
@@ -54,8 +53,8 @@ struct OnboardingInfoInputView: View {
                                 .foregroundColor(.grey05)
                         }
                     }
-
-                    // (2) ScrollView
+                    
+                    // MARK: - ScrollView
                     ScrollView(showsIndicators: false) {
                         VStack(alignment: .leading, spacing: 24) {
                             // 페이지 인디케이터
@@ -65,7 +64,7 @@ struct OnboardingInfoInputView: View {
                                 activeColor: .orange05,
                                 inactiveColor: .grey01
                             )
-
+                            
                             // 타이틀
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("만나서 반가워요 👋")
@@ -76,7 +75,7 @@ struct OnboardingInfoInputView: View {
                                     .foregroundColor(.grey03)
                             }
                             .padding(.horizontal)
-
+                            
                             // 닉네임 입력
                             InputFieldView(
                                 title: {
@@ -87,10 +86,15 @@ struct OnboardingInfoInputView: View {
                                 placeholder: "닉네임을 입력하세요.",
                                 text: $nickname
                             )
+                            .onReceive(Just(nickname)) { _ in
+                                if nickname.count > 7 {
+                                    nickname = String(nickname.prefix(7))
+                                }
+                            }
                             .padding(.top, 16)
                             .padding(.horizontal)
                             .focused($focusedField, equals: .nickname)
-
+                            
                             // 나이 + 성별
                             HStack(alignment: .top, spacing: 12) {
                                 InputFieldView(
@@ -104,8 +108,13 @@ struct OnboardingInfoInputView: View {
                                     keyboardType: .numberPad,
                                     suffixText: "세"
                                 )
+                                .onReceive(Just(age)) { _ in
+                                    if age.count > 2 {
+                                        age = String(age.prefix(2))
+                                    }
+                                }
                                 .focused($focusedField, equals: .age)
-
+                                
                                 VStack(alignment: .leading, spacing: 12) {
                                     Text("성별")
                                         .font(.PretendardMedium18)
@@ -121,24 +130,29 @@ struct OnboardingInfoInputView: View {
                         }
                         .padding(.bottom, 20)
                     }
-
-                    // (3) 하단 버튼
+                    
+                    // MARK: - 하단 버튼
                     MainButton(
                         color: nextButtonColor,
                         text: "다음",
                         textColor: nextButtonTextColor
                     ) {
                         if isFormValid {
-                            print("다음 화면 이동")
+                            navigateToNext = true
                         }
                     }
                     .disabled(!isFormValid)
                     .padding(.horizontal)
                     .padding(.bottom, 20)
+                    
+                    // MARK: - Navigation Destination
+                    .navigationDestination(isPresented: $navigateToNext) {
+                        OnboardingGoalAndDurationView(nickname: nickname)
+                    }
                 }
             }
             .navigationBarBackButtonHidden(true)
-            .scrollDismissesKeyboard(.interactively) // iOS 15+ 자동 키보드 관리
+            .scrollDismissesKeyboard(.interactively)
             .onTapGesture { hideKeyboard() }
         }
     }
