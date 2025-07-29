@@ -45,11 +45,7 @@ struct MainTabView: View {
 }
 
 
-struct WorkoutRoutineView: View {
-    var body: some View {
-        Text("WorkoutRoutine Screen")
-    }
-}
+
 struct ReportView: View {
     var body: some View {
         Text("Report Screen")
