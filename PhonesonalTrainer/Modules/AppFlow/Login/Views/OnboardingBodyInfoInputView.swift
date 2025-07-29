@@ -18,7 +18,21 @@ struct OnboardingBodyInfoInputView: View {
     @State private var diagnosisModel: DiagnosisModel? = nil
 
     var isFormValid: Bool {
-        height.count >= 2 && weight.count >= 2
+        isHeightValid && isWeightValid
+    }
+
+    private var isHeightValid: Bool {
+        if let value = Double(height), value >= 100, value <= 250 {
+            return true
+        }
+        return false
+    }
+
+    private var isWeightValid: Bool {
+        if let value = Double(weight), value >= 30, value <= 300 {
+            return true
+        }
+        return false
     }
 
     private let totalPages = 4
@@ -60,6 +74,7 @@ struct OnboardingBodyInfoInputView: View {
                         // 입력 폼
                         VStack(spacing: 48) {
                             HStack(spacing: 12) {
+                                // 신장
                                 InputFieldView(
                                     title: {
                                         Text("신장")
@@ -71,13 +86,14 @@ struct OnboardingBodyInfoInputView: View {
                                     },
                                     placeholder: "",
                                     text: $height,
-                                    keyboardType: .numberPad,
+                                    keyboardType: .decimalPad,
                                     suffixText: "cm"
                                 )
-                                .onReceive(Just(height)) { _ in
-                                    if height.count > 3 { height = String(height.prefix(3)) }
+                                .onChange(of: height) {
+                                    height = filterDecimalInput(height, maxDigitsBeforeDecimal: 3)
                                 }
 
+                                // 몸무게
                                 InputFieldView(
                                     title: {
                                         Text("몸무게")
@@ -89,14 +105,15 @@ struct OnboardingBodyInfoInputView: View {
                                     },
                                     placeholder: "",
                                     text: $weight,
-                                    keyboardType: .numberPad,
+                                    keyboardType: .decimalPad,
                                     suffixText: "kg"
                                 )
-                                .onReceive(Just(weight)) { _ in
-                                    if weight.count > 3 { weight = String(weight.prefix(3)) }
+                                .onChange(of: weight) {
+                                    weight = filterDecimalInput(weight, maxDigitsBeforeDecimal: 3)
                                 }
                             }
 
+                            // 선택 입력 (체지방률, 골격근량)
                             HStack(spacing: 12) {
                                 InputFieldView(
                                     title: {
@@ -158,6 +175,36 @@ struct OnboardingBodyInfoInputView: View {
                 )
             }
         }
+    }
+
+    /// 소수점 한자리까지만 허용하고 숫자 외 문자는 제거
+    func filterDecimalInput(_ input: String, maxDigitsBeforeDecimal: Int) -> String {
+        var value = input.filter { "0123456789.".contains($0) }
+
+        // 소수점 중복 제거
+        if value.components(separatedBy: ".").count > 2 {
+            value.removeLast()
+        }
+
+        // 소수점 자리수 제한
+        if let dotIndex = value.firstIndex(of: ".") {
+            let decimalPart = value[value.index(after: dotIndex)...]
+            if decimalPart.count > 1 {
+                value = String(value.prefix(value.distance(from: value.startIndex, to: dotIndex) + 2))
+            }
+        }
+
+        // 정수부 자리수 제한
+        if let dotIndex = value.firstIndex(of: ".") {
+            let intPart = value[..<dotIndex]
+            if intPart.count > maxDigitsBeforeDecimal {
+                value = String(intPart.prefix(maxDigitsBeforeDecimal)) + "." + value[dotIndex...].dropFirst()
+            }
+        } else if value.count > maxDigitsBeforeDecimal {
+            value = String(value.prefix(maxDigitsBeforeDecimal))
+        }
+
+        return value
     }
 }
 
