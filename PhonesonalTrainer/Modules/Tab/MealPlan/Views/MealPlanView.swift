@@ -4,8 +4,8 @@
 //
 //  Created by 강리현 on 7/14/25.
 //
-/// 배경색 회색...
-/// StickyHeader 어디를 기준으로 구현?  -> 구현 안 하기로 결정.
+
+
 import SwiftUI
 
 struct MealPlanView: View {

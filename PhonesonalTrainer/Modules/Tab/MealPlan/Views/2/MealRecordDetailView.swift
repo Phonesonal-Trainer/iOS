@@ -11,6 +11,7 @@ struct MealRecordDetailView: View {
     // MARK: - Property
     let mealType: MealType // 추후 model이나 viewModel을 넣는 것을 고려
     @StateObject private var viewModel = AddedMealViewModel()
+    @State private var uploadedImage: UIImage? = nil  // 이미지 업로드
     @State private var selectedMeal: MealModel? = nil  // 팝업 되는 식단
     @State private var showPopup: Bool = false
     @Environment(\.dismiss) private var dismiss  // 뒤로가기 액션
@@ -48,8 +49,8 @@ struct MealRecordDetailView: View {
                     
                     ScrollView {
                         VStack(spacing: MealRecordDetailConstant.vSpacing) {
-                            // 이미지 업로드 (서버에 업로드) -> 공용 컴포넌트 고려
-                            ImageUpload()
+                            // 이미지 업로드 (서버에 업로드)
+                            ImageUploadButton(image: $uploadedImage, isLocal: false)
                                 .padding(.top, MealRecordDetailConstant.vSpacing)
                             
                             RecordInfoView()
