@@ -19,14 +19,14 @@ struct OnboardingStartView: View {
                 VStack(spacing: 4) {
                     Text("핸드폰 안에서 만나는")
                         .font(.PretendardRegular20)
-                        .foregroundColor(.grey03)
+                        .foregroundStyle(Color.grey03)
 
                     HStack(spacing: 0) {
                         Text("나만의 ")
                             .font(.PretendardSemiBold22)
-                            .foregroundColor(.grey06)
+                            .foregroundStyle(Color.grey06)
                         Text("폰스널 트레이너")
-                            .foregroundColor(.orange05)
+                            .foregroundStyle(Color.orange05)
                             .font(.PretendardSemiBold22)
                     }
                 }
@@ -40,7 +40,7 @@ struct OnboardingStartView: View {
             VStack(spacing: 24) {
                 Text("SNS 계정으로 간편 로그인하세요")
                     .font(.PretendardRegular14)
-                    .foregroundColor(.grey03)
+                    .foregroundStyle(Color.grey03)
 
                 HStack(spacing: 16) {
                     Button(action: {}) {
@@ -59,7 +59,7 @@ struct OnboardingStartView: View {
             .padding(.bottom, 104)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.white)
+        .background(Color.grey00)
     }
 }
 

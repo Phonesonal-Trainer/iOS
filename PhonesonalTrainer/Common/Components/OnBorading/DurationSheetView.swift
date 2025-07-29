@@ -32,14 +32,14 @@ struct DurationSheetView: View {
             HStack {
                 Text("목표 기간을 선택해주세요.")
                     .font(.PretendardMedium20)
-                    .foregroundColor(.grey06)
+                    .foregroundStyle(Color.grey06)
                     .padding()
                 Spacer()
                 Button(action: {
                     isPresented = false
                 }) {
                     Image(systemName: "xmark")
-                        .foregroundColor(.grey06)
+                        .foregroundStyle(Color.grey06)
                         .padding()
                 }
             }
@@ -54,7 +54,7 @@ struct DurationSheetView: View {
                     }) {
                         Text(option.rawValue)
                             .font(.PretendardMedium18)
-                            .foregroundColor(.grey05)
+                            .foregroundStyle(Color.grey05)
                             .frame(maxWidth: .infinity)
                             .padding()
                     }

@@ -35,7 +35,7 @@ struct OnboradingDiagnosisView: View {
                         }) {
                             Image(systemName: "chevron.left")
                                 .font(.PretendardMedium22)
-                                .foregroundColor(.grey05)
+                                .foregroundStyle(Color.grey05)
                         }
                     }
 
@@ -52,10 +52,10 @@ struct OnboradingDiagnosisView: View {
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("폰스널 트레이너의 진단")
                                     .font(.PretendardSemiBold24)
-                                    .foregroundColor(.grey06)
+                                    .foregroundStyle(Color.grey06)
                                 Text("\(nickname)님 맞춤형 진단이에요.")
                                     .font(.PretendardRegular20)
-                                    .foregroundColor(.grey03)
+                                    .foregroundStyle(Color.grey03)
                             }
                             .padding(.horizontal)
 
@@ -67,11 +67,11 @@ struct OnboradingDiagnosisView: View {
                                         .frame(width: 16, height: 16)
                                     Text("폰스널 트레이너의 진단")
                                         .font(.PretendardMedium14)
-                                        .foregroundColor(.orange05)
+                                        .foregroundStyle(Color.orange05)
                                 }
                                 Text(diagnosis.comment)
                                     .font(.PretendardMedium12)
-                                    .foregroundColor(.grey05)
+                                    .foregroundStyle(Color.grey05)
                                     .padding(.top, 2)
                             }
                             .padding()
@@ -85,7 +85,7 @@ struct OnboradingDiagnosisView: View {
                             VStack(alignment: .leading, spacing: 16) {
                                 Text("추천 목표 수치")
                                     .font(.PretendardMedium18)
-                                    .foregroundColor(.grey06)
+                                    .foregroundStyle(Color.grey06)
                                     .padding(.bottom, 12)
 
                                 VStack(spacing: 16) {
@@ -103,7 +103,7 @@ struct OnboradingDiagnosisView: View {
                             VStack(alignment: .leading, spacing: 16) {
                                 Text("운동 목표")
                                     .font(.PretendardMedium18)
-                                    .foregroundColor(.grey06)
+                                    .foregroundStyle(Color.grey06)
                                     .padding(.bottom, 12)
 
                                 ForEach(Array(diagnosis.exerciseGoals.enumerated()), id: \.element.id) { index, goal in
@@ -111,16 +111,16 @@ struct OnboradingDiagnosisView: View {
                                         HStack {
                                             Text(goal.type)
                                                 .font(.PretendardMedium16)
-                                                .foregroundColor(.grey05)
+                                                .foregroundStyle(Color.grey05)
                                             Spacer()
                                             Text(goal.mainInfo)
                                                 .font(.PretendardMedium16)
-                                                .foregroundColor(.grey05)
+                                                .foregroundStyle(Color.grey05)
                                         }
                                         if let detail = goal.detail {
                                             Text(detail)
                                                 .font(.PretendardRegular14)
-                                                .foregroundColor(.grey03)
+                                                .foregroundStyle(Color.grey03)
                                         }
                                     }
                                     if index < diagnosis.exerciseGoals.count - 1 { Divider() }
@@ -134,18 +134,18 @@ struct OnboradingDiagnosisView: View {
                             VStack(alignment: .leading, spacing: 16) {
                                 Text("식단 목표")
                                     .font(.PretendardMedium18)
-                                    .foregroundColor(.grey06)
+                                    .foregroundStyle(Color.grey06)
                                     .padding(.bottom, 12)
 
                                 ForEach(Array(diagnosis.dietGoals.enumerated()), id: \.element.id) { index, goal in
                                     HStack {
                                         Text(goal.key)
                                             .font(.PretendardMedium16)
-                                            .foregroundColor(.grey05)
+                                            .foregroundStyle(Color.grey05)
                                         Spacer()
                                         Text(goal.value)
                                             .font(.PretendardMedium16)
-                                            .foregroundColor(.grey05)
+                                            .foregroundStyle(Color.grey05)
                                     }
                                     if index < diagnosis.dietGoals.count - 1 { Divider() }
                                 }
@@ -159,7 +159,7 @@ struct OnboradingDiagnosisView: View {
                             }) {
                                 Text("시작하기")
                                     .font(.PretendardSemiBold18)
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(Color.grey00)
                                     .frame(maxWidth: .infinity)
                                     .frame(height: 56)
                                     .background(Color.orange05)

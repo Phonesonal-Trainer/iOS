@@ -32,7 +32,7 @@ struct OnboardingBodyInfoInputView: View {
                     Button(action: { print("뒤로가기 버튼 클릭") }) {
                         Image(systemName: "chevron.left")
                             .font(.PretendardMedium22)
-                            .foregroundColor(.grey05)
+                            .foregroundStyle(Color.grey05)
                     }
                 }
 
@@ -50,10 +50,10 @@ struct OnboardingBodyInfoInputView: View {
                         VStack(alignment: .leading, spacing: 6) {
                             Text("체형 정보를 입력해주세요.")
                                 .font(.PretendardSemiBold24)
-                                .foregroundColor(.grey06)
+                                .foregroundStyle(Color.grey06)
                             Text("인바디 수치를 기반으로 입력해주세요.")
                                 .font(.PretendardRegular20)
-                                .foregroundColor(.grey03)
+                                .foregroundStyle(Color.grey03)
                         }
                         .padding(.horizontal)
 
@@ -64,10 +64,10 @@ struct OnboardingBodyInfoInputView: View {
                                     title: {
                                         Text("신장")
                                             .font(.PretendardMedium18)
-                                            .foregroundColor(.grey06)
+                                            .foregroundStyle(Color.grey06)
                                         + Text(" *")
                                             .font(.PretendardMedium18)
-                                            .foregroundColor(.orange05)
+                                            .foregroundStyle(Color.orange05)
                                     },
                                     placeholder: "",
                                     text: $height,
@@ -82,10 +82,10 @@ struct OnboardingBodyInfoInputView: View {
                                     title: {
                                         Text("몸무게")
                                             .font(.PretendardMedium18)
-                                            .foregroundColor(.grey06)
+                                            .foregroundStyle(Color.grey06)
                                         + Text(" *")
                                             .font(.PretendardMedium18)
-                                            .foregroundColor(.orange05)
+                                            .foregroundStyle(Color.orange05)
                                     },
                                     placeholder: "",
                                     text: $weight,
@@ -102,7 +102,7 @@ struct OnboardingBodyInfoInputView: View {
                                     title: {
                                         Text("체지방률")
                                             .font(.PretendardMedium18)
-                                            .foregroundColor(.grey06)
+                                            .foregroundStyle(Color.grey06)
                                     },
                                     placeholder: "",
                                     text: $bodyFat,
@@ -114,7 +114,7 @@ struct OnboardingBodyInfoInputView: View {
                                     title: {
                                         Text("골격근량")
                                             .font(.PretendardMedium18)
-                                            .foregroundColor(.grey06)
+                                            .foregroundStyle(Color.grey06)
                                     },
                                     placeholder: "",
                                     text: $muscleMass,

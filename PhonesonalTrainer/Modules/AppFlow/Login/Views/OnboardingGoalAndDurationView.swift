@@ -35,7 +35,7 @@ struct OnboardingGoalAndDurationView: View {
                         }) {
                             Image(systemName: "chevron.left")
                                 .font(.PretendardMedium22)
-                                .foregroundColor(.grey05)
+                                .foregroundStyle(Color.grey05)
                         }
                     }
 
@@ -52,10 +52,10 @@ struct OnboardingGoalAndDurationView: View {
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("\(nickname) 회원님,")
                                     .font(.PretendardSemiBold24)
-                                    .foregroundColor(.grey06)
+                                    .foregroundStyle(Color.grey06)
                                 Text("당신에 대해 알려주세요.")
                                     .font(.PretendardRegular20)
-                                    .foregroundColor(.grey03)
+                                    .foregroundStyle(Color.grey03)
                             }
                             .padding(.horizontal)
 
@@ -63,7 +63,7 @@ struct OnboardingGoalAndDurationView: View {
                             VStack(alignment: .leading, spacing: 16) {
                                 Text("앱 사용 목적")
                                     .font(.PretendardMedium18)
-                                    .foregroundColor(.grey06)
+                                    .foregroundStyle(Color.grey06)
 
                                 HStack(spacing: 12) {
                                     ForEach(Goal.allCases) { goal in
@@ -90,7 +90,7 @@ struct OnboardingGoalAndDurationView: View {
                             VStack(alignment: .leading, spacing: 16) {
                                 Text("목표 기간")
                                     .font(.PretendardMedium18)
-                                    .foregroundColor(.grey06)
+                                    .foregroundStyle(Color.grey06)
 
                                 Button(action: {
                                     withAnimation(.easeInOut) {
@@ -100,10 +100,10 @@ struct OnboardingGoalAndDurationView: View {
                                     HStack {
                                         Text(selectedDuration.rawValue)
                                             .font(.PretendardRegular18)
-                                            .foregroundColor(.grey05)
+                                            .foregroundStyle(Color.grey05)
                                         Spacer()
                                         Image(systemName: showDurationSheet ? "chevron.up" : "chevron.down")
-                                            .foregroundColor(.grey03)
+                                            .foregroundStyle(Color.grey03)
                                     }
                                     .padding(.horizontal)
                                     .frame(height: 52)

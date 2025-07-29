@@ -34,7 +34,7 @@ struct OnboardingBodyRecordView: View {
                             print("SKIP 버튼 클릭")
                         }
                         .font(.PretendardRegular20)
-                        .foregroundColor(.grey03)
+                        .foregroundStyle(Color.grey03)
                     }
 
                     ScrollView(showsIndicators: false) {
@@ -42,7 +42,7 @@ struct OnboardingBodyRecordView: View {
                             // 주차 텍스트
                             Text("\(currentWeek)주차 눈바디 기록")
                                 .font(.PretendardRegular14)
-                                .foregroundColor(.orange05)
+                                .foregroundStyle(Color.orange05)
                                 .padding(.vertical, 6)
                                 .padding(.horizontal, 12)
                                 .overlay(
@@ -55,13 +55,13 @@ struct OnboardingBodyRecordView: View {
                             (
                                 Text("\(goalDuration.rawValue) 간의 여정에 앞서\n")
                                     .font(.PretendardRegular22)
-                                    .foregroundColor(.grey06)
+                                    .foregroundStyle(Color.grey06)
                                 + Text("BEFORE 눈바디 기록")
                                     .font(.PretendardSemiBold22)
-                                    .foregroundColor(.grey06)
+                                    .foregroundStyle(Color.grey06)
                                 + Text("을 남겨볼까요?")
                                     .font(.PretendardRegular22)
-                                    .foregroundColor(.grey06)
+                                    .foregroundStyle(Color.grey06)
                             )
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
@@ -87,8 +87,8 @@ struct OnboardingBodyRecordView: View {
                                         }
                                         .padding(.vertical, 6)
                                         .padding(.horizontal, 10)
-                                        .background(Color.grey00)
-                                        .foregroundColor(.grey05)
+                                        .foregroundStyle(Color.grey00)
+                                        .foregroundStyle(Color.grey05)
                                         .cornerRadius(5)
                                     }
                                     .padding(16)

@@ -32,19 +32,19 @@ struct CustomAlertView: View {
                     (
                         Text("정말 ")
                             .font(.PretendardSemiBold22)
-                            .foregroundColor(.grey06)
+                            .foregroundStyle(Color.grey06)
                         + Text("삭제")
                             .font(.PretendardSemiBold22)
-                            .foregroundColor(.orange05)
+                            .foregroundStyle(Color.orange05)
                         + Text("하시겠어요?")
                             .font(.PretendardSemiBold22)
-                            .foregroundColor(.grey06)
+                            .foregroundStyle(Color.grey06)
                     )
                     .multilineTextAlignment(.center)
 
                     Text("삭제한 사진은 복구할 수 없습니다.")
                         .font(.PretendardMedium16)
-                        .foregroundColor(.grey03)
+                        .foregroundStyle(Color.grey03)
                         .multilineTextAlignment(.center)
                         .padding(.bottom, 8)
 
@@ -54,7 +54,7 @@ struct CustomAlertView: View {
                         }) {
                             Text("취소")
                                 .font(.PretendardSemiBold18)
-                                .foregroundColor(.grey05)
+                                .foregroundStyle(Color.grey05)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 12)
                                 .background(Color.grey01)
@@ -67,7 +67,7 @@ struct CustomAlertView: View {
                         }) {
                             Text("삭제")
                                 .font(.PretendardSemiBold18)
-                                .foregroundColor(.white)
+                                .foregroundStyle(Color.grey00)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 12)
                                 .background(Color.orange05)

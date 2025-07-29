@@ -69,10 +69,10 @@ struct OnboardingInfoInputView: View {
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("만나서 반가워요 👋")
                                     .font(.PretendardSemiBold24)
-                                    .foregroundColor(.grey06)
+                                    .foregroundStyle(Color.grey06)
                                 Text("회원님의 정보를 입력해주세요.")
                                     .font(.PretendardRegular20)
-                                    .foregroundColor(.grey03)
+                                    .foregroundStyle(Color.grey03)
                             }
                             .padding(.horizontal)
                             
@@ -81,7 +81,7 @@ struct OnboardingInfoInputView: View {
                                 title: {
                                     Text("닉네임")
                                         .font(.PretendardMedium18)
-                                        .foregroundColor(.grey06)
+                                        .foregroundStyle(Color.grey06)
                                 },
                                 placeholder: "닉네임을 입력하세요.",
                                 text: $nickname
@@ -101,7 +101,7 @@ struct OnboardingInfoInputView: View {
                                     title: {
                                         Text("나이")
                                             .font(.PretendardMedium18)
-                                            .foregroundColor(.grey06)
+                                            .foregroundStyle(Color.grey06)
                                     },
                                     placeholder: "",
                                     text: $age,
