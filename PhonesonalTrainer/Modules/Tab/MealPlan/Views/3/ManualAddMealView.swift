@@ -85,6 +85,7 @@ struct ManualAddMealView: View {
                         if isFormValid {
                             // 입력한 음식 정보 저장
                         }
+                        dismiss()
                     }
                     .disabled(!isFormValid)
                     .frame(width: ManualAddMealConstants.baseWidth)

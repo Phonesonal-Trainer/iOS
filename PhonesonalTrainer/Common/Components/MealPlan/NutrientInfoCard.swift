@@ -1,5 +1,5 @@
 //
-//  NutritionInfoCard.swift
+//  NutrientInfoCard.swift
 //  PhonesonalTrainer
 //
 //  Created by 강리현 on 7/22/25.
@@ -7,14 +7,14 @@
 
 import SwiftUI
 
-struct NutritionInfoCard: View {
+struct NutrientInfoCard: View {
     
-    let nutrition: NutritionInfoModel
+    let Nutrient: NutrientInfoModel
     
-    @StateObject private var viewModel = NutritionInfoViewModel()
+    @StateObject private var viewModel = NutrientInfoViewModel()
     
     // MARK: - 상수 정의
-    fileprivate enum NutritionInfoConstants {
+    fileprivate enum NutrientInfoConstants {
         static let vSpacing: CGFloat = 15
         static let textHSpacing: CGFloat = 10
         static let textVSpacing: CGFloat = 5
@@ -23,30 +23,30 @@ struct NutritionInfoCard: View {
     
     // MARK: - Body
     var body: some View {
-        VStack(spacing: NutritionInfoConstants.vSpacing) {
+        VStack(spacing: NutrientInfoConstants.vSpacing) {
             mealTypeAndKcalText  // 상단: 식사 타입과 섭취 칼로리 텍스트
             
             HStack {   // 하단: 탄단지 항목
-                carbProteinFat(title: "탄수화물", value: nutrition.carb)
-                    .padding(.trailing, NutritionInfoConstants.textHPadding)
+                carbProteinFat(title: "탄수화물", value: Nutrient.carb)
+                    .padding(.trailing, NutrientInfoConstants.textHPadding)
                 divider()
-                carbProteinFat(title: "단백질", value: nutrition.protein)
-                    .padding(.leading, NutritionInfoConstants.textHPadding)
-                    .padding(.trailing, NutritionInfoConstants.textHPadding)
+                carbProteinFat(title: "단백질", value: Nutrient.protein)
+                    .padding(.leading, NutrientInfoConstants.textHPadding)
+                    .padding(.trailing, NutrientInfoConstants.textHPadding)
                 divider()
-                carbProteinFat(title: "지방", value: nutrition.fat)
-                    .padding(.leading, NutritionInfoConstants.textHPadding)
+                carbProteinFat(title: "지방", value: Nutrient.fat)
+                    .padding(.leading, NutrientInfoConstants.textHPadding)
             }
         }
     }
     
     // MARK: - 식사 타입과 섭취 칼로리 텍스트 뷰
     private var mealTypeAndKcalText: some View {
-        HStack(spacing: NutritionInfoConstants.textHSpacing, content: {
-            Text("\(nutrition.mealType ?? "") 섭취 칼로리")
+        HStack(spacing: NutrientInfoConstants.textHSpacing, content: {
+            Text("\(Nutrient.mealType ?? "") 섭취 칼로리")
                 .font(.PretendardMedium16)
                 .foregroundStyle(Color.grey05)
-            Text("\(nutrition.kcal)kcal")
+            Text("\(Nutrient.kcal)kcal")
                 .font(.PretendardSemiBold16)
                 .foregroundStyle(Color.orange05)
         })
@@ -54,7 +54,7 @@ struct NutritionInfoCard: View {
     
     // MARK: - 탄단지 항목 뷰
     private func carbProteinFat(title: String, value: Int) -> some View {
-        VStack(spacing: NutritionInfoConstants.textVSpacing, content: {
+        VStack(spacing: NutrientInfoConstants.textVSpacing, content: {
             Text(title)
                 .font(.PretendardRegular14)
                 .foregroundStyle(Color.grey03)
@@ -74,5 +74,5 @@ struct NutritionInfoCard: View {
 }
 
 #Preview {
-    NutritionInfoCard(nutrition: NutritionInfoModel(mealType: "아침", kcal: 1234, carb: 111, protein: 111, fat: 111))
+    NutrientInfoCard(Nutrient: NutrientInfoModel(mealType: "아침", kcal: 1234, carb: 111, protein: 111, fat: 111))
 }

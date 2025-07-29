@@ -49,9 +49,7 @@ struct HomeScreenView: View {
                     .padding(.vertical, 20)
                 }
 
-                // 아래 붙어 있는 탭바
-                MainTabView()
-                    .frame(height: 60)
+               
             }
 
             // 팝업

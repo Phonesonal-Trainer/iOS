@@ -1,5 +1,5 @@
 //
-//  NutritionInfoViewModel.swift
+//  NutrientInfoViewModel.swift
 //  PhonesonalTrainer
 //
 //  Created by 강리현 on 7/22/25.
@@ -9,18 +9,18 @@
 import Foundation
 import Combine
 
-class NutritionInfoViewModel: ObservableObject {
-    @Published var nutritionData: [NutritionInfoModel] = []
+class NutrientInfoViewModel: ObservableObject {
+    @Published var NutrientData: [NutrientInfoModel] = []
 
-    func fetchNutritionInfo() {
-        guard let url = URL(string: "https://api.yourserver.com/nutrition") else { return }
+    func fetchNutrientInfo() {
+        guard let url = URL(string: "https://api.yourserver.com/Nutrient") else { return }
 
         URLSession.shared.dataTask(with: url) { data, response, error in
             if let data = data {
                 do {
-                    let decoded = try JSONDecoder().decode([NutritionInfoModel].self, from: data)
+                    let decoded = try JSONDecoder().decode([NutrientInfoModel].self, from: data)
                     DispatchQueue.main.async {
-                        self.nutritionData = decoded
+                        self.NutrientData = decoded
                     }
                 } catch {
                     print("디코딩 오류: \(error)")

@@ -12,7 +12,7 @@ struct DayPlanModel: Identifiable {
     let id: UUID = UUID()
     let date: Date
     let meals: [MealType: [MealModel]]
-    // let nutrition : [MealType: MealRecordModel]
+    // let Nutrient : [MealType: MealRecordModel]
     let totalKcal : Int
     let goalKcal : Int
 }
