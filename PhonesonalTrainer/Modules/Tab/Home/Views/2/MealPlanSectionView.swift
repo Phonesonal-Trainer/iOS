@@ -27,7 +27,7 @@ struct MealPlanSectionView: View {
     }
 }
 #Preview {
-    let dummy = NutritionInfoModel(mealType: "아침", kcal: 1234, carb: 180, protein: 70, fat: 30)
+    let dummy = NutrientInfoModel(mealType: "아침", kcal: 1234, carb: 180, protein: 70, fat: 30)
     return MealPlanSectionView(
         carbs: dummy.carb,
         protein: dummy.protein,

@@ -19,7 +19,6 @@ fileprivate enum MealRecordConstants {
 
 struct MealRecordSectionView: View {
     @ObservedObject var viewModel: MealPlanViewModel
-    var mealDetail: ((MealType) -> Void)? = nil
     
     // MARK: - Body
     var body: some View {
@@ -32,8 +31,8 @@ struct MealRecordSectionView: View {
                     .font(.PretendardMedium18)
                     .foregroundStyle(Color.grey06)
                 
-                Button(action: {
-                    mealDetail?(type)    // 콜백 호출(식단 기록 상세로 가기)
+                NavigationLink(destination: {
+                    MealRecordDetailView(mealType: type)
                 }) {
                     Image(systemName: "chevron.right")
                         .foregroundColor(.grey05)
@@ -79,7 +78,7 @@ struct RecordInfoView: View {
                 .frame(width: MealRecordConstants.recordSectionWidth, height: MealRecordConstants.recordInfoHeight)
                 .shadow(color: Color.black.opacity(0.1), radius: 2)
             
-            NutritionInfoCard(nutrition: NutritionInfoModel(mealType: "아침", kcal: 1234, carb: 111, protein: 111, fat: 111))
+            NutrientInfoCard(Nutrient: NutrientInfoModel(mealType: "아침", kcal: 1234, carb: 111, protein: 111, fat: 111))
         }
     }
 }
@@ -93,8 +92,8 @@ struct RecordWithImageView: View {
                 .frame(width: MealRecordConstants.recordSectionWidth)
                 .shadow(color: Color.black.opacity(0.1), radius: 2)
             
-            NutritionInfoCard(nutrition: NutritionInfoModel(mealType: "아침", kcal: 1234, carb: 111, protein: 111, fat: 111))
-            //nutritionInfoCard 에 이미지 추가할까 어떻게 구현하지 걍 아예 새로 해야되나
+            NutrientInfoCard(Nutrient: NutrientInfoModel(mealType: "아침", kcal: 1234, carb: 111, protein: 111, fat: 111))
+            //NutrientInfoCard 에 이미지 추가할까 어떻게 구현하지 걍 아예 새로 해야되나
         }
     }
 }

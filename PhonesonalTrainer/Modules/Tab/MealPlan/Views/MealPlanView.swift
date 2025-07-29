@@ -12,7 +12,6 @@ struct MealPlanView: View {
     let screenWidth = UIScreen.main.bounds.width
     
     @StateObject private var viewModel = MealPlanViewModel()
-    @State private var path = NavigationPath()  // 식단 기록 상세로 가기 위해
     
     // MARK: - Constants
     fileprivate enum MealPlanConstants {
@@ -20,7 +19,7 @@ struct MealPlanView: View {
     }
     
     var body: some View {
-        NavigationStack(path: $path) {
+        NavigationStack {
             VStack(spacing: 0) {   // spacing을 0으로 주면 scrollview가 깔끔해짐.
                 VStack {
                     Text("식단 플랜")
@@ -48,9 +47,7 @@ struct MealPlanView: View {
                         MealListView()
                         
                         // 식단 기록 뷰
-                        MealRecordSectionView(viewModel: viewModel) { selectedType in
-                            path.append(MealPlanRoute.mealRecordDetail(selectedType))
-                        }
+                        MealRecordSectionView(viewModel: viewModel) 
                     }
                 }
             }

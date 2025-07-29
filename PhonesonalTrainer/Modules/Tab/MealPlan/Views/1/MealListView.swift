@@ -42,7 +42,7 @@ struct MealListView: View {
             }
             .padding(.top, MealListConstants.mealCardTopPadding)
             .padding(.bottom, MealListConstants.mealCardBottomPadding)
-            .background(Color.white)
+            .background(Color.grey00)
             .cornerRadius(5)
             .shadow(color: Color.black.opacity(0.1), radius: 2)
             .frame(width: MealListConstants.mealListWidth)
