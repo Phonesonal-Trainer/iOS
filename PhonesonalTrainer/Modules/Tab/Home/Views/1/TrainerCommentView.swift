@@ -7,7 +7,7 @@
 
 import SwiftUI
 struct TrainerCommentView: View {
-    var comment: String
+    var comment: String = "어쩌구저쩌구코멘트" //더미 
 
     var body: some View {
         HStack {

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct WorkoutSectionView: View {
-    @StateObject var workoutViewModel = CalorieProgressWorkoutViewModel(kcal: 800, goal: 1000)
+    @StateObject var workoutViewModel = CalorieProgressWorkoutViewModel(kcal: 1234, goal: 2456)
 
     var body: some View {
         VStack(spacing: 20) {

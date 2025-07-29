@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct WorkoutInfoView: View {
-    var focus: String = "전신"//더미
-        var anaerobic: Int = 30 //더미
+    var focus: String = "상체"//더미
+        var anaerobic: Int = 40 //더미
         var aerobic: Int = 15//더미
     
    // var focus: String     // 상체, 하체 등 // 얘가 찐

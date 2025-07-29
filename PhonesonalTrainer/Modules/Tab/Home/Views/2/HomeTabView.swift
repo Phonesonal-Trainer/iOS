@@ -33,17 +33,18 @@ struct HomeTabView: View {
             }
         }
         .cornerRadius(8)
-        .frame(width: 300)
+        .frame(width: 340)
         
         if selectedTab == .workout {
             WorkoutSectionView()
         } else {
-            MealPlanSectionView()
+            MealPlanSectionView(
+                carbs: 111,
+                protein: 111,
+                fat: 111
+            )
         }
         
-        Spacer()
-        
-            .padding(.top, 16)
     }
 }
 #Preview {
