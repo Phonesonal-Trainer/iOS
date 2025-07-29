@@ -12,7 +12,7 @@ struct MainTabView: View {
     
     var body: some View {
         TabView(selection : $selection){
-            HomeView()
+            HomeScreenView()
                 .tabItem {
                     Image(selection == 0 ? "icon1" : "icon1_2")
                     Text("홈")
@@ -44,11 +44,7 @@ struct MainTabView: View {
     }
 }
 
-struct HomeView: View {
-    var body: some View {
-        Text("Home Screen")
-    }
-}
+
 struct WorkoutRoutineView: View {
     var body: some View {
         Text("WorkoutRoutine Screen")
