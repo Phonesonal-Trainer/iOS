@@ -10,7 +10,8 @@ import SwiftUI
 struct MealListCard: View {
     let item: MealModel
     let showImage: Bool
-    @ObservedObject var viewModel: MealCheckListViewModel
+    let showCheckbox: Bool
+    let viewModel: MealCheckListViewModel?
     
     // MARK: - Constants(상수 정의)
     fileprivate enum MealCardConstants {
@@ -24,9 +25,8 @@ struct MealListCard: View {
     
     // MARK: - Body
     var body: some View {
-        HStack(spacing: MealCardConstants.imageTextSpacing) {
-            
-            if showImage {  // 좌측에 이미지 보여주기
+        if showImage {  // 좌측에 이미지 보여주기
+            HStack(spacing: MealCardConstants.imageTextSpacing) {
                 AsyncImage(url: URL(string: item.imageURL)) { image in
                     image
                         .resizable()
@@ -36,17 +36,27 @@ struct MealListCard: View {
                     ProgressView()
                         .frame(width: MealCardConstants.imageSize, height: MealCardConstants.imageSize)
                 }
-            } else {   // 좌측에 체크박스 보여주기 (식단 기록 상세 뷰에서)
-                Button(action: {
-                    viewModel.toggleSelection(of: item)
-                }) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .resizable()
-                        .foregroundStyle(viewModel.selectedMealIDs.contains(item.id) ? Color.orange05 : Color.grey02)
-                        .frame(width: MealCardConstants.checkboxSize, height: MealCardConstants.checkboxSize)
-                }
+                
+                // 우측 텍스트 정보
+                rightInfo
             }
-        
+        } else if showCheckbox {   // 좌측에 체크박스 보여주기 (식단 기록 상세 뷰에서)
+            HStack(spacing: MealCardConstants.imageTextSpacing) {
+                if let viewModel {
+                    Button(action: {
+                        viewModel.toggleSelection(of: item)
+                    }) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .resizable()
+                            .foregroundStyle(viewModel.selectedMealIDs.contains(item.id) ? Color.orange05 : Color.grey02)
+                            .frame(width: MealCardConstants.checkboxSize, height: MealCardConstants.checkboxSize)
+                    }
+                }
+
+                // 우측 텍스트 정보
+                rightInfo
+            }
+        } else {    // 추가 식단에서 사용할 이미지, 체크박스 없는 카드
             // 우측 텍스트 정보
             rightInfo
         }
@@ -84,7 +94,7 @@ struct MealListCard: View {
     
     /// 식단 칼로리 표시
     private var mealKcal: some View {
-        Text("\(item.kcal) kcal")
+        Text("\(formatKcal(item.kcal)) kcal")
             .font(.PretendardMedium18)
             .foregroundStyle(.orange05)
     }

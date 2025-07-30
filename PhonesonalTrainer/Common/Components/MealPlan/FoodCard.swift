@@ -70,7 +70,7 @@ struct FoodCard: View {
     
     // MARK: - 서브 설명 (양 + 칼로리)
     private var subTitleText: some View {
-        Text("1인분 (\(item.amount)g) / \(item.kcal)kcal")
+        Text("1인분 (\(item.amount)g) / \(formatKcal(item.kcal))kcal")
             .font(.PretendardRegular12)
             .foregroundStyle(Color.grey03)
     }

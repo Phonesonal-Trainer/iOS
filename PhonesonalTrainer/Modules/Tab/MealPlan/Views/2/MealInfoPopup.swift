@@ -93,7 +93,7 @@ struct MealInfoPopup: View {
                 .buttonStyle(.plain)
             }
             /// 식단 양 + 칼로리
-            Text("\(viewModel.meal.amount)g (\(viewModel.meal.kcal)kcal)")
+            Text("\(viewModel.meal.amount)g (\(formatKcal(viewModel.meal.kcal))kcal)")
                 .font(.PretendardMedium18)
                 .foregroundStyle(Color.grey03)
         }
@@ -119,13 +119,13 @@ struct MealInfoPopup: View {
     
     // MARK: - 퍼센트 계산
     /// percentText를 위한 정수형
-    func calcPercent(_ value: Int) -> Int {
+    func calcPercent(_ value: Double) -> Int {
         let total = viewModel.nutrient.carb + viewModel.nutrient.protein + viewModel.nutrient.fat
         guard total > 0 else { return 0 }
         return Int((Double(value) / Double(total)) * 100)
     }
     /// percentage를 위한 비율형
-    func calcRatio(_ value: Int) -> Double {
+    func calcRatio(_ value: Double) -> Double {
         let total = viewModel.nutrient.carb + viewModel.nutrient.protein + viewModel.nutrient.fat
         guard total > 0 else { return 0.0 }
         return Double(value) / Double(total)

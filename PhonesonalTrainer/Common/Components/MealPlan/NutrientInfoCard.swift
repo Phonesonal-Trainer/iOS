@@ -27,14 +27,14 @@ struct NutrientInfoCard: View {
             mealTypeAndKcalText  // 상단: 식사 타입과 섭취 칼로리 텍스트
             
             HStack {   // 하단: 탄단지 항목
-                carbProteinFat(title: "탄수화물", value: Nutrient.carb)
+                carbProteinFat(title: "탄수화물", value: formatToString(Nutrient.carb))
                     .padding(.trailing, NutrientInfoConstants.textHPadding)
                 divider()
-                carbProteinFat(title: "단백질", value: Nutrient.protein)
+                carbProteinFat(title: "단백질", value: formatToString(Nutrient.protein))
                     .padding(.leading, NutrientInfoConstants.textHPadding)
                     .padding(.trailing, NutrientInfoConstants.textHPadding)
                 divider()
-                carbProteinFat(title: "지방", value: Nutrient.fat)
+                carbProteinFat(title: "지방", value: formatToString(Nutrient.fat))
                     .padding(.leading, NutrientInfoConstants.textHPadding)
             }
         }
@@ -46,14 +46,14 @@ struct NutrientInfoCard: View {
             Text("\(Nutrient.mealType ?? "") 섭취 칼로리")
                 .font(.PretendardMedium16)
                 .foregroundStyle(Color.grey05)
-            Text("\(Nutrient.kcal)kcal")
+            Text("\(formatKcal(Nutrient.kcal))kcal")
                 .font(.PretendardSemiBold16)
                 .foregroundStyle(Color.orange05)
         })
     }
     
     // MARK: - 탄단지 항목 뷰
-    private func carbProteinFat(title: String, value: Int) -> some View {
+    private func carbProteinFat(title: String, value: String) -> some View {
         VStack(spacing: NutrientInfoConstants.textVSpacing, content: {
             Text(title)
                 .font(.PretendardRegular14)

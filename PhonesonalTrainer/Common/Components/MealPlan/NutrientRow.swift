@@ -13,7 +13,7 @@ struct NutrientRow: View {
     @State var percentage: CGFloat
     let label: String
     let percentText: Int   // 이렇게 해도 되나ㅠ
-    let gram: Int
+    let gram: Double
     
     fileprivate enum NutrientRowConstants {
         static let width: CGFloat = 300
@@ -40,7 +40,7 @@ struct NutrientRow: View {
             
             /// '11g'+ 퍼센트바
             VStack(alignment: .trailing, spacing: NutrientRowConstants.VSpacing) {
-                Text("\(gram)g")
+                Text("\(formatToString(gram))g")
                     .font(.PretendardMedium12)
                     .foregroundStyle(Color.grey06)
                 

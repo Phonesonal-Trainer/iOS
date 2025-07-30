@@ -34,16 +34,16 @@ class MealInfoViewModel: ObservableObject {
             id: meal.id,
             name: meal.name,
             amount: newAmount,
-            kcal: Int(Double(meal.kcal) * factor),
+            kcal: (Double(meal.kcal) * factor),
             imageURL: meal.imageURL
         )
         
         nutrient = NutrientInfoModel(
             mealType: nutrient.mealType,
-            kcal: Int(Double(nutrient.kcal) * factor),
-            carb: Int(Double(nutrient.carb) * factor),
-            protein: Int(Double(nutrient.protein) * factor),
-            fat: Int(Double(nutrient.fat) * factor)
+            kcal: Double(nutrient.kcal) * factor,
+            carb: Double(nutrient.carb) * factor,
+            protein: Double(nutrient.protein) * factor,
+            fat: Double(nutrient.fat) * factor
         )
     }
 

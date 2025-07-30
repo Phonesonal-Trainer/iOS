@@ -9,23 +9,23 @@ import Foundation
 
 class AddedMealViewModel: ObservableObject {
     @Published var addedMeals: [MealModel] = []
-    @Published var isLoading: Bool = false
     
-    func fetchMeals(for mealType: MealType) {
-        isLoading = true
-            
-        // 예시: 서버 통신 시뮬레이션
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            self.addedMeals = [
-                MealModel(name: "닭가슴살", amount: 200, kcal: 250, imageURL: "temp_image"),
-                MealModel(name: "현미밥", amount: 150, kcal: 200, imageURL: "temp_image")
-            ]
-            self.isLoading = false
-        }
+    // 더미데이터로 일단 구현. api 받으면 연동
+    init() {
+        loadDummyData()
     }
-    
+
+    func loadDummyData() {
+        addedMeals = [
+            MealModel(name: "소고기", amount: 180, kcal: 321, imageURL: ""),
+            MealModel(name: "닭가슴살", amount: 150, kcal: 230, imageURL: ""),
+            MealModel(name: "고구마", amount: 100, kcal: 120, imageURL: "")
+        ]
+    }
+
     func deleteMeal(_ meal: MealModel) {
-        // 서버에 삭제 요청 보내는 로직 추가 필요
-        addedMeals.removeAll { $0.id == meal.id }
+        if let index = addedMeals.firstIndex(where: { $0.id == meal.id }) {
+            addedMeals.remove(at: index)
+        }
     }
 }

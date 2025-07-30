@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct NutrientView: View {
-    var carbs: Int
-    var protein: Int
-    var fat: Int
+    var carbs: Double
+    var protein: Double
+    var fat: Double
 
     var body: some View {
         HStack(spacing: 0) {
@@ -31,12 +31,12 @@ struct NutrientView: View {
         .frame(width: 256, height: 44)
     }
 
-    private func nutrientColumn(title: String, value: Int) -> some View {
+    private func nutrientColumn(title: String, value: Double) -> some View {
         VStack(spacing: 4) {
             Text(title)
                 .font(.system(size: 14)) // 네가 바꿔
                 .foregroundColor(.grey03)
-            Text("\(value)g")
+            Text("\(formatToString(value))g")
                 .font(.system(size: 18, weight: .semibold)) // 네가 바꿔
                 .foregroundColor(.grey05)
         }

@@ -30,7 +30,7 @@ struct MealListView: View {
             
             VStack(spacing: 0) {
                 ForEach(Array(mealviewModel.mealItems.enumerated()), id: \.1.id) { index, meal in
-                    MealListCard(item: meal, showImage: true, viewModel: viewModel)
+                    MealListCard(item: meal, showImage: true, showCheckbox: false, viewModel: nil)
                                 
                     if index != mealviewModel.mealItems.count - 1 {
                         Divider()

@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct MealPlanSectionView: View {
-    let carbs: Int
-    let protein: Int
-    let fat: Int
+    let carbs: Double
+    let protein: Double
+    let fat: Double
 
     var body: some View {
         VStack(spacing: 20) {

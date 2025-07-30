@@ -14,10 +14,10 @@ import Foundation
 struct NutrientInfoModel: Codable, Identifiable {
     let id = UUID()
     let mealType: String?   // 식단 정보 뷰에서 재사용하기 위해서 옵셔널로 둠.
-    let kcal: Int
-    let carb: Int
-    let protein: Int
-    let fat: Int
+    let kcal: Double
+    let carb: Double
+    let protein: Double
+    let fat: Double
     
     /// 디코딩할 때마다 새로운 UUID 가 생성되지 않기 위해
     /// 직접 CodingKeys를 지정하여 id를 제외.

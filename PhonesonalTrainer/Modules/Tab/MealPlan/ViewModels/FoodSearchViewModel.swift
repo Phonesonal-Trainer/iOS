@@ -32,9 +32,24 @@ class FoodSearchViewModel: ObservableObject {
     let itemsPerPage = 8
     
     // 추후에 백엔드와 연결시 allFoods를 API 호출 결과로 대체.
-    @Published var allFoods: [MealModel] = (1...18).map { i in
-        MealModel(name: "닭가슴살 \(i)", amount: 100, kcal: 95, imageURL: "temp_image")
-    }
+    @Published var allFoods: [MealModel] = [
+        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image"),
+        MealModel(name: "삶은 달걀", amount: 50, kcal: 68, imageURL: "temp_image"),
+        MealModel(name: "토마토", amount: 100, kcal: 14, imageURL: "temp_image"),
+        MealModel(name: "방울토마토", amount: 13, kcal: 2, imageURL: "temp_image"),
+        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image"),
+        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image"),
+        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image"),
+        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image"),
+        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image"),
+        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image"),
+        MealModel(name: "스테비아방울토마토", amount: 15, kcal: 6.8, imageURL: "temp_image"),
+        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image"),
+        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image"),
+        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image"),
+        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image"),
+        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image")
+    ]
     
     var filteredFoods: [MealModel] {
         let sorted = selectedSort == .frequency ? allFoods : allFoods.reversed() // 예시
