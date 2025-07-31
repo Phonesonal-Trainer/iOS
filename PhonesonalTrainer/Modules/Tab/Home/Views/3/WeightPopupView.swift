@@ -12,12 +12,28 @@ struct WeightPopupView: View {
     var onSave: (Double) -> Void
 
     @FocusState private var isFocused: Bool
+    @State private var shakeOffset: CGFloat = 0
 
+    // 입력값이 존재하는지만 체크
+    var isInputEmpty: Bool {
+        weightText.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    // 저장 가능한 유효한 값인지 체크
     var isValid: Bool {
-        if let value = Double(weightText), weightText.count <= 4 {
-            return value > 0
+        guard let value = Double(weightText),
+              value >= 30, value <= 300 else {
+            return false
         }
-        return false
+
+        if weightText.contains(".") {
+            let parts = weightText.split(separator: ".")
+            if parts.count == 2, parts[1].count > 1 {
+                return false
+            }
+        }
+
+        return true
     }
 
     var body: some View {
@@ -51,6 +67,7 @@ struct WeightPopupView: View {
                         .foregroundColor(.grey05)
                         .padding(.leading, 20)
                         .padding(.vertical, 15)
+                        .offset(x: shakeOffset)
 
                     Spacer()
 
@@ -75,20 +92,22 @@ struct WeightPopupView: View {
                         .cornerRadius(5)
                 }
 
-                // 저장
+                // 저장 버튼
                 Button(action: {
                     if let value = Double(weightText), isValid {
                         onSave(value)
+                    } else {
+                        shakeTextField()
                     }
                 }) {
                     Text("저장")
                         .font(.system(size: 14, weight: .semibold))
                         .frame(width: 145, height: 50)
-                        .background(isValid ? Color.orange05 : Color.orange01)
-                        .foregroundColor(isValid ? .grey00 : .orange03)
+                        .background(isInputEmpty ? Color.orange01 : Color.orange05)
+                        .foregroundColor(isInputEmpty ? .orange03 : .grey00)
                         .cornerRadius(5)
                 }
-                .disabled(!isValid)
+                .disabled(isInputEmpty)
             }
             .padding(.top, 30)
             .padding(.horizontal, 20)
@@ -96,7 +115,18 @@ struct WeightPopupView: View {
         .frame(width: 340, height: 243)
         .background(Color.grey00)
         .cornerRadius(10)
-        .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 2)
+        .shadow(color: .black.opacity(0.1), radius: 2)
+    }
+
+    // 흔들리는 애니메이션
+    private func shakeTextField() {
+        let shakeValues: [CGFloat] = [-16, 16, -12, 12, -6, 6, 0]
+        for (index, value) in shakeValues.enumerated() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05 * Double(index)) {
+                withAnimation(.easeInOut(duration: 0.05)) {
+                    shakeOffset = value
+                }
+            }
+        }
     }
 }
-
