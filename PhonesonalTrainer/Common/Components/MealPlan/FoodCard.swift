@@ -21,12 +21,14 @@ struct FoodCard: View {
         static let imageSize: CGFloat = 16
         static let checkboxSize: CGFloat = 20
         static let edgePadding: CGFloat = 15
+        static let width: CGFloat = 165
+        static let height: CGFloat = 70
     }
     
     // MARK: - Body
     var body: some View {
         HStack(spacing: FoodCardConstants.hSpacing) {
-            VStack(spacing: FoodCardConstants.textLineSpacing) {
+            VStack(alignment: .leading, spacing: FoodCardConstants.textLineSpacing) {
                 topTitleText
                 
                 subTitleText
@@ -41,6 +43,7 @@ struct FoodCard: View {
             }
         }
         .padding(FoodCardConstants.edgePadding)
+        .frame(width: FoodCardConstants.width, height: FoodCardConstants.height)
         .background(
             RoundedRectangle(cornerRadius: 5)
                 .fill(viewModel.selectedMealIDs.contains(item.id) ? Color.orange01 : Color.grey01)

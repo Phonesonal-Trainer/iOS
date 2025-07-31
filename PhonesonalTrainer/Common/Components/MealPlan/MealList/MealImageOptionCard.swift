@@ -1,22 +1,19 @@
 //
-//  MealListItemView.swift
+//  MealImageOptionCard.swift
 //  PhonesonalTrainer
 //
-//  Created by 강리현 on 7/20/25.
+//  Created by 강리현 on 7/31/25.
 //
 
 import SwiftUI
 
-struct MealListCard: View {
+struct MealImageOptionCard: View {
     let item: MealModel
     let showImage: Bool
-    let showCheckbox: Bool
-    let viewModel: MealCheckListViewModel?
     
     // MARK: - Constants(상수 정의)
     fileprivate enum MealCardConstants {
         static let imageSize: CGFloat = 45
-        static let checkboxSize: CGFloat = 20
         static let imageTextSpacing: CGFloat = 15   // 이미지와 텍스트 간 간격
         static let textLineSpacing: CGFloat = 2     // name과 amount 사이 간격
         static let mealItemTopPadding: CGFloat = 10
@@ -37,22 +34,6 @@ struct MealListCard: View {
                         .frame(width: MealCardConstants.imageSize, height: MealCardConstants.imageSize)
                 }
                 
-                // 우측 텍스트 정보
-                rightInfo
-            }
-        } else if showCheckbox {   // 좌측에 체크박스 보여주기 (식단 기록 상세 뷰에서)
-            HStack(spacing: MealCardConstants.imageTextSpacing) {
-                if let viewModel {
-                    Button(action: {
-                        viewModel.toggleSelection(of: item)
-                    }) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .resizable()
-                            .foregroundStyle(viewModel.selectedMealIDs.contains(item.id) ? Color.orange05 : Color.grey02)
-                            .frame(width: MealCardConstants.checkboxSize, height: MealCardConstants.checkboxSize)
-                    }
-                }
-
                 // 우측 텍스트 정보
                 rightInfo
             }

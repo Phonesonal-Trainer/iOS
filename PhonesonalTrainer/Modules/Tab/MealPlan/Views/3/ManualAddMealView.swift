@@ -24,7 +24,7 @@ struct ManualAddMealView: View {
         static let VSpacing: CGFloat = 25
         static let HSpacing: CGFloat = 20
         static let textFieldTopPadding: CGFloat = 25
-        static let textFieldBottomPadding: CGFloat = 100
+        static let textFieldBottomPadding: CGFloat = 160
         static let noticeHeight: CGFloat = 60 // notice 이미지 높이
     }
     /// mainButton 활성화 조건 ('식단명' + '칼로리')

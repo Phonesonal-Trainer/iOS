@@ -7,6 +7,7 @@
 import SwiftUI
 
 struct HomeScreenView: View {
+    @Binding var path: [HomeRoute]
     @State private var showWeightPopup = false
     @State private var weightText = ""
 
@@ -75,5 +76,7 @@ struct HomeScreenView: View {
 }
 
 #Preview {
-    HomeScreenView()
+    StatefulPreviewWrapper([HomeRoute]()) { path in
+        HomeScreenView(path: path)
+    }
 }

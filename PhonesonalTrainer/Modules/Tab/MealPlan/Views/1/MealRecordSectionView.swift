@@ -19,6 +19,8 @@ fileprivate enum MealRecordConstants {
 
 struct MealRecordSectionView: View {
     @ObservedObject var viewModel: MealPlanViewModel
+    @Binding var path: [MealPlanRoute]
+    
     
     // MARK: - Body
     var body: some View {
@@ -31,8 +33,8 @@ struct MealRecordSectionView: View {
                     .font(.PretendardMedium18)
                     .foregroundStyle(Color.grey06)
                 
-                NavigationLink(destination: {
-                    MealRecordDetailView(mealType: type)
+                Button(action: {
+                    path.append(.mealRecord)
                 }) {
                     Image(systemName: "chevron.right")
                         .foregroundColor(.grey05)
@@ -98,9 +100,3 @@ struct RecordWithImageView: View {
     }
 }
 
-#Preview {
-    let viewModel = MealPlanViewModel()
-        viewModel.mealRecordStates[.breakfast] = .noImage // 강제 설정
-
-        return MealRecordSectionView(viewModel: viewModel)
-}

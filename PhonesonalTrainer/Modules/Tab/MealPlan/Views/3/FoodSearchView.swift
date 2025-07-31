@@ -12,6 +12,7 @@ struct FoodSearchView: View {
     // MARK: - Property
     @StateObject private var viewModel = FoodSearchViewModel()
     @Environment(\.dismiss) private var dismiss // 뒤로가기
+    @Binding var path: [MealPlanRoute]
     
     // MARK: - 상수 정의
     fileprivate enum FoodSearchConstants {
@@ -39,43 +40,44 @@ struct FoodSearchView: View {
         isValid ? .grey00 : .grey02
     }
     
+    let columns: [GridItem] = Array(repeating: GridItem(.fixed(165), spacing: 15), count: 2)
+    
     // MARK: - Body
     var body: some View {
-        NavigationStack {  // 이거 루트뷰에다가 써야돼.. 수정해..
-            VStack(spacing: 0) {
-                // NavigationBar 적용
-                topTitle
-                    .background(Color.grey00)
-                    .shadow(color: Color.black.opacity(0.1), radius: 2)
-                    .zIndex(1)
-                
-                ScrollView {
-                    VStack(spacing: FoodSearchConstants.VSpacing) {
-                        /// 서치바 + 정렬 선택 세그먼트 + 음식 그리드
-                        middleContent
-                            .padding(.top, FoodSearchConstants.VSpacing)
-                        
-                        /// notice 이미지
-                        notice
-                        
-                        // 저장 버튼
-                        MainButton(
-                            color: saveButtonColor,
-                            text: "저장하기",
-                            textColor: saveButtonTextColor
-                        ) {
-                            if isValid {
-                                // 선택한 음식 정보 저장
-                            }
+        VStack(spacing: 0) {
+            // NavigationBar 적용
+            topTitle
+                .background(Color.grey00)
+                .shadow(color: Color.black.opacity(0.1), radius: 2)
+                .zIndex(1)
+            
+            ScrollView {
+                VStack(spacing: FoodSearchConstants.VSpacing) {
+                    /// 서치바 + 정렬 선택 세그먼트 + 음식 그리드
+                    middleContent
+                        .padding(.top, FoodSearchConstants.VSpacing)
+                    
+                    /// notice 이미지
+                    notice
+                    
+                    // 저장 버튼
+                    MainButton(
+                        color: saveButtonColor,
+                        text: "저장하기",
+                        textColor: saveButtonTextColor
+                    ) {
+                        if isValid {
+                            // 선택한 음식 정보 저장
+                            dismiss()
                         }
-                        .disabled(!isValid)
-                        .frame(width: FoodSearchConstants.baseWidth)
                     }
+                    .disabled(!isValid)
+                    .frame(width: FoodSearchConstants.baseWidth)
                 }
             }
-            .background(Color.background)
-            .navigationBarBackButtonHidden(true)
         }
+        .background(Color.background)
+        .navigationBarBackButtonHidden(true)
     }
     
     // MARK: - 상단 제목
@@ -87,7 +89,9 @@ struct FoodSearchView: View {
                     .foregroundColor(.grey05)
             }
         } trailing: {
-            NavigationLink(destination: ManualAddMealView()) {
+            Button(action: {
+                path.append(.manualAdd)
+            }) {
                 Text("직접 추가")
                     .font(.PretendardRegular16)
                     .foregroundColor(.grey05)
@@ -125,7 +129,9 @@ struct FoodSearchView: View {
                 .fill(Color.grey02)
                 .frame(width: 1, height: 8)
                 
-            Button(action: { viewModel.selectSort(.favorite) }) {
+            Button(action: {
+                viewModel.selectSort(.favorite)
+            }) {
                 Text("즐겨찾기 순")
                     .font(.PretendardMedium12)
                     .foregroundColor(viewModel.selectedSort == .favorite ? .grey03 : .grey02)
@@ -144,7 +150,9 @@ struct FoodSearchView: View {
                         .font(.PretendardMedium16)
                         .foregroundStyle(Color.grey03)
                     
-                    NavigationLink(destination: ManualAddMealView()) {
+                    Button(action: {
+                        path.append(.manualAdd)
+                    }) {
                         ZStack {
                             RoundedRectangle(cornerRadius: 30)
                                 .fill(Color.orange05)
@@ -159,12 +167,16 @@ struct FoodSearchView: View {
                 .frame(width: FoodSearchConstants.baseWidth, height: FoodSearchConstants.gridHeight)
             } else {
                 // 식단 그리드
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 15) {
-                    ForEach(viewModel.pagedFoods) { item in
-                        FoodCard(item: item, viewModel: viewModel)
+                VStack{
+                    LazyVGrid(columns: columns, spacing: 15) {
+                        ForEach(viewModel.pagedFoods) { item in
+                            FoodCard(item: item, viewModel: viewModel)
+                        }
                     }
+                    
                 }
-                .frame(width: FoodSearchConstants.baseWidth, height: FoodSearchConstants.gridHeight)
+                .frame(maxHeight: .infinity, alignment: .top)
+                .frame(height: FoodSearchConstants.gridHeight)
             }
         }
     }
@@ -196,5 +208,7 @@ struct FoodSearchView: View {
 }
 
 #Preview {
-    FoodSearchView()
+    StatefulPreviewWrapper([MealPlanRoute]()) { path in
+        FoodSearchView(path: path)
+    }
 }

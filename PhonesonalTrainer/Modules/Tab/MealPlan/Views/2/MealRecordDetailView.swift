@@ -13,6 +13,7 @@ struct MealRecordDetailView: View {
     @State private var uploadedImage: UIImage? = nil  // 이미지 업로드
     @StateObject private var viewModel = AddedMealViewModel()
     @Environment(\.dismiss) private var dismiss // 뒤로가기 액션
+    @Binding var path: [MealPlanRoute]
     
     // MARK: - 상수 정의
     fileprivate enum MealRecordDetailConstant {
@@ -48,7 +49,7 @@ struct MealRecordDetailView: View {
                     MealCheckListView()
                     // 추가 식단 영역 필요 시 추가
                     
-                    AddedMealSectionView(viewModel: viewModel)
+                    AddedMealSectionView(viewModel: viewModel, path: $path)
                 }
                 .padding(.horizontal)
             }
@@ -59,5 +60,7 @@ struct MealRecordDetailView: View {
 }
 
 #Preview {
-    MealRecordDetailView(mealType: .breakfast)
+    StatefulPreviewWrapper([MealPlanRoute]()){ path in
+        MealRecordDetailView(mealType: .breakfast, path: path)
+    }
 }
