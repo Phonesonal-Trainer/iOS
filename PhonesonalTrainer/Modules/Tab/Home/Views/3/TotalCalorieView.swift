@@ -11,8 +11,8 @@ struct TotalCalorieView: View {
     let calorieGoal: Int       // 목표 칼로리
 
     var body: some View {
-        let diff = totalCalorie - calorieGoal // 목표 - 현재
-        let diffText = String(format: "%+d kcal", diff)
+       // let diff = totalCalorie - calorieGoal // 목표 - 현재
+       // let diffText = String(format: "%+d kcal", diff)
 
         VStack(alignment: .leading, spacing: 0) {
                     // 상단 텍스트 라인
@@ -21,11 +21,11 @@ struct TotalCalorieView: View {
                             .font(.system(size: 14))
                             .foregroundColor(.grey04)
 
-                        Spacer() .frame(width: 5)
+                      //  Spacer() .frame(width: 5)
 
-                        Text(diffText)
-                            .font(.system(size: 12))
-                            .foregroundColor(.orange05)
+                       // Text(diffText)
+                            //.font(.system(size: 12))
+                           // .foregroundColor(.orange05)
                     }
             
                     Spacer().frame(height: 15)
@@ -58,7 +58,7 @@ struct TotalCalorieView: View {
                .frame(width: 160, height: 125, alignment: .leading)
         .background(Color.grey00)
         .cornerRadius(5)
-        .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+        .shadow(color: .black.opacity(0.1), radius: 2)
     }
 }
 #Preview {
