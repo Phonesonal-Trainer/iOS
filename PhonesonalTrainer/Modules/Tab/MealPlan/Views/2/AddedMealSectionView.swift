@@ -11,6 +11,10 @@ struct AddedMealSectionView: View {
     @ObservedObject var viewModel: AddedMealViewModel
     @Binding var path: [MealPlanRoute]
     
+    // 바인딩으로 상태 전달 받기
+    @Binding var selectedMealViewModel: MealInfoViewModel?
+    @Binding var showPopup: Bool
+    
     fileprivate enum AddedMealSectionConstants {
         static let basicWidth: CGFloat = 340
         static let VSpacing: CGFloat = 20
@@ -68,16 +72,23 @@ struct AddedMealSectionView: View {
     // MARK: - 추가된 식단 리스트
     private var addedMeal: some View {
         VStack(spacing: AddedMealSectionConstants.addedMealListVSpacing) {
-            ForEach(viewModel.addedMeals) { meal in
+            ForEach(viewModel.addedMeals) { entry in
                 HStack {
-                    MealImageOptionCard(item: meal, showImage: false)  // 텍스트만 있는 카드
+                    MealImageOptionCard(item: entry.meal, showImage: false)  // 텍스트만 있는 카드
                         .padding(.trailing, AddedMealSectionConstants.mealCardHorizontalPadding)
                         .frame(width: AddedMealSectionConstants.mealCardWidth)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            selectedMealViewModel = MealInfoViewModel(meal: entry.meal, nutrient: entry.nutrient, isFavorite: false)
+                            withAnimation {
+                                showPopup = true
+                            }
+                        }
                         
                     
                     Button(action: {    // 추가 식단 데이터에서 삭제
                         withAnimation(.easeInOut(duration: 0.3)){
-                            viewModel.deleteMeal(meal)
+                            viewModel.deleteMeal(entry)
                         }
                     }) {
                         Image(systemName: "xmark.circle.fill")
