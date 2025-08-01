@@ -101,17 +101,44 @@ extension DiagnosisModel {
             bodyFat: "30",
             muscleMass: "23"
         )
-        // 필요 시 테스트용 데이터 세팅
+
         model.comment = "어쩌구저쩌구 코멘트"
+
+        model.weightChange = MetricChange(
+            before: "55 kg",
+            after: "49 kg",
+            diff: "-6kg"
+        )
+
+        model.bmiChange = MetricChange(
+            before: "21.5",
+            after: "19.1",
+            diff: "-2.4"
+        )
+
+        model.bodyFatChange = MetricChange(
+            before: "30%",
+            after: "22%",
+            diff: "-8%p"
+        )
+
+        model.muscleMassChange = MetricChange(
+            before: "23 kg",
+            after: "유지 또는 소폭 증가",
+            diff: nil // 차이값 없음
+        )
+
         model.exerciseGoals = [
             ExerciseGoal(type: "주기", mainInfo: "주 3회 / 1시간"),
             ExerciseGoal(type: "무산소", mainInfo: "주 3회 / 40분", detail: "상체/하체/전신 하루씩"),
             ExerciseGoal(type: "유산소", mainInfo: "주 2회 / 20분")
         ]
+
         model.dietGoals = [
             DietGoal(key: "영양소", value: "고단백 / 저지방"),
             DietGoal(key: "일일 섭취량", value: "1,300 ~ 1,400 kcal")
         ]
+
         return model
     }
 }

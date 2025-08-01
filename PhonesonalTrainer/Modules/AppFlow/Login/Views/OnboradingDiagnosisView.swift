@@ -5,13 +5,20 @@
 //  Created by Sua Cho on 7/24/25.
 //
 
+
+//
+//  OnboradingDiagnosisView.swift
+//  PhonesonalTrainer
+//
+
 import SwiftUI
 
 struct OnboradingDiagnosisView: View {
     let nickname: String
     let diagnosis: DiagnosisModel
 
-    @State private var goToBodyRecord = false // 다음 화면 전환 상태
+    @State private var goToBodyRecord = false
+    @Environment(\.dismiss) private var dismiss
 
     private var metrics: [(String, MetricChange)] {
         [
@@ -28,26 +35,19 @@ struct OnboradingDiagnosisView: View {
                 Color.grey00.ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    // (1) NavigationBar
-                    NavigationBar {
-                        Button(action: {
-                            print("뒤로가기 버튼 클릭")
-                        }) {
+                    // 상단 Navigation Bar
+                    NavigationBar(title: nil, hasDefaultBackAction: true) {
+                        Button(action: { dismiss() }) {
                             Image(systemName: "chevron.left")
                                 .font(.PretendardMedium22)
                                 .foregroundStyle(Color.grey05)
                         }
                     }
 
-                    // (2) ScrollView
                     ScrollView(showsIndicators: false) {
                         VStack(alignment: .leading, spacing: 24) {
-                            PageIndicator(
-                                totalPages: 4,
-                                currentPage: 3,
-                                activeColor: .orange05,
-                                inactiveColor: .grey01
-                            )
+                            PageIndicator(totalPages: 4, currentPage: 3, activeColor: .orange05, inactiveColor: .grey01)
+                                .padding(.horizontal)
 
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("폰스널 트레이너의 진단")
@@ -59,9 +59,9 @@ struct OnboradingDiagnosisView: View {
                             }
                             .padding(.horizontal)
 
-                            // 코멘트
+                            // 진단 코멘트 박스
                             VStack(alignment: .leading, spacing: 4) {
-                                HStack(alignment: .center, spacing: 6) {
+                                HStack(spacing: 6) {
                                     Image("코멘트아이콘")
                                         .resizable()
                                         .frame(width: 16, height: 16)
@@ -74,19 +74,17 @@ struct OnboradingDiagnosisView: View {
                                     .foregroundStyle(Color.grey05)
                                     .padding(.top, 2)
                             }
-                            .padding()
+                            .padding(16)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .background(Color.orange01)
                             .cornerRadius(5)
                             .padding(.horizontal)
-                            .padding(.bottom, 8)
 
                             // 추천 목표 수치
                             VStack(alignment: .leading, spacing: 16) {
                                 Text("추천 목표 수치")
                                     .font(.PretendardMedium18)
                                     .foregroundStyle(Color.grey06)
-                                    .padding(.bottom, 12)
 
                                 VStack(spacing: 16) {
                                     ForEach(Array(metrics.enumerated()), id: \.offset) { index, metric in
@@ -104,7 +102,6 @@ struct OnboradingDiagnosisView: View {
                                 Text("운동 목표")
                                     .font(.PretendardMedium18)
                                     .foregroundStyle(Color.grey06)
-                                    .padding(.bottom, 12)
 
                                 ForEach(Array(diagnosis.exerciseGoals.enumerated()), id: \.element.id) { index, goal in
                                     VStack(alignment: .leading, spacing: 4) {
@@ -135,7 +132,6 @@ struct OnboradingDiagnosisView: View {
                                 Text("식단 목표")
                                     .font(.PretendardMedium18)
                                     .foregroundStyle(Color.grey06)
-                                    .padding(.bottom, 12)
 
                                 ForEach(Array(diagnosis.dietGoals.enumerated()), id: \.element.id) { index, goal in
                                     HStack {
@@ -151,28 +147,29 @@ struct OnboradingDiagnosisView: View {
                                 }
                                 .padding(.horizontal, 28)
                             }
-                            .padding(.horizontal, 20)
-
-                            // 시작하기 버튼
-                            Button(action: {
-                                goToBodyRecord = true
-                            }) {
-                                Text("시작하기")
-                                    .font(.PretendardSemiBold18)
-                                    .foregroundStyle(Color.grey00)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 56)
-                                    .background(Color.orange05)
-                                    .cornerRadius(30)
-                            }
                             .padding(.horizontal)
-                            .padding(.top, 20)
-                            .padding(.bottom, 16)
                         }
+                        .padding(.top)
+                        .padding(.bottom, 32)
                     }
+
+                    // 시작하기 버튼 (하단 고정)
+                    Button(action: {
+                        goToBodyRecord = true
+                    }) {
+                        Text("시작하기")
+                            .font(.PretendardSemiBold18)
+                            .foregroundStyle(Color.grey00)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 56)
+                            .background(Color.orange05)
+                            .cornerRadius(30)
+                            .padding(.horizontal)
+                    }
+                    .padding(.bottom, 20)
                 }
 
-                // Navigation Destination
+                // 다음 화면 이동
                 .navigationDestination(isPresented: $goToBodyRecord) {
                     OnboardingBodyRecordView()
                 }
@@ -205,6 +202,7 @@ struct MetricRow: View {
                         .font(.PretendardMedium16)
                         .foregroundColor(valueColor)
                 }
+
                 if let diff = change.diff {
                     Text(diff)
                         .font(.PretendardMedium12)
@@ -219,6 +217,7 @@ struct MetricRow: View {
     }
 }
 
+// MARK: - Preview
 
 #Preview {
     OnboradingDiagnosisView(nickname: "서연", diagnosis: .dummy)

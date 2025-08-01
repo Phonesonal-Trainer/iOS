@@ -9,9 +9,11 @@ import SwiftUI
 
 @main
 struct PhonesonalTrainerApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate // ✅ 필수!
+
     var body: some Scene {
         WindowGroup {
-            OnboardingInfoInputView()  // 첫 화면으로 표시할 뷰
+            OnboardingInfoInputView()
         }
     }
 }

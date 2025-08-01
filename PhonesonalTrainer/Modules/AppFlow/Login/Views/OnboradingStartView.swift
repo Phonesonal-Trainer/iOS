@@ -8,60 +8,59 @@
 import SwiftUI
 
 struct OnboardingStartView: View {
-    var body: some View {
-        VStack(spacing: 40) {
-            // 로고와 문구를 중앙 정렬
-            VStack(spacing: 24) {
-                Image("최종로고시안")
-                    .resizable()
-                    .frame(width: 180, height: 180)
+    @StateObject private var viewModel = AuthViewModel()
+    @State private var navigateToNext = false
 
-                VStack(spacing: 4) {
-                    Text("핸드폰 안에서 만나는")
-                        .font(.PretendardRegular20)
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 40) {
+                // 로고 및 문구 생략 ...
+
+                Spacer()
+
+                VStack(spacing: 24) {
+                    Text("SNS 계정으로 간편 로그인하세요")
+                        .font(.PretendardRegular14)
                         .foregroundStyle(Color.grey03)
 
-                    HStack(spacing: 0) {
-                        Text("나만의 ")
-                            .font(.PretendardSemiBold22)
-                            .foregroundStyle(Color.grey06)
-                        Text("폰스널 트레이너")
-                            .foregroundStyle(Color.orange05)
-                            .font(.PretendardSemiBold22)
+                    HStack(spacing: 16) {
+                        Button(action: {}) {
+                            Image("구글로그인")
+                                .resizable()
+                                .frame(width: 50, height: 50)
+                        }
+
+                        Button(action: {
+                            viewModel.loginWithKakao()
+                        }) {
+                            Image("카카오로그인")
+                                .resizable()
+                                .frame(width: 50, height: 50)
+                        }
+                    }
+
+                    if let error = viewModel.loginError {
+                        Text("로그인 실패: \(error)")
+                            .foregroundColor(.red)
+                            .font(.caption)
                     }
                 }
+                .padding(.bottom, 104)
             }
-            
-            .padding(.top, 64)
-
-            Spacer() // 로그인 영역과 상단 간 간격
-
-            // 로그인 버튼 영역 (중앙 정렬)
-            VStack(spacing: 24) {
-                Text("SNS 계정으로 간편 로그인하세요")
-                    .font(.PretendardRegular14)
-                    .foregroundStyle(Color.grey03)
-
-                HStack(spacing: 16) {
-                    Button(action: {}) {
-                        Image("구글로그인")
-                            .resizable()
-                            .frame(width: 50, height: 50)
-                    }
-
-                    Button(action: {}) {
-                        Image("카카오로그인")
-                            .resizable()
-                            .frame(width: 50, height: 50)
-                    }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.grey00)
+            .onChange(of: viewModel.isLoggedIn) { loggedIn in
+                if loggedIn {
+                    navigateToNext = true
                 }
             }
-            .padding(.bottom, 104)
+            .navigationDestination(isPresented: $navigateToNext) {
+                OnboardingInfoInputView() // 👈 다음 뷰로 이동
+            }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.grey00)
     }
 }
+
 
 #Preview {
     OnboardingStartView()
