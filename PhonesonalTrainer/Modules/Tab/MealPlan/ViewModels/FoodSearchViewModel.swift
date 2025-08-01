@@ -37,18 +37,18 @@ class FoodSearchViewModel: ObservableObject {
         MealModel(name: "삶은 달걀", amount: 50, kcal: 68, imageURL: "temp_image"),
         MealModel(name: "토마토", amount: 100, kcal: 14, imageURL: "temp_image"),
         MealModel(name: "방울토마토", amount: 13, kcal: 2, imageURL: "temp_image"),
-        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image"),
-        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image"),
-        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image"),
-        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image"),
-        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image"),
-        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image"),
+        MealModel(name: "바나나", amount: 100, kcal: 93, imageURL: "temp_image"),
+        MealModel(name: "야채샐러드", amount: 150, kcal: 148, imageURL: "temp_image"),
+        MealModel(name: "사과", amount: 150, kcal: 57, imageURL: "temp_image"),
+        MealModel(name: "블루베리", amount: 28, kcal: 16, imageURL: "temp_image"),
+        MealModel(name: "단백질바", amount: 50, kcal: 249, imageURL: "temp_image"),
+        MealModel(name: "포케", amount: 230, kcal: 221, imageURL: "temp_image"),
         MealModel(name: "스테비아방울토마토", amount: 15, kcal: 6.8, imageURL: "temp_image"),
-        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image"),
-        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image"),
-        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image"),
-        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image"),
-        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image")
+        MealModel(name: "찐고구마", amount: 200, kcal: 277, imageURL: "temp_image"),
+        MealModel(name: "계란 프라이", amount: 46, kcal: 89, imageURL: "temp_image"),
+        MealModel(name: "토마토 스파게티", amount: 200, kcal: 370, imageURL: "temp_image"),
+        MealModel(name: "단백질 쉐이크", amount: 30, kcal: 110, imageURL: "temp_image"),
+        MealModel(name: "아몬드", amount: 6, kcal: 40, imageURL: "temp_image")
     ]
     
     var filteredFoods: [MealModel] {

@@ -63,7 +63,7 @@ struct WeightInfoView: View {
             .frame(width: 160, height: 125, alignment: .leading)
             .background(Color.grey00)
             .cornerRadius(5)
-            .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+            .shadow(color: .black.opacity(0.1), radius: 2)
         }
         .buttonStyle(PlainButtonStyle()) // 버튼 스타일 안 보이게!
     }

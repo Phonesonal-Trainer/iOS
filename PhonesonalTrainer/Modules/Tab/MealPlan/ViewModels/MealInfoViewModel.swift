@@ -13,12 +13,18 @@ class MealInfoViewModel: ObservableObject {
     @Published var nutrient: NutrientInfoModel
     @Published var isFavorite: Bool
     @Published var originalAmount: Int
+    
+    private let originalMeal: MealModel
+    private let originalNutrient: NutrientInfoModel
 
     init(meal: MealModel, nutrient: NutrientInfoModel, isFavorite: Bool = false) {
         self.meal = meal
         self.nutrient = nutrient
         self.isFavorite = isFavorite
         self.originalAmount = meal.amount
+        
+        self.originalMeal = meal //  복사본 저장
+        self.originalNutrient = nutrient
     }
 
     func toggleFavorite() {
@@ -26,25 +32,31 @@ class MealInfoViewModel: ObservableObject {
         // 서버 or 로컬 저장 로직 연결 가능
     }
 
-    func updateAmount(by delta: Int) {
-        let newAmount = max(1, meal.amount + delta)
+    func updateAmount(by delta: Double) {
+        let newAmount = max(1, Int(round(Double(meal.amount) + delta)))
         let factor = Double(newAmount) / Double(originalAmount)
         
+        // original 기준으로 항상 다시 계산
         meal = MealModel(
-            id: meal.id,
-            name: meal.name,
+            id: originalMeal.id,
+            name: originalMeal.name,
             amount: newAmount,
-            kcal: (Double(meal.kcal) * factor),
-            imageURL: meal.imageURL
+            kcal: originalMeal.kcal * factor,
+            imageURL: originalMeal.imageURL
         )
         
         nutrient = NutrientInfoModel(
-            mealType: nutrient.mealType,
-            kcal: Double(nutrient.kcal) * factor,
-            carb: Double(nutrient.carb) * factor,
-            protein: Double(nutrient.protein) * factor,
-            fat: Double(nutrient.fat) * factor
+            mealType: originalNutrient.mealType,
+            kcal: originalNutrient.kcal * factor,
+            carb: originalNutrient.carb * factor,
+            protein: originalNutrient.protein * factor,
+            fat: originalNutrient.fat * factor
         )
+    }
+    
+    func resetChanges() {
+        self.meal = originalMeal
+        self.nutrient = originalNutrient
     }
 
     var hasChanges: Bool {

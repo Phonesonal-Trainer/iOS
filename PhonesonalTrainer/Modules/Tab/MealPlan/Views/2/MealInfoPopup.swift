@@ -10,8 +10,8 @@ import SwiftUI
 struct MealInfoPopup: View {
     // MARK: - Property
     @ObservedObject var viewModel: MealInfoViewModel
-    @Environment(\.dismiss) private var dismiss   // 뒤로가기
-    @State private var showEdit = false   // 수정 팝업창 띄우기
+    @Binding var isPresented: Bool   // 팝업창 닫기
+    @Binding var showEditPopup: Bool   // 수정 팝업창 띄우기
     
     // MARK: - 상수 정의
     fileprivate enum MealInfoConstants {
@@ -102,16 +102,15 @@ struct MealInfoPopup: View {
     // MARK: - '수정' + '확인' 버튼
     private var buttons: some View {
         HStack {
-            NavigationLink(destination: EditMealPopup(viewModel: viewModel)) {
-                SubButton(color: .grey01, text: "수정", textColor: .grey05) {
-                    // 수정 화면으로 넘어가기
-                    showEdit = true
-                }
-                .frame(width: MealInfoConstants.buttonWidth)
+            SubButton(color: .grey01, text: "수정", textColor: .grey05) {
+                // 수정 화면으로 넘어가기
+                showEditPopup = true
             }
+            .frame(width: MealInfoConstants.buttonWidth)
             
             SubButton(color: .orange05, text: "확인", textColor: .grey00) {
-                dismiss()
+                // 수정된 사항이 있다면 저장하는 로직 추가
+                isPresented = false
             }
             .frame(width: MealInfoConstants.buttonWidth)
         }

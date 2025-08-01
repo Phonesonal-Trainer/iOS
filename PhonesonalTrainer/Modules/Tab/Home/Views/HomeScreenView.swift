@@ -7,10 +7,11 @@
 import SwiftUI
 
 struct HomeScreenView: View {
+    @Binding var path: [HomeRoute]
     @State private var showWeightPopup = false
     @State private var weightText = ""
 
-    @State private var currentWeight: Double = 66.6 // 팝업에서 변경될 몸무게 상태
+    @State private var currentWeight: Double = 70 // 팝업에서 변경될 몸무게 상태
 
     // 예시 날짜
     let startDate = Date().addingTimeInterval(-60*60*24*30)
@@ -48,6 +49,7 @@ struct HomeScreenView: View {
                     .frame(width: 340)
                     .padding(.vertical, 20)
                 }
+                .scrollIndicators(.hidden)
 
                
             }
@@ -75,5 +77,7 @@ struct HomeScreenView: View {
 }
 
 #Preview {
-    HomeScreenView()
+    StatefulPreviewWrapper([HomeRoute]()) { path in
+        HomeScreenView(path: path)
+    }
 }

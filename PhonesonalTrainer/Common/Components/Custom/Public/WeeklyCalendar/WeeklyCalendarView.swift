@@ -27,7 +27,7 @@ struct WeeklyCalendarView: View {
     
     // 기준 주의 시작일 (앱 시작 시 기준)
     // 현재 임의로 날짜 넣음. 나중에 백엔드와 연결.
-    private let startDate: Date = Calendar.current.date(from: DateComponents(year: 2025, month: 7, day: 28))!
+    private let startDate: Date = Calendar.current.date(from: DateComponents(year: 2025, month: 7, day: 15))!
     
     var body: some View {
         VStack(alignment: .center, spacing: 20) {
@@ -52,7 +52,7 @@ struct WeeklyCalendarView: View {
             }
             .disabled(!canGoToPreviousWeek)
             
-            Text("\(currentWeekOffset)주차")
+            Text("\(currentWeekOffset+1)주차")
                 .font(.PretendardMedium18)
                 .foregroundStyle(.grey05)
             

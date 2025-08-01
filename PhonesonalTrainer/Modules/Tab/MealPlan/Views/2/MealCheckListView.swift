@@ -33,7 +33,7 @@ struct MealCheckListView: View {
             
             VStack(spacing: 0) {
                 ForEach(Array(mealviewModel.mealItems.enumerated()), id: \.1.id) { index, meal in
-                    MealListCard(item: meal, showImage: false, showCheckbox: true, viewModel: viewModel)
+                    MealCheckboxCard(item: meal, viewModel: viewModel)
                                 
                     if index != mealviewModel.mealItems.count - 1 {
                         Divider()

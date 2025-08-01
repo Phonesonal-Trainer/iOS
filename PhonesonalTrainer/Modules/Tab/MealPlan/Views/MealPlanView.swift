@@ -11,6 +11,7 @@ import SwiftUI
 struct MealPlanView: View {
     let screenWidth = UIScreen.main.bounds.width
     
+    @Binding var path: [MealPlanRoute]
     @StateObject private var viewModel = MealPlanViewModel()
     
     // MARK: - Constants
@@ -19,44 +20,48 @@ struct MealPlanView: View {
     }
     
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {   // spacing을 0으로 주면 scrollview가 깔끔해짐.
-                VStack {
-                    Text("식단 플랜")
-                        .font(.PretendardMedium22)
-                        .foregroundStyle(.grey05)
-                        .padding(.bottom, 20)
-                    
-                    WeeklyCalendarView()
-                    
-                    /// 일단 divider 로 구현해둠
-                    Divider()
-                }
-                .background(Color.grey00)
-                .zIndex(1)
+        let type = viewModel.selectedType
+        
+        VStack(spacing: 0) {   // spacing을 0으로 주면 scrollview가 깔끔해짐.
+            VStack {
+                Text("식단 플랜")
+                    .font(.PretendardMedium22)
+                    .foregroundStyle(.grey05)
+                    .padding(.bottom, 20)
                 
-                ScrollView {
-                    VStack(spacing: MealPlanConstants.scrollViewSpacing) {
-                        // 총 섭취 칼로리
-                        caloriesSectionView
-                        
-                        // 식단 세그먼트
-                        MealTypeSegmentView()
-                        
-                        // 식단 플랜 뷰
-                        MealListView()
-                        
-                        // 식단 기록 뷰
-                        MealRecordSectionView(viewModel: viewModel) 
-                    }
+                WeeklyCalendarView()
+                
+                /// 일단 divider 로 구현해둠
+                Divider()
+            }
+            .background(Color.grey00)
+            .zIndex(1)
+            
+            ScrollView {
+                VStack(spacing: MealPlanConstants.scrollViewSpacing) {
+                    // 총 섭취 칼로리
+                    caloriesSectionView
+                    
+                    // 식단 세그먼트
+                    MealTypeSegmentView()
+                    
+                    // 식단 플랜 뷰
+                    MealListView()
+                    
+                    // 식단 기록 뷰
+                    MealRecordSectionView(viewModel: viewModel, path: $path)
                 }
             }
-            .background(Color.background)
-            .navigationDestination(for: MealPlanRoute.self) { route in
-                switch route {
-                case .mealRecordDetail(let mealType):
-                    MealRecordDetailView(mealType: mealType)
-                }
+        }
+        .background(Color.background)
+        .navigationDestination(for: MealPlanRoute.self) { route in
+            switch route {
+            case .mealRecord:
+                MealRecordDetailView(mealType: type ,path: $path)
+            case .foodSearch:
+                FoodSearchView(path: $path)
+            case .manualAdd:
+                ManualAddMealView()
             }
         }
     }
@@ -86,5 +91,7 @@ struct MealPlanView: View {
 }
 
 #Preview {
-    MealPlanView()
+    StatefulPreviewWrapper([MealPlanRoute]()) { path in
+        MealPlanView(path: path)
+    }
 }

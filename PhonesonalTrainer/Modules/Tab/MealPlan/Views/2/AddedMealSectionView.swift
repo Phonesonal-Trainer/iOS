@@ -9,16 +9,23 @@ import SwiftUI
 
 struct AddedMealSectionView: View {
     @ObservedObject var viewModel: AddedMealViewModel
+    @Binding var path: [MealPlanRoute]
+    
+    // 바인딩으로 상태 전달 받기
+    @Binding var selectedMealViewModel: MealInfoViewModel?
+    @Binding var showPopup: Bool
     
     fileprivate enum AddedMealSectionConstants {
+        static let basicWidth: CGFloat = 340
         static let VSpacing: CGFloat = 20
-        static let horizontalPadding: CGFloat = 25
         static let magnifyingglassIconSize: CGFloat = 24
         static let searchBarPadding: CGFloat = 20
         static let searchBarHeight: CGFloat = 44
         static let addedMealListVSpacing: CGFloat = 10
         static let mealCardHorizontalPadding: CGFloat = 20
+        static let mealCardWidth: CGFloat = 270
         static let mealCardHeight: CGFloat = 65
+        static let deleteButtonSize: CGFloat = 20
     }
     
     var body: some View {
@@ -27,31 +34,16 @@ struct AddedMealSectionView: View {
                 .font(.PretendardMedium18)
                 .foregroundStyle(Color.grey06)
                 
-            NavigationLink(destination: FoodSearchView()) {
+            Button(action: {
+                path.append(.foodSearch)
+            }){
                 searchBar
             }
             
-            if !viewModel.addedMeals.isEmpty {
-                List {
-                    ForEach(viewModel.addedMeals) { meal in
-                        MealListCard(item: meal, showImage: false, showCheckbox: false, viewModel: nil)
-                            .listRowBackground(Color.grey00) // 개별 셀 배경
-                            .swipeActions(edge: .trailing) {
-                                Button {
-                                    viewModel.deleteMeal(meal)
-                                } label: {
-                                    Text("삭제")
-                                }
-                                .tint(Color.orange05) // 원하는 색상으로 설정
-                            }
-                    }
-                }
-                .listStyle(.plain) // separator 및 기본 스타일 제거
-                .clipShape(RoundedRectangle(cornerRadius: 12)) // 모서리 둥글게
-                .shadow(color: .gray.opacity(0.2), radius: 4, x: 0, y: 2) // 그림자
-            } 
+            // 추가된 식단 리스트
+            addedMeal
         }
-        .padding(.horizontal, AddedMealSectionConstants.horizontalPadding)
+        .frame(maxWidth: AddedMealSectionConstants.basicWidth)
         
     }
     
@@ -70,11 +62,52 @@ struct AddedMealSectionView: View {
         }
         .padding(.horizontal, AddedMealSectionConstants.searchBarPadding)
         .frame(height: AddedMealSectionConstants.searchBarHeight)
+        
         .background(
             RoundedRectangle(cornerRadius: 50)
                 .fill(Color.grey01)
         )
-        .frame(maxWidth: .infinity)
+    }
+    
+    // MARK: - 추가된 식단 리스트
+    private var addedMeal: some View {
+        VStack(spacing: AddedMealSectionConstants.addedMealListVSpacing) {
+            ForEach(viewModel.addedMeals) { entry in
+                HStack {
+                    MealImageOptionCard(item: entry.meal, showImage: false)  // 텍스트만 있는 카드
+                        .padding(.trailing, AddedMealSectionConstants.mealCardHorizontalPadding)
+                        .frame(width: AddedMealSectionConstants.mealCardWidth)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            selectedMealViewModel = MealInfoViewModel(meal: entry.meal, nutrient: entry.nutrient, isFavorite: false)
+                            withAnimation {
+                                showPopup = true
+                            }
+                        }
+                        
+                    
+                    Button(action: {    // 추가 식단 데이터에서 삭제
+                        withAnimation(.easeInOut(duration: 0.3)){
+                            viewModel.deleteMeal(entry)
+                        }
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .resizable()
+                            .frame(width: AddedMealSectionConstants.deleteButtonSize, height: AddedMealSectionConstants.deleteButtonSize)
+                            .foregroundStyle(Color.orange05)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal, AddedMealSectionConstants.mealCardHorizontalPadding)
+                .frame(height: AddedMealSectionConstants.mealCardHeight)
+                .background(
+                    RoundedRectangle(cornerRadius: 5)
+                        .fill(Color.grey00)
+                        .shadow(color: Color.black.opacity(0.1), radius: 2)
+                )
+                
+            }
+        }
     }
 }
 

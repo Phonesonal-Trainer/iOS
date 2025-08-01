@@ -11,7 +11,7 @@ struct EditMealPopup: View {
     // MARK: - Property
     @ObservedObject var viewModel: MealInfoViewModel
     @State private var isFavorite: Bool = false  // 즐겨찾기 상태
-    @Environment(\.dismiss) private var dismiss  // 뒤로가기
+    @Binding var isPresented: Bool  // 팝업창 닫기
     
     // MARK: - 상수 정의
     fileprivate enum EditMealConstants {
@@ -113,9 +113,9 @@ struct EditMealPopup: View {
         HStack(spacing: EditMealConstants.editMealSectionHSpacing) {
             /// '-' 버튼
             Button(action: {
-                viewModel.updateAmount(by: -(viewModel.originalAmount / 2))
+                viewModel.updateAmount(by: -Double((viewModel.originalAmount / 2)))
             }) {
-                Image(systemName: "minus.circle")
+                Image("minus")
                     .resizable()
                     .frame(width: EditMealConstants.editButtonSize, height: EditMealConstants.editButtonSize)
             }
@@ -125,9 +125,9 @@ struct EditMealPopup: View {
                 .foregroundStyle(Color.grey03)
             /// '+' 버튼
             Button(action: {
-                viewModel.updateAmount(by: viewModel.originalAmount / 2)
+                viewModel.updateAmount(by: Double(viewModel.originalAmount / 2))
             }) {
-                Image(systemName: "plus.circle")
+                Image("plus")
                     .resizable()
                     .frame(width: EditMealConstants.editButtonSize, height: EditMealConstants.editButtonSize)
             }
@@ -138,14 +138,13 @@ struct EditMealPopup: View {
     private var buttons: some View {
         HStack {
             SubButton(color: .grey01, text: "취소", textColor: .grey05) {
-                // 뒤로가기
-                dismiss()
+                viewModel.resetChanges()  // 변경사항 복원
+                isPresented = false  // 뒤로가기
             }
             .frame(width: EditMealConstants.buttonWidth)
             
             SubButton(color: saveButtonColor, text: "확인", textColor: saveButtonTextColor) {
-                // 저장하기 원래 화면으로 돌아가는 로직
-                dismiss()
+                isPresented = false   // 뒤로가기
             }
             .disabled(!viewModel.hasChanges)
             .frame(width: EditMealConstants.buttonWidth)

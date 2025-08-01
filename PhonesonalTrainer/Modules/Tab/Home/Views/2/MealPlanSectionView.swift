@@ -23,7 +23,7 @@ struct MealPlanSectionView: View {
         .frame(width: 340, height: 244)
         .background(Color.grey00)
         .cornerRadius(5)
-        .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+        .shadow(color: .black.opacity(0.1), radius: 2)
     }
 }
 #Preview {
