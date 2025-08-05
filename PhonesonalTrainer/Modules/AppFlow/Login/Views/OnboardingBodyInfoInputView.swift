@@ -13,180 +13,211 @@ struct OnboardingBodyInfoInputView: View {
     @State private var weight: String = ""
     @State private var bodyFat: String = ""
     @State private var muscleMass: String = ""
-    
+
     @State private var goToDiagnosis = false
     @State private var diagnosisModel: DiagnosisModel? = nil
 
-    var isFormValid: Bool {
-        isHeightValid && isWeightValid
+    @FocusState private var focusedField: Field?
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var shakeHeight = false
+    @State private var shakeWeight = false
+
+    private let totalPages = 4
+    private let currentPage = 2
+
+    enum Field {
+        case height, weight, bodyFat, muscleMass
     }
 
-    private var isHeightValid: Bool {
+    var isHeightValid: Bool {
         if let value = Double(height), value >= 100, value <= 250 {
             return true
         }
         return false
     }
 
-    private var isWeightValid: Bool {
+    var isWeightValid: Bool {
         if let value = Double(weight), value >= 30, value <= 300 {
             return true
         }
         return false
     }
 
-    private let totalPages = 4
-    private let currentPage = 2
+    var isFormFilled: Bool {
+        !height.isEmpty && !weight.isEmpty
+    }
+
+    var nextButtonEnabled: Bool {
+        isFormFilled
+    }
 
     var body: some View {
-        NavigationStack {
+        ZStack(alignment: .bottom) {
+            Color.grey00
+                .ignoresSafeArea()
+                .onTapGesture {
+                    focusedField = nil
+                }
+
             VStack(spacing: 0) {
-                // NavigationBar
-                NavigationBar {
-                    Button(action: { print("뒤로가기 버튼 클릭") }) {
+                NavigationBar(title: nil, hasDefaultBackAction: false) {
+                    Button(action: {
+                        dismiss()
+                    }) {
                         Image(systemName: "chevron.left")
                             .font(.PretendardMedium22)
-                            .foregroundStyle(Color.grey05)
+                            .foregroundColor(.grey05)
                     }
                 }
 
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 24) {
-                        // 페이지 인디케이터
-                        PageIndicator(
-                            totalPages: totalPages,
-                            currentPage: currentPage,
-                            activeColor: .orange05,
-                            inactiveColor: .grey01
+                VStack(alignment: .leading, spacing: 24) {
+                    PageIndicator(
+                        totalPages: totalPages,
+                        currentPage: currentPage,
+                        activeColor: .orange05,
+                        inactiveColor: .grey01
+                    )
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("체형 정보를 입력해주세요.")
+                            .font(.PretendardSemiBold24)
+                            .foregroundStyle(Color.grey06)
+                        Text("인바디 수치를 기반으로 입력해주세요.")
+                            .font(.PretendardRegular20)
+                            .foregroundStyle(Color.grey03)
+                    }
+
+                    HStack(spacing: 12) {
+                        InputFieldView(
+                            title: {
+                                Text("신장")
+                                    .font(.PretendardMedium18)
+                                    .foregroundStyle(Color.grey06)
+                                + Text(" *")
+                                    .font(.PretendardMedium18)
+                                    .foregroundStyle(Color.orange05)
+                            },
+                            placeholder: "",
+                            text: $height,
+                            keyboardType: .decimalPad,
+                            suffixText: "cm"
                         )
-
-                        // 타이틀
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("체형 정보를 입력해주세요.")
-                                .font(.PretendardSemiBold24)
-                                .foregroundStyle(Color.grey06)
-                            Text("인바디 수치를 기반으로 입력해주세요.")
-                                .font(.PretendardRegular20)
-                                .foregroundStyle(Color.grey03)
+                        .offset(x: shakeHeight ? -10 : 0)
+                        .animation(.default, value: shakeHeight)
+                        .focused($focusedField, equals: .height)
+                        .onChange(of: height) {
+                            height = filterDecimalInput(height, maxDigitsBeforeDecimal: 3)
                         }
-                        .padding(.horizontal)
 
-                        // 입력 폼
-                        VStack(spacing: 48) {
-                            HStack(spacing: 12) {
-                                // 신장
-                                InputFieldView(
-                                    title: {
-                                        Text("신장")
-                                            .font(.PretendardMedium18)
-                                            .foregroundStyle(Color.grey06)
-                                        + Text(" *")
-                                            .font(.PretendardMedium18)
-                                            .foregroundStyle(Color.orange05)
-                                    },
-                                    placeholder: "",
-                                    text: $height,
-                                    keyboardType: .decimalPad,
-                                    suffixText: "cm"
-                                )
-                                .onChange(of: height) {
-                                    height = filterDecimalInput(height, maxDigitsBeforeDecimal: 3)
-                                }
-
-                                // 몸무게
-                                InputFieldView(
-                                    title: {
-                                        Text("몸무게")
-                                            .font(.PretendardMedium18)
-                                            .foregroundStyle(Color.grey06)
-                                        + Text(" *")
-                                            .font(.PretendardMedium18)
-                                            .foregroundStyle(Color.orange05)
-                                    },
-                                    placeholder: "",
-                                    text: $weight,
-                                    keyboardType: .decimalPad,
-                                    suffixText: "kg"
-                                )
-                                .onChange(of: weight) {
-                                    weight = filterDecimalInput(weight, maxDigitsBeforeDecimal: 3)
-                                }
-                            }
-
-                            // 선택 입력 (체지방률, 골격근량)
-                            HStack(spacing: 12) {
-                                InputFieldView(
-                                    title: {
-                                        Text("체지방률")
-                                            .font(.PretendardMedium18)
-                                            .foregroundStyle(Color.grey06)
-                                    },
-                                    placeholder: "",
-                                    text: $bodyFat,
-                                    keyboardType: .decimalPad,
-                                    suffixText: "%"
-                                )
-
-                                InputFieldView(
-                                    title: {
-                                        Text("골격근량")
-                                            .font(.PretendardMedium18)
-                                            .foregroundStyle(Color.grey06)
-                                    },
-                                    placeholder: "",
-                                    text: $muscleMass,
-                                    keyboardType: .decimalPad,
-                                    suffixText: "kg"
-                                )
-                            }
-                        }
-                        .padding(.top, 24)
-                        .padding(.horizontal)
-                    }
-                    .padding(.bottom, 20)
-                }
-
-                // 다음 버튼
-                MainButton(
-                    color: isFormValid ? Color.grey05 : Color.grey01,
-                    text: "다음",
-                    textColor: isFormValid ? .white : .grey02
-                ) {
-                    if isFormValid {
-                        diagnosisModel = DiagnosisModel(
-                            height: height,
-                            weight: weight,
-                            bodyFat: bodyFat.isEmpty ? nil : bodyFat,
-                            muscleMass: muscleMass.isEmpty ? nil : muscleMass
+                        InputFieldView(
+                            title: {
+                                Text("몸무게")
+                                    .font(.PretendardMedium18)
+                                    .foregroundStyle(Color.grey06)
+                                + Text(" *")
+                                    .font(.PretendardMedium18)
+                                    .foregroundStyle(Color.orange05)
+                            },
+                            placeholder: "",
+                            text: $weight,
+                            keyboardType: .decimalPad,
+                            suffixText: "kg"
                         )
-                        goToDiagnosis = true
+                        .offset(x: shakeWeight ? -10 : 0)
+                        .animation(.default, value: shakeWeight)
+                        .focused($focusedField, equals: .weight)
+                        .onChange(of: weight) {
+                            weight = filterDecimalInput(weight, maxDigitsBeforeDecimal: 3)
+                        }
                     }
+
+                    HStack(spacing: 12) {
+                        InputFieldView(
+                            title: {
+                                Text("체지방률")
+                                    .font(.PretendardMedium18)
+                                    .foregroundStyle(Color.grey06)
+                            },
+                            placeholder: "",
+                            text: $bodyFat,
+                            keyboardType: .decimalPad,
+                            suffixText: "%"
+                        )
+                        .focused($focusedField, equals: .bodyFat)
+
+                        InputFieldView(
+                            title: {
+                                Text("골격근량")
+                                    .font(.PretendardMedium18)
+                                    .foregroundStyle(Color.grey06)
+                            },
+                            placeholder: "",
+                            text: $muscleMass,
+                            keyboardType: .decimalPad,
+                            suffixText: "kg"
+                        )
+                        .focused($focusedField, equals: .muscleMass)
+                    }
+
+                    Spacer()
                 }
-                .disabled(!isFormValid)
                 .padding(.horizontal)
-                .padding(.bottom, 20)
+                .padding(.top, 8)
+                .frame(maxHeight: .infinity)
             }
-            .background(Color.grey00.ignoresSafeArea())
-            .navigationBarBackButtonHidden(true)
-            .navigationDestination(isPresented: $goToDiagnosis) {
-                OnboradingDiagnosisView(
-                    nickname: "서연",
-                    diagnosis: diagnosisModel ?? .dummy
-                )
+
+            MainButton(
+                color: nextButtonEnabled ? .grey05 : .grey01,
+                text: "다음",
+                textColor: nextButtonEnabled ? .white : .grey02
+            ) {
+                if isHeightValid && isWeightValid {
+                    diagnosisModel = DiagnosisModel(
+                        height: height,
+                        weight: weight,
+                        bodyFat: bodyFat.isEmpty ? nil : bodyFat,
+                        muscleMass: muscleMass.isEmpty ? nil : muscleMass
+                    )
+                    goToDiagnosis = true
+                } else {
+                    if !isHeightValid {
+                        withAnimation { shakeHeight = true }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            shakeHeight = false
+                        }
+                        focusedField = .height
+                    }
+                    if !isWeightValid {
+                        withAnimation { shakeWeight = true }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            shakeWeight = false
+                        }
+                        if isHeightValid { focusedField = .weight }
+                    }
+                }
             }
+            .disabled(!nextButtonEnabled)
+            .padding(.horizontal)
+            .padding(.bottom, 20)
+        }
+        .ignoresSafeArea(.keyboard)
+        .navigationBarBackButtonHidden(true)
+        .navigationDestination(isPresented: $goToDiagnosis) {
+            OnboradingDiagnosisView(
+                nickname: "서연",
+                diagnosis: diagnosisModel ?? .dummy
+            )
         }
     }
 
-    /// 소수점 한자리까지만 허용하고 숫자 외 문자는 제거
     func filterDecimalInput(_ input: String, maxDigitsBeforeDecimal: Int) -> String {
         var value = input.filter { "0123456789.".contains($0) }
 
-        // 소수점 중복 제거
         if value.components(separatedBy: ".").count > 2 {
             value.removeLast()
         }
 
-        // 소수점 자리수 제한
         if let dotIndex = value.firstIndex(of: ".") {
             let decimalPart = value[value.index(after: dotIndex)...]
             if decimalPart.count > 1 {
@@ -194,7 +225,6 @@ struct OnboardingBodyInfoInputView: View {
             }
         }
 
-        // 정수부 자리수 제한
         if let dotIndex = value.firstIndex(of: ".") {
             let intPart = value[..<dotIndex]
             if intPart.count > maxDigitsBeforeDecimal {
@@ -209,5 +239,7 @@ struct OnboardingBodyInfoInputView: View {
 }
 
 #Preview {
-    OnboardingBodyInfoInputView()
+    NavigationStack {
+        OnboardingBodyInfoInputView()
+    }
 }

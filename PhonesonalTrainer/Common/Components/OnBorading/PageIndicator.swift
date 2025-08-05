@@ -22,7 +22,6 @@ struct PageIndicator: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.horizontal)
     }
 }
 
