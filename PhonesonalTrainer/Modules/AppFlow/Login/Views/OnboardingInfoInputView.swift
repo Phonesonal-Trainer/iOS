@@ -45,6 +45,10 @@ struct OnboardingInfoInputView: View {
         return false
     }
 
+    var isFormValid: Bool {
+        isFormFilled && isNicknameValid && isAgeValid
+    }
+
     var nextButtonColor: Color {
         isFormFilled ? .grey05 : .grey01
     }
@@ -148,16 +152,20 @@ struct OnboardingInfoInputView: View {
                         text: "다음",
                         textColor: nextButtonTextColor
                     ) {
-                        if isFormFilled && isNicknameValid && isAgeValid {
+                        if isFormValid {
                             navigateToNext = true
                         } else {
                             if !isNicknameValid {
                                 withAnimation { nicknameShake = true }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { nicknameShake = false }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                    nicknameShake = false
+                                }
                                 focusedField = .nickname
                             } else if !isAgeValid {
                                 withAnimation { ageShake = true }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { ageShake = false }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                    ageShake = false
+                                }
                                 focusedField = .age
                             }
                         }
