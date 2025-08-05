@@ -30,7 +30,7 @@ struct MealCheckboxCard: View {
             }) {
                 Image(systemName: "checkmark.circle.fill")
                     .resizable()
-                    .foregroundStyle(viewModel.selectedMealIDs.contains(item.id) ? Color.orange05 : Color.grey02)
+                    .foregroundStyle(viewModel.isSelected(item) ? Color.orange05 : Color.grey02)
                     .frame(width: MealCardConstants.checkboxSize, height: MealCardConstants.checkboxSize)
             }
         

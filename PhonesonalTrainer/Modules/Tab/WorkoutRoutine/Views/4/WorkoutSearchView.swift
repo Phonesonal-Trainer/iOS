@@ -1,34 +1,33 @@
 //
-//  FoodSearchView.swift
+//  WorkoutSearchView.swift
 //  PhonesonalTrainer
 //
-//  Created by 강리현 on 7/25/25.
+//  Created by 강리현 on 8/2/25.
 //
 
 import SwiftUI
 
-struct FoodSearchView: View {
-    
+struct WorkoutSearchView: View {
     // MARK: - Property
-    @StateObject private var viewModel = FoodSearchViewModel()
+    @StateObject private var viewModel = WorkoutSearchViewModel()
     @Environment(\.dismiss) private var dismiss // 뒤로가기
-    @Binding var path: [MealPlanRoute]
+    @Binding var path: [WorkoutRoutineRoute]  // navigation 경로
     
     // MARK: - 상수 정의
-    fileprivate enum FoodSearchConstants {
+    fileprivate enum WorkoutSearchConstants {
         static let baseWidth: CGFloat = 340  // 기본적으로 전부 적용되는 너비
         static let VSpacing: CGFloat = 25
-        static let gridHeight: CGFloat = 317
+        static let gridHeight: CGFloat = 346
         static let noResultSpacing: CGFloat = 15
         static let noticeHeight: CGFloat = 60 // notice 이미지 높이
         static let pageNavigationHSpacing: CGFloat = 10
-        static let addMealButtonWidth: CGFloat = 108
-        static let addMealButtonHeight: CGFloat = 28
+        static let addWorkoutButtonWidth: CGFloat = 108
+        static let addWorkoutButtonHeight: CGFloat = 28
     }
     
     /// '저장하기' 버튼 활성화 조건  ->  선택한 음식이 하나는 있어야 함.
     private var isValid: Bool {
-        !viewModel.selectedMealIDs.isEmpty
+        !viewModel.selectedWorkoutIDs.isEmpty
     }
     
     /// '저장하기' 버튼 색상
@@ -53,10 +52,10 @@ struct FoodSearchView: View {
                 .zIndex(1)
             
             ScrollView {
-                VStack(spacing: FoodSearchConstants.VSpacing) {
-                    /// 서치바 + 정렬 선택 세그먼트 + 음식 그리드
+                VStack(spacing: WorkoutSearchConstants.VSpacing) {
+                    // 서치바 + 운동 그리드
                     middleContent
-                        .padding(.top, FoodSearchConstants.VSpacing)
+                        .padding(.top, WorkoutSearchConstants.VSpacing)
                     
                     /// notice 이미지
                     notice
@@ -68,22 +67,20 @@ struct FoodSearchView: View {
                         textColor: saveButtonTextColor
                     ) {
                         if isValid {
-                            // 선택한 음식 정보 저장
+                            // 선택한 운동 정보 저장
                             dismiss()
                         }
                     }
                     .disabled(!isValid)
-                    .frame(width: FoodSearchConstants.baseWidth)
+                    .frame(width: WorkoutSearchConstants.baseWidth)
                 }
             }
         }
-        .background(Color.background)
-        .navigationBarBackButtonHidden(true)
     }
     
-    // MARK: - 상단 제목
+    // NavigationBar 상단
     private var topTitle: some View {
-        NavigationBar(title: "식단 검색") {
+        NavigationBar(title: "운동 추가") {
             Button(action: { dismiss() }) {
                 Image(systemName: "chevron.left")
                     .font(.PretendardMedium22)
@@ -100,53 +97,24 @@ struct FoodSearchView: View {
         }
     }
     
-    // MARK: - 중간 식단 검색 부분
+    // MARK: - 중간 운동 검색 부분
     private var middleContent: some View {
-        VStack(spacing: FoodSearchConstants.VSpacing) {
-            CustomSearchBar(text: $viewModel.searchText, placeholder: "식단 검색")
-            
-            // 정렬 선택
-            sortSegment
-            
-            // 식단 그리드 부분
-            foodGridView
-            
-            // 페이지네이션
+        VStack(spacing: WorkoutSearchConstants.VSpacing) {
+            /// 서치바
+            CustomSearchBar(text: $viewModel.searchText, placeholder: "운동 검색")
+            /// 운동 그리드 부분
+            workoutGridView
+            /// 페이지네이션
             pageNavigation
         }
     }
     
-    // MARK: - 정렬 Segment
-    private var sortSegment: some View {
-        HStack {
-            Spacer()
-            
-            Button(action: { viewModel.selectSort(.frequency) }) {
-                Text("빈도 높은 순")
-                    .font(.PretendardMedium12)
-                    .foregroundColor(viewModel.selectedSort == .frequency ? .grey03 : .grey02)
-            }
-            Rectangle()
-                .fill(Color.grey02)
-                .frame(width: 1, height: 8)
-                
-            Button(action: {
-                viewModel.selectSort(.favorite)
-            }) {
-                Text("즐겨찾기 순")
-                    .font(.PretendardMedium12)
-                    .foregroundColor(viewModel.selectedSort == .favorite ? .grey03 : .grey02)
-            }
-        }
-        .frame(width: FoodSearchConstants.baseWidth)
-    }
-    
-    // MARK: - 음식 아이템 그리드 뷰
-    private var foodGridView: some View {
+    // MARK: - 운동 아이템 그리드 뷰
+    private var workoutGridView: some View {
         Group {
-            if viewModel.pagedFoods.isEmpty {
+            if viewModel.pagedWorkouts.isEmpty {
                 // 검색 결과 없음.
-                VStack {
+                VStack(spacing: WorkoutSearchConstants.noResultSpacing) {
                     Text("검색 결과가 없습니다.")
                         .font(.PretendardMedium16)
                         .foregroundStyle(Color.grey03)
@@ -157,7 +125,7 @@ struct FoodSearchView: View {
                         ZStack {
                             RoundedRectangle(cornerRadius: 30)
                                 .fill(Color.orange05)
-                                .frame(width: FoodSearchConstants.addMealButtonWidth, height: FoodSearchConstants.addMealButtonHeight)
+                                .frame(width: WorkoutSearchConstants.addWorkoutButtonWidth, height: WorkoutSearchConstants.addWorkoutButtonHeight)
                             
                             Text("+ 직접 추가하기")
                                 .font(.PretendardMedium12)
@@ -165,26 +133,25 @@ struct FoodSearchView: View {
                         }
                     }
                 }
-                .frame(width: FoodSearchConstants.baseWidth, height: FoodSearchConstants.gridHeight)
+                .frame(width: WorkoutSearchConstants.baseWidth, height: WorkoutSearchConstants.gridHeight)
             } else {
-                // 식단 그리드
-                VStack{
+                // 운동 그리드
+                VStack {
                     LazyVGrid(columns: columns, spacing: 15) {
-                        ForEach(viewModel.pagedFoods) { item in
-                            FoodCard(item: item, viewModel: viewModel)
+                        ForEach(viewModel.pagedWorkouts) { item in
+                            WorkoutCard(item: item, viewModel: viewModel)
                         }
                     }
-                    
                 }
                 .frame(maxHeight: .infinity, alignment: .top)
-                .frame(height: FoodSearchConstants.gridHeight)
+                .frame(height: WorkoutSearchConstants.gridHeight)
             }
         }
     }
     
     // MARK: - 페이지네이션
     private var pageNavigation: some View {
-        HStack(spacing: FoodSearchConstants.pageNavigationHSpacing) {
+        HStack(spacing: WorkoutSearchConstants.pageNavigationHSpacing) {
             Button(action: { viewModel.goToPreviousPage() }) {
                 Image(systemName: "chevron.left")
                     .foregroundStyle(viewModel.currentPage == 1 ? Color.grey02 : Color.grey05)
@@ -202,14 +169,14 @@ struct FoodSearchView: View {
     
     // MARK: - Notice
     private var notice: some View {
-        Image("mealSearchNotice")
+        Image("workoutSearchNotice")
             .resizable()
-            .frame(width: FoodSearchConstants.baseWidth, height: FoodSearchConstants.noticeHeight)
+            .frame(width: WorkoutSearchConstants.baseWidth, height: WorkoutSearchConstants.noticeHeight)
     }
 }
 
 #Preview {
-    StatefulPreviewWrapper([MealPlanRoute]()) { path in
-        FoodSearchView(path: path)
+    StatefulPreviewWrapper([WorkoutRoutineRoute]()) { path in
+        WorkoutSearchView(path: path)
     }
 }

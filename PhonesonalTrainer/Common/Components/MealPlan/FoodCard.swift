@@ -38,7 +38,7 @@ struct FoodCard: View {
             }) {
                 Image(systemName: "checkmark.circle.fill")
                     .resizable()
-                    .foregroundStyle(viewModel.selectedMealIDs.contains(item.id) ? Color.orange05 : Color.grey02)
+                    .foregroundStyle(viewModel.isSelected(item) ? Color.orange05 : Color.grey02)
                     .frame(width: FoodCardConstants.checkboxSize, height: FoodCardConstants.checkboxSize)
             }
         }
@@ -46,8 +46,8 @@ struct FoodCard: View {
         .frame(width: FoodCardConstants.width, height: FoodCardConstants.height)
         .background(
             RoundedRectangle(cornerRadius: 5)
-                .fill(viewModel.selectedMealIDs.contains(item.id) ? Color.orange01 : Color.grey01)
-                .stroke(viewModel.selectedMealIDs.contains(item.id) ? Color.orange03 : Color.clear, lineWidth: 1)
+                .fill(viewModel.isSelected(item) ? Color.orange01 : Color.grey01)
+                .stroke(viewModel.isSelected(item) ? Color.orange03 : Color.clear, lineWidth: 1)
         )
             
     }
@@ -66,8 +66,8 @@ struct FoodCard: View {
             }
             
             Text(item.name)  // 선택에 따라 텍스트 색상 달라짐.
-                .font(.PretendardSemiBold16)
-                .foregroundStyle(viewModel.selectedMealIDs.contains(item.id) ? Color.orange05 : Color.grey05)
+                .font(.PretendardSemiBold14)
+                .foregroundStyle(viewModel.isSelected(item) ? Color.orange05 : Color.grey05)
         }
     }
     

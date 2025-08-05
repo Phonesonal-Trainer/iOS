@@ -30,7 +30,7 @@ struct GenderSelectButtonView: View {
                 .foregroundColor(isSelected ? .orange05 : .grey02)
                 .frame(width: 75, height: 52) // ✅ 버튼 전체 사이즈 고정
                 .overlay(
-                    RoundedRectangle(cornerRadius: 4)
+                    RoundedRectangle(cornerRadius: 5)
                         .stroke(isSelected ? Color.orange05 : Color.grey02, lineWidth: 1)
                 )
         }

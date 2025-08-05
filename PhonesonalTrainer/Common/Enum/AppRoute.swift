@@ -14,7 +14,8 @@ enum HomeRoute: Hashable {
 }
 /// WorkoutRoutine 화면에서 일어나는 navigation 흐름
 enum WorkoutRoutineRoute: Hashable {
-    
+    case workoutSearch
+    case manualAdd
 }
 /// MealPlan 화면에서 일어나는 navigation 흐름
 enum MealPlanRoute: Hashable {

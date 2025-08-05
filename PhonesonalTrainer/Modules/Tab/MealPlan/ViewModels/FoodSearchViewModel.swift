@@ -26,7 +26,7 @@ class FoodSearchViewModel: ObservableObject {
     
     func isSelected(_ meal: MealModel) -> Bool {
             selectedMealIDs.contains(meal.id)
-        }
+    }
     
     // 그리드에 사용
     let itemsPerPage = 8

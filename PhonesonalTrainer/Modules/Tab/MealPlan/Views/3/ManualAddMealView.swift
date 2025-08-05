@@ -14,22 +14,40 @@ struct ManualAddMealView: View {
     // MARK: - 정의
     /// 입력 받는 정보 정의
     @State private var foodName: String = ""
-    @State private var foodCalories: String = ""   // 근데 얘네들 int로 받아야되는거 아닌가
+    @State private var foodCalories: String = ""
     @State private var foodCarb: String = ""
     @State private var foodProtein: String = ""
     @State private var foodFat: String = ""
+    
+    /// Double로 변환된 값
+    private var caloriesValue: Double? {
+        Double(foodCalories)
+    }
+
+    private var carbValue: Double? {
+        Double(foodCarb)
+    }
+
+    private var proteinValue: Double? {
+        Double(foodProtein)
+    }
+
+    private var fatValue: Double? {
+        Double(foodFat)
+    }
     
     fileprivate enum ManualAddMealConstants {
         static let baseWidth: CGFloat = 340  // 기본적으로 전부 적용되는 너비
         static let VSpacing: CGFloat = 25
         static let HSpacing: CGFloat = 20
         static let textFieldTopPadding: CGFloat = 25
-        static let textFieldBottomPadding: CGFloat = 160
+        static let textFieldBottomPadding: CGFloat = 170
         static let noticeHeight: CGFloat = 60 // notice 이미지 높이
     }
+    
     /// mainButton 활성화 조건 ('식단명' + '칼로리')
     private var isFormValid: Bool {
-        !foodName.isEmpty && !foodCalories.isEmpty
+        !foodName.isEmpty && caloriesValue != nil
     }
     /// '추가하기' 버튼 색상
     private var addButtonColor: Color {
@@ -83,9 +101,20 @@ struct ManualAddMealView: View {
                         textColor: addButtonTextColor
                     ) {
                         if isFormValid {
-                            // 입력한 음식 정보 저장
+                            let mealName = foodName
+                            let kcal = caloriesValue ?? 0
+                            let carb = carbValue ?? 0
+                            let protein = proteinValue ?? 0
+                            let fat = fatValue ?? 0
+
+                            // 예시: 모델 생성 (나중에 viewModel로 넘겨서 저장 로직 연결할 때 사용)
+                            let newMeal = MealModel(name: mealName, amount: 100, kcal: kcal, imageURL: "")
+                            let nutrient = NutrientInfoModel(mealType: nil, kcal: kcal, carb: carb, protein: protein, fat: fat)
+                                
+                            // TODO: 저장 로직 연결
+                                
+                            dismiss()
                         }
-                        dismiss()
                     }
                     .disabled(!isFormValid)
                     .frame(width: ManualAddMealConstants.baseWidth)

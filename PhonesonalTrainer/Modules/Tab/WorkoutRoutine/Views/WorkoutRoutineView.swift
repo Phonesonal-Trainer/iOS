@@ -8,7 +8,17 @@
 import SwiftUI
 
 struct WorkoutRoutineView: View {
+    // MARK: - Property
     @Binding var path: [WorkoutRoutineRoute]
+    
+    
+    // MARK: - 상수 정의
+    fileprivate enum WorkoutRoutineConstants {
+        static let baseWidth: CGFloat = 340
+        static let VSpacing: CGFloat = 25
+        static let addWorkoutButtonWidth: CGFloat = 94
+        static let addWorkoutButtonHeight: CGFloat = 41
+    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -27,9 +37,46 @@ struct WorkoutRoutineView: View {
             .zIndex(1)
             
             ScrollView {
-                
+                VStack(spacing: WorkoutRoutineConstants.VSpacing) {
+                    topContent
+                    
+                    WorkoutListView()
+                }
             }
         }
+        .background(Color.background)
+        .navigationDestination(for: WorkoutRoutineRoute.self) { route in
+            switch route {
+            case .workoutSearch:
+                WorkoutSearchView(path: $path)
+            case .manualAdd:
+                ManualAddWorkoutView()
+            }
+        }
+    }
+    
+    // MARK: - '총 소모 칼로리' + '운동추가' 버튼
+    private var topContent: some View {
+        HStack {
+            KcalBurnedView()
+            
+            Spacer()
+            
+            Button(action: {
+                path.append(.workoutSearch)
+            }) {
+                Text("+ 운동 추가")
+                    .font(.PretendardMedium14)
+                    .foregroundStyle(Color.orange05)
+                    .frame(width: WorkoutRoutineConstants.addWorkoutButtonWidth, height: WorkoutRoutineConstants.addWorkoutButtonHeight)
+                    .background(
+                        RoundedRectangle(cornerRadius: 5)
+                            .fill(Color.orange01)
+                    )
+            }
+        }
+        .padding(.top, WorkoutRoutineConstants.VSpacing)
+        .frame(width: WorkoutRoutineConstants.baseWidth)
     }
 }
 

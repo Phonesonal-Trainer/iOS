@@ -34,7 +34,7 @@ struct OnboardingInfoInputView: View {
     }
 
     var nextButtonTextColor: Color {
-        isFormValid ? .white : .grey02
+        isFormValid ? .grey00 : .grey02
     }
 
     var body: some View {
