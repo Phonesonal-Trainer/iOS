@@ -11,6 +11,8 @@ struct WorkoutListCard: View {
     // MARK: - Property
     let workout: WorkoutModel
     
+    @State private var showDetailSheet = false
+    
     // MARK: - 상수 정의
     fileprivate enum WorkoutListCardConstants {
         static let baseWidth: CGFloat = 340
@@ -38,6 +40,9 @@ struct WorkoutListCard: View {
                     Image("searchIcon")
                         .resizable()
                         .frame(width: WorkoutListCardConstants.searchIconSize, height: WorkoutListCardConstants.searchIconSize)
+                        .onTapGesture {
+                            showDetailSheet = true
+                        }
                 }
                 
                 Spacer()
@@ -59,6 +64,9 @@ struct WorkoutListCard: View {
                 .frame(maxWidth: .infinity)
                 .shadow(color: Color.black.opacity(0.1), radius: 2)
         )
+        .sheet(isPresented: $showDetailSheet) {
+            WorkoutDetailSheetView(workout: workout)
+        }
         
     }
     
