@@ -10,6 +10,8 @@ import Combine
 
 struct OnboardingInfoInputView: View {
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject var viewModel: OnboardingViewModel
+
 
     @State private var nickname: String = ""
     @State private var age: String = ""
@@ -153,23 +155,16 @@ struct OnboardingInfoInputView: View {
                         textColor: nextButtonTextColor
                     ) {
                         if isFormValid {
+                            viewModel.nickname = nickname
+                            viewModel.age = Int(age) ?? 0
+                            viewModel.gender = selectedGender?.rawValue ?? ""
+
                             navigateToNext = true
                         } else {
-                            if !isNicknameValid {
-                                withAnimation { nicknameShake = true }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                    nicknameShake = false
-                                }
-                                focusedField = .nickname
-                            } else if !isAgeValid {
-                                withAnimation { ageShake = true }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                    ageShake = false
-                                }
-                                focusedField = .age
-                            }
+                            // 에러 처리
                         }
                     }
+
                     .disabled(!isFormFilled)
                     .padding(.horizontal)
                     .padding(.bottom, 20)
@@ -180,8 +175,9 @@ struct OnboardingInfoInputView: View {
             .scrollDismissesKeyboard(.interactively)
             .onTapGesture { hideKeyboard() }
             .navigationDestination(isPresented: $navigateToNext) {
-                OnboardingGoalAndDurationView(nickname: nickname)
+                OnboardingGoalAndDurationView(nickname: nickname, viewModel: viewModel)
             }
+
         }
     }
 
@@ -192,5 +188,5 @@ struct OnboardingInfoInputView: View {
 }
 
 #Preview {
-    OnboardingInfoInputView()
+    OnboardingInfoInputView(viewModel: OnboardingViewModel())
 }

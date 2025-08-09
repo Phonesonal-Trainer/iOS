@@ -13,7 +13,7 @@ struct PhonesonalTrainerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            OnboardingInfoInputView()
+            OnboardingStartView()
         }
     }
 }

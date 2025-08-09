@@ -4,11 +4,12 @@
 //
 //  Created by Sua Cho on 7/24/25.
 
-//
 
 import SwiftUI
 
 struct OnboardingBodyRecordView: View {
+    @ObservedObject var viewModel: OnboardingViewModel
+
     let currentWeek: Int = 0
     let goalDuration: Duration = .sixMonths
 
@@ -16,6 +17,11 @@ struct OnboardingBodyRecordView: View {
     @State private var showDeleteAlert = false
     @State private var navigateToHome = false
     @State private var dummyPath: [HomeRoute] = [] // ✅ HomeScreenView용 임시 path
+
+    // ✅ API 상태 처리용
+    @State private var isLoading = false
+    @State private var showError = false
+    @State private var errorMessage = ""
 
     var body: some View {
         NavigationStack {
@@ -151,21 +157,45 @@ struct OnboardingBodyRecordView: View {
 
     // MARK: - 기록하기 버튼
     private var recordButton: some View {
-        SubButton(
-            color: uploadedImage != nil ? .grey05 : .grey01,
-            text: "기록하기",
-            textColor: uploadedImage != nil ? .white : .grey02
-        ) {
-            if uploadedImage != nil {
-                navigateToHome = true
+        VStack {
+            if isLoading {
+                ProgressView("가입 중...")
+                    .padding(.bottom, 10)
             }
+
+            SubButton(
+                color: uploadedImage != nil ? .grey05 : .grey01,
+                text: "기록하기",
+                textColor: uploadedImage != nil ? .white : .grey02
+            ) {
+                if uploadedImage != nil {
+                    isLoading = true
+                    AuthService.shared.signup(with: viewModel, tempToken: viewModel.tempToken) { result in
+                        DispatchQueue.main.async {
+                            isLoading = false
+                            switch result {
+                            case .success:
+                                navigateToHome = true
+                            case .failure(let error):
+                                errorMessage = error.localizedDescription
+                                showError = true
+                            }
+                        }
+                    }
+                }
+            }
+            .disabled(uploadedImage == nil)
+            .padding(.horizontal)
+            .padding(.bottom, 20)
         }
-        .disabled(uploadedImage == nil)
-        .padding(.horizontal)
-        .padding(.bottom, 20)
+        .alert("회원가입 실패", isPresented: $showError) {
+            Button("확인", role: .cancel) { }
+        } message: {
+            Text(errorMessage)
+        }
     }
 }
 
 #Preview {
-    OnboardingBodyRecordView()
+    OnboardingBodyRecordView(viewModel: OnboardingViewModel())
 }

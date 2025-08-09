@@ -5,17 +5,11 @@
 //  Created by Sua Cho on 7/24/25.
 //
 
-
-//
-//  OnboradingDiagnosisView.swift
-//  PhonesonalTrainer
-//
-
 import SwiftUI
 
 struct OnboradingDiagnosisView: View {
     let nickname: String
-    let diagnosis: DiagnosisModel
+    let diagnosis: DiagnosisInputModel  // 수정된 모델 사용
 
     @State private var goToBodyRecord = false
     @Environment(\.dismiss) private var dismiss
@@ -153,7 +147,7 @@ struct OnboradingDiagnosisView: View {
                         .padding(.bottom, 32)
                     }
 
-                    // 시작하기 버튼 (하단 고정)
+                    // 시작하기 버튼
                     Button(action: {
                         goToBodyRecord = true
                     }) {
@@ -169,9 +163,8 @@ struct OnboradingDiagnosisView: View {
                     .padding(.bottom, 20)
                 }
 
-                // 다음 화면 이동
                 .navigationDestination(isPresented: $goToBodyRecord) {
-                    OnboardingBodyRecordView()
+                    OnboardingBodyRecordView(viewModel: OnboardingViewModel())
                 }
             }
             .navigationBarBackButtonHidden(true)
@@ -220,5 +213,23 @@ struct MetricRow: View {
 // MARK: - Preview
 
 #Preview {
-    OnboradingDiagnosisView(nickname: "서연", diagnosis: .dummy)
+    OnboradingDiagnosisView(
+        nickname: "서연",
+        diagnosis: DiagnosisInputModel(
+            weightChange: MetricChange(before: "70kg", after: "67kg", diff: "-3kg"),
+            bmiChange: MetricChange(before: "24.5", after: "22.1", diff: "-2.4"),
+            bodyFatChange: MetricChange(before: "30%", after: "25%", diff: "-5%"),
+            muscleMassChange: MetricChange(before: "28kg", after: "29kg", diff: "+1kg"),
+            comment: "체지방이 높은 편입니다. 유산소 운동을 늘려보세요!",
+            exerciseGoals: [
+                ExerciseGoal(type: "유산소", mainInfo: "주 3회 30분", detail: "빠르게 걷기나 자전거 타기 추천"),
+                ExerciseGoal(type: "근력", mainInfo: "주 2회 40분", detail: "하체 위주 루틴 구성")
+            ],
+            dietGoals: [
+                DietGoal(key: "권장 섭취 열량", value: "1800 kcal"),
+                DietGoal(key: "탄수화물", value: "200g"),
+                DietGoal(key: "단백질", value: "100g")
+            ]
+        )
+    )
 }

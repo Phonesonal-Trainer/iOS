@@ -9,11 +9,15 @@ import SwiftUI
 
 struct OnboardingGoalAndDurationView: View {
     let nickname: String
+    @ObservedObject var viewModel: OnboardingViewModel
 
     @State private var selectedGoal: Goal? = nil
     @State private var selectedDuration: Duration = .oneMonth
     @State private var showDurationSheet = false
     @State private var navigateToNext = false
+
+    // ✅ 새로 추가: ViewModel 인스턴스 생성
+    //@StateObject private var viewModel = OnboardingViewModel()
 
     private let totalPages = 4
     private let currentPage = 1
@@ -28,24 +32,15 @@ struct OnboardingGoalAndDurationView: View {
                 Color.background.ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    // MARK: - 상단 NavigationBar
                     NavigationBar(title: nil, hasDefaultBackAction: true) {
                         Image(systemName: "chevron.left")
                             .font(.PretendardMedium22)
                             .foregroundColor(.grey05)
                     }
 
-                    // MARK: - 본문 영역
                     VStack(alignment: .leading, spacing: 24) {
-                        // 페이지 인디케이터
-                        PageIndicator(
-                            totalPages: totalPages,
-                            currentPage: currentPage,
-                            activeColor: .orange05,
-                            inactiveColor: .grey01
-                        )
+                        PageIndicator(totalPages: totalPages, currentPage: currentPage, activeColor: .orange05, inactiveColor: .grey01)
 
-                        // 타이틀
                         VStack(alignment: .leading, spacing: 6) {
                             Text("\(nickname) 회원님,")
                                 .font(.PretendardSemiBold24)
@@ -55,7 +50,6 @@ struct OnboardingGoalAndDurationView: View {
                                 .foregroundStyle(Color.grey03)
                         }
 
-                        // 앱 사용 목적
                         VStack(alignment: .leading, spacing: 16) {
                             Text("앱 사용 목적")
                                 .font(.PretendardMedium18)
@@ -80,7 +74,6 @@ struct OnboardingGoalAndDurationView: View {
                             }
                         }
 
-                        // 목표 기간
                         VStack(alignment: .leading, spacing: 16) {
                             Text("목표 기간")
                                 .font(.PretendardMedium18)
@@ -113,7 +106,6 @@ struct OnboardingGoalAndDurationView: View {
                     .padding(.horizontal)
                     .padding(.top, 8)
 
-                    // MARK: - 하단 버튼
                     MainButton(
                         color: isFormValid ? Color.grey05 : Color.grey01,
                         text: "다음",
@@ -128,7 +120,6 @@ struct OnboardingGoalAndDurationView: View {
                     .padding(.bottom, 20)
                 }
 
-                // MARK: - DurationSheetView (목표 기간 시트)
                 if showDurationSheet {
                     Color.black.opacity(0.5)
                         .ignoresSafeArea()
@@ -148,8 +139,10 @@ struct OnboardingGoalAndDurationView: View {
                     .ignoresSafeArea(edges: .bottom)
                 }
             }
+
+            // ✅ 여기서 viewModel 전달!
             .navigationDestination(isPresented: $navigateToNext) {
-                OnboardingBodyInfoInputView()
+                OnboardingBodyInfoInputView(viewModel: viewModel)
             }
             .navigationBarBackButtonHidden(true)
         }
@@ -157,5 +150,5 @@ struct OnboardingGoalAndDurationView: View {
 }
 
 #Preview {
-    OnboardingGoalAndDurationView(nickname: "서연")
+    OnboardingGoalAndDurationView(nickname: "홍길동", viewModel: OnboardingViewModel())
 }

@@ -9,13 +9,9 @@ import SwiftUI
 import Combine
 
 struct OnboardingBodyInfoInputView: View {
-    @State private var height: String = ""
-    @State private var weight: String = ""
-    @State private var bodyFat: String = ""
-    @State private var muscleMass: String = ""
+    @ObservedObject var viewModel: OnboardingViewModel
 
     @State private var goToDiagnosis = false
-    @State private var diagnosisModel: DiagnosisModel? = nil
 
     @FocusState private var focusedField: Field?
     @Environment(\.dismiss) private var dismiss
@@ -31,25 +27,21 @@ struct OnboardingBodyInfoInputView: View {
     }
 
     var isHeightValid: Bool {
-        if let value = Double(height), value >= 100, value <= 250 {
+        if let value = Double(viewModel.height), value >= 100, value <= 250 {
             return true
         }
         return false
     }
 
     var isWeightValid: Bool {
-        if let value = Double(weight), value >= 30, value <= 300 {
+        if let value = Double(viewModel.weight), value >= 30, value <= 300 {
             return true
         }
         return false
     }
 
     var isFormFilled: Bool {
-        !height.isEmpty && !weight.isEmpty
-    }
-
-    var nextButtonEnabled: Bool {
-        isFormFilled
+        !viewModel.height.isEmpty && !viewModel.weight.isEmpty
     }
 
     var body: some View {
@@ -61,6 +53,7 @@ struct OnboardingBodyInfoInputView: View {
                 }
 
             VStack(spacing: 0) {
+                // 상단 네비게이션 바
                 NavigationBar(title: nil, hasDefaultBackAction: false) {
                     Button(action: {
                         dismiss()
@@ -88,6 +81,7 @@ struct OnboardingBodyInfoInputView: View {
                             .foregroundStyle(Color.grey03)
                     }
 
+                    // 신장 + 몸무게
                     HStack(spacing: 12) {
                         InputFieldView(
                             title: {
@@ -99,15 +93,15 @@ struct OnboardingBodyInfoInputView: View {
                                     .foregroundStyle(Color.orange05)
                             },
                             placeholder: "",
-                            text: $height,
+                            text: $viewModel.height,
                             keyboardType: .decimalPad,
                             suffixText: "cm"
                         )
                         .offset(x: shakeHeight ? -10 : 0)
                         .animation(.default, value: shakeHeight)
                         .focused($focusedField, equals: .height)
-                        .onChange(of: height) {
-                            height = filterDecimalInput(height, maxDigitsBeforeDecimal: 3)
+                        .onChange(of: viewModel.height) {
+                            viewModel.height = filterDecimalInput(viewModel.height, maxDigitsBeforeDecimal: 3)
                         }
 
                         InputFieldView(
@@ -120,18 +114,19 @@ struct OnboardingBodyInfoInputView: View {
                                     .foregroundStyle(Color.orange05)
                             },
                             placeholder: "",
-                            text: $weight,
+                            text: $viewModel.weight,
                             keyboardType: .decimalPad,
                             suffixText: "kg"
                         )
                         .offset(x: shakeWeight ? -10 : 0)
                         .animation(.default, value: shakeWeight)
                         .focused($focusedField, equals: .weight)
-                        .onChange(of: weight) {
-                            weight = filterDecimalInput(weight, maxDigitsBeforeDecimal: 3)
+                        .onChange(of: viewModel.weight) {
+                            viewModel.weight = filterDecimalInput(viewModel.weight, maxDigitsBeforeDecimal: 3)
                         }
                     }
 
+                    // 체지방률 + 골격근량
                     HStack(spacing: 12) {
                         InputFieldView(
                             title: {
@@ -140,7 +135,7 @@ struct OnboardingBodyInfoInputView: View {
                                     .foregroundStyle(Color.grey06)
                             },
                             placeholder: "",
-                            text: $bodyFat,
+                            text: $viewModel.bodyFat,
                             keyboardType: .decimalPad,
                             suffixText: "%"
                         )
@@ -153,7 +148,7 @@ struct OnboardingBodyInfoInputView: View {
                                     .foregroundStyle(Color.grey06)
                             },
                             placeholder: "",
-                            text: $muscleMass,
+                            text: $viewModel.muscleMass,
                             keyboardType: .decimalPad,
                             suffixText: "kg"
                         )
@@ -167,18 +162,13 @@ struct OnboardingBodyInfoInputView: View {
                 .frame(maxHeight: .infinity)
             }
 
+            // 하단 버튼
             MainButton(
-                color: nextButtonEnabled ? .grey05 : .grey01,
+                color: isFormFilled ? .grey05 : .grey01,
                 text: "다음",
-                textColor: nextButtonEnabled ? .white : .grey02
+                textColor: isFormFilled ? .white : .grey02
             ) {
                 if isHeightValid && isWeightValid {
-                    diagnosisModel = DiagnosisModel(
-                        height: height,
-                        weight: weight,
-                        bodyFat: bodyFat.isEmpty ? nil : bodyFat,
-                        muscleMass: muscleMass.isEmpty ? nil : muscleMass
-                    )
                     goToDiagnosis = true
                 } else {
                     if !isHeightValid {
@@ -197,7 +187,7 @@ struct OnboardingBodyInfoInputView: View {
                     }
                 }
             }
-            .disabled(!nextButtonEnabled)
+            .disabled(!isFormFilled)
             .padding(.horizontal)
             .padding(.bottom, 20)
         }
@@ -205,12 +195,13 @@ struct OnboardingBodyInfoInputView: View {
         .navigationBarBackButtonHidden(true)
         .navigationDestination(isPresented: $goToDiagnosis) {
             OnboradingDiagnosisView(
-                nickname: "서연",
-                diagnosis: diagnosisModel ?? .dummy
+                nickname: viewModel.nickname,
+                diagnosis: viewModel.toDiagnosisModel()
             )
         }
     }
 
+    // MARK: - 입력값 필터링 (소수점, 최대 자릿수 등 제한)
     func filterDecimalInput(_ input: String, maxDigitsBeforeDecimal: Int) -> String {
         var value = input.filter { "0123456789.".contains($0) }
 
@@ -238,8 +229,9 @@ struct OnboardingBodyInfoInputView: View {
     }
 }
 
+// MARK: - 미리보기
 #Preview {
     NavigationStack {
-        OnboardingBodyInfoInputView()
+        OnboardingBodyInfoInputView(viewModel: OnboardingViewModel())
     }
 }
