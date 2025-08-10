@@ -10,20 +10,39 @@ struct MyPageView: View {
     @State private var showReset = false
     @State private var showLogout = false
 
+    // GoalView 이동 상태
+    @State private var goToGoalView = false
+
     // ===== 더미 값=====
     private let dummyName = "서연"
     private let dummyGoalText = "목표 체중 60kg"
     private let dummyDurationText = "3주차"
     private let dummySignUpDate = Date().addingTimeInterval(-60*60*24*21) // 3주 전
     private let dummyTargetWeeks = 12
-    
+
     private let dummyGoalData = GoalStatsData(
-            weight: GoalNumbers(current: 66.6, goal: 60.0),
-            bodyFat: GoalNumbers(current: 24.0, goal: 18.0),
-            muscle: GoalNumbers(current: 25.0, goal: 27.0),
-            bmi: GoalNumbers(current: 1700, goal: 2000)
-            )
-            
+        weight: GoalNumbers(current: 66.6, goal: 60.0),
+        bodyFat: GoalNumbers(current: 24.0, goal: 18.0),
+        muscle: GoalNumbers(current: 25.0, goal: 27.0),
+        bmi: GoalNumbers(current: 1700, goal: 2000)
+    )
+
+    // GoalView에 넘길 더미
+    private let dummyRecommend = RecommendedGoalsUIModel(
+        weightFrom: "55 kg", weightTo: "49 kg", weightDiff: "-6kg",
+        bmiFrom: "21.5", bmiTo: "19.1", bmiDiff: "-2.4",
+        fatFrom: "30%", fatTo: "22%", fatDiff: "-8%p",
+        skeletalTag: "유지 또는 소폭 증가"
+    )
+    private let dummyWorkout = WorkoutGoalsUIModel(
+        routine: "주 3회 / 1시간",
+        anaerobic: "주 3회 / 40분",
+        aerobic: "주 2회 / 20분"
+    )
+    private let dummyMeal = MealGoalsUIModel(
+        nutrient: "고단백/저지방",
+        amount: "1300 ~ 1400 kcal"
+    )
 
     var body: some View {
         ZStack {
@@ -31,50 +50,37 @@ struct MyPageView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-
-                    // 1) 헤더 (더미)
+                    // 1) 헤더
                     MyPageHeaderView(
                         name: dummyName,
                         goalText: dummyGoalText,
                         durationText: dummyDurationText,
-                        onChevronTap: {
-                            // TODO: 프로필 이동 (나중에)
-                        }
+                        onChevronTap: { }
                     )
 
-                    // ↓ 25
                     Spacer().frame(height: 25)
 
-                    // 구분 박스 (높이 10, grey01)
-                    Rectangle()
-                        .fill(Color.grey01)
-                        .frame(height: 10)
+                    Rectangle().fill(Color.grey01).frame(height: 10)
 
-                    // ↓ 25
                     Spacer().frame(height: 25)
 
-                    // 2) 주차 진행 (더미)
+                    // 2) 주차 진행
                     WeeksProgressView(
                         signUpDate: dummySignUpDate,
                         targetWeeks: dummyTargetWeeks
                     )
-                    // TODO: API 연결 후 서버 값으로 교체
 
-                    // ↓ 25
                     Spacer().frame(height: 25)
 
-                    // 3) 내 목표
+                    // 3) 내 목표 (자세히 보기 → GoalView)
                     MyGoalView(
-                                           data: dummyGoalData,
-                                           onSeeAll: {
-                                               // TODO: 전체 보기 이동
-                                           }
-                                       )
+                        data: dummyGoalData,
+                        onSeeAll: { goToGoalView = true }
+                    )
 
-                    // ↓ 25
                     Spacer().frame(height: 25)
 
-                    // 4) 텍스트 버튼들 (왼쪽 정렬)
+                    // 4) 텍스트 버튼들
                     Button { showReset = true } label: {
                         Text("목표 리셋 후 재시작")
                             .font(.system(size: 14))
@@ -82,7 +88,6 @@ struct MyPageView: View {
                     }
                     .contentShape(Rectangle())
 
-                    // ↓ 10
                     Spacer().frame(height: 10)
 
                     Button { showLogout = true } label: {
@@ -104,10 +109,7 @@ struct MyPageView: View {
 
                 ResetPopup(
                     onCancel: { showReset = false },
-                    onRestart: {
-                        showReset = false
-                        // TODO: 리셋 + 온보딩 이동 (나중에)
-                    }
+                    onRestart: { showReset = false }
                 )
                 .transition(.scale.combined(with: .opacity))
             }
@@ -119,19 +121,31 @@ struct MyPageView: View {
 
                 LogoutPopup(
                     onCancel: { showLogout = false },
-                    onRestart: {
-                        showLogout = false
-                        // TODO: 로그아웃 처리 + 온보딩 이동 (나중에)
-                    }
+                    onRestart: { showLogout = false }
                 )
                 .transition(.scale.combined(with: .opacity))
             }
         }
+        // ✅ 숨겨진 NavigationLink: goToGoalView가 true면 GoalView로 push
+        .background(
+            NavigationLink(
+                destination: GoalView(
+                    recommend: dummyRecommend,
+                    workout: dummyWorkout,
+                    meal: dummyMeal
+                ),
+                isActive: $goToGoalView
+            ) { EmptyView() }
+            .hidden()
+        )
         .animation(.easeInOut(duration: 0.2), value: showReset)
         .animation(.easeInOut(duration: 0.2), value: showLogout)
     }
 }
 
+// ✅ 프리뷰는 NavigationStack으로 감싸야 작동
 #Preview {
-    MyPageView() // 프리뷰에서도 더미로 바로 확인
+    NavigationStack {
+        MyPageView()
+    }
 }

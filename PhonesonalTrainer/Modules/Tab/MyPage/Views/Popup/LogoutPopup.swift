@@ -36,7 +36,7 @@ struct LogoutPopup: View {
                 }
 
                 Button(action: onRestart) {
-                    Text("재시작")
+                    Text("로그아웃")
                         .font(.PretendardSemiBold18)
                         .frame(width: 145, height: 50)
                         .background(Color.orange05)
