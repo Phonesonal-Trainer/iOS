@@ -27,7 +27,7 @@ struct WorkoutSearchView: View {
     
     /// '저장하기' 버튼 활성화 조건  ->  선택한 음식이 하나는 있어야 함.
     private var isValid: Bool {
-        !viewModel.selectedWorkoutIDs.isEmpty
+        !viewModel.selectedExerciseIDs.isEmpty
     }
     
     /// '저장하기' 버튼 색상
@@ -78,7 +78,7 @@ struct WorkoutSearchView: View {
         }
     }
     
-    // NavigationBar 상단
+    // MARK: - NavigationBar 상단
     private var topTitle: some View {
         NavigationBar(title: "운동 추가") {
             Button(action: { dismiss() }) {

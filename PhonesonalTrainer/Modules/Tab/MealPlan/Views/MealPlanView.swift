@@ -12,6 +12,7 @@ struct MealPlanView: View {
     let screenWidth = UIScreen.main.bounds.width
     
     @Binding var path: [MealPlanRoute]
+    @State private var selectedDate: Date = Date()
     @StateObject private var viewModel = MealPlanViewModel()
     
     // MARK: - Constants
@@ -29,7 +30,7 @@ struct MealPlanView: View {
                     .foregroundStyle(.grey05)
                     .padding(.bottom, 20)
                 
-                WeeklyCalendarView()
+                WeeklyCalendarView(selectedDate: $selectedDate)
                 
                 /// 일단 divider 로 구현해둠
                 Divider()
