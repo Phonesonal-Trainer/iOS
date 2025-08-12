@@ -120,7 +120,7 @@ struct EditMealPopup: View {
                     .frame(width: EditMealConstants.editButtonSize, height: EditMealConstants.editButtonSize)
             }
             /// 식단 양 + 칼로리
-            Text("\(viewModel.meal.amount)g (\(formatKcal(viewModel.meal.kcal))kcal)")
+            Text("\(viewModel.meal.amount)g (\(formatKcal(viewModel.meal.kcal ?? 0))kcal)")
                 .font(.PretendardMedium18)
                 .foregroundStyle(Color.grey03)
             /// '+' 버튼

@@ -44,12 +44,14 @@ struct WorkoutDetailSheetView: View {
     
     // MARK: - Constants
     fileprivate enum SheetConstants {
-        static let baseWidth: CGFloat = 340
+        static let HPadding: CGFloat = 25
         static let xButtonSize: CGFloat = 20
         /// 운동 방법
+        static let chevronSize: CGFloat = 16
+        static let VHPadding: CGFloat = 20
         static let stepCircleSize: CGFloat = 20
         static let stepMainSpacing: CGFloat = 10
-        static let VSpacing: CGFloat = 15
+        static let VSpacing: CGFloat = 15  // 본문 vspacing
         /// 유의사항
         static let alertIconSize: CGFloat = 18  // 유의사항 아이콘
         static let cautionTextSpacing: CGFloat = 10
@@ -91,17 +93,14 @@ struct WorkoutDetailSheetView: View {
                 workoutImage
                 /// 운동 방법 토글
                 workoutInstructions
-                    .background(
-                        RoundedRectangle(cornerRadius: 5)
-                            .fill(Color.grey00)
-                            .shadow(color: Color.black.opacity(0.1), radius: 2)
-                    )
                 /// 운동 유의사항
                 workoutCaution
                 
                 /// 유튜브 썸네일만,  클릭하면 서버 URL로 WebView
                 youtubeThumbnail
             }
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.horizontal, SheetConstants.HPadding)
         }
         .sheet(isPresented: $showYouTube) {
             if let url = detail.youtubeURL {
@@ -151,36 +150,62 @@ struct WorkoutDetailSheetView: View {
     
     // MARK: - 운동 방법
     private var workoutInstructions: some View {
-        DisclosureGroup("운동 방법" ,isExpanded: $isExpanded) {
-            VStack(alignment: .leading, spacing: SheetConstants.VSpacing) {
-                let steps = detail.descriptions
-                ForEach(steps) { step in
-                    HStack(alignment: .top, spacing: SheetConstants.stepMainSpacing) {
-                        Text("\(step.step)")
-                            .font(.PretendardMedium12)
-                            .foregroundStyle(Color.orange05)
-                            .background(
+        VStack(spacing: 0) {
+            // 헤더 (토근 버튼)
+            Button {
+                withAnimation(.easeInOut) { isExpanded.toggle() } // 애니메이션 넣을지 말지 고민...
+            } label: {
+                HStack {
+                    Text("운동 방법")
+                        .font(.PretendardSemiBold18)
+                        .foregroundStyle(Color.grey06)
+                    Spacer()
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .frame(width: SheetConstants.chevronSize)
+                        .foregroundStyle(Color.grey03)
+                }
+            }
+            .padding(.horizontal, SheetConstants.VHPadding)
+            .padding(.vertical, SheetConstants.VHPadding)
+            .contentShape(Rectangle())
+            
+            // 본문
+            if isExpanded {
+                VStack(alignment: .leading, spacing: SheetConstants.VSpacing) {
+                    let steps = detail.descriptions
+                    ForEach(steps) { step in
+                        HStack(alignment: .top, spacing: SheetConstants.stepMainSpacing) {
+                            ZStack {
                                 Circle()
                                     .fill(Color.orange02)
                                     .frame(width: SheetConstants.stepCircleSize, height: SheetConstants.stepCircleSize)
-                            )
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text(step.main)
-                                .font(.PretendardMedium16)
-                                .foregroundStyle(Color.grey06)
-                            
-                            Text(step.sub)
-                                .font(.PretendardRegular14)
-                                .foregroundStyle(Color.grey03)
+                                Text("\(step.step)")
+                                    .font(.PretendardMedium12)
+                                    .foregroundStyle(Color.orange05)
+                            }
+                            VStack(alignment: .leading, spacing: 5) {
+                                Text(step.main)
+                                    .font(.PretendardMedium16)
+                                    .foregroundStyle(Color.grey06)
+                                
+                                Text(step.sub)
+                                    .font(.PretendardRegular14)
+                                    .foregroundStyle(Color.grey03)
+                            }
                         }
                     }
                 }
+                .padding(.horizontal, SheetConstants.VHPadding)
+                .padding(.bottom, SheetConstants.VHPadding)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(.top, 5)
         }
-        .font(.PretendardSemiBold18)
-        .foregroundStyle(Color.grey06)
-        .padding(.horizontal)
+        .background(
+            RoundedRectangle(cornerRadius: 5)
+                .fill(Color.grey00)
+                .shadow(color: .black.opacity(0.1), radius: 2)
+        )
+        .padding(.top, SheetConstants.VSpacing)
     }
     
     // MARK: - 운동 유의사항
@@ -192,7 +217,7 @@ struct WorkoutDetailSheetView: View {
             .map { "\($0)." } // 마침표 복원
         
         return VStack(alignment: .leading, spacing: SheetConstants.VSpacing) {
-            HStack {
+            HStack(spacing: 0) {
                 Image("AlertIcon2")
                     .resizable()
                     .frame(width: SheetConstants.alertIconSize, height: SheetConstants.alertIconSize)
@@ -202,6 +227,7 @@ struct WorkoutDetailSheetView: View {
                     .font(.PretendardSemiBold14)
                     .foregroundStyle(Color.grey03)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             
             VStack(alignment: .leading, spacing: SheetConstants.cautionTextSpacing) {
                 ForEach(cautionItems, id: \.self) { item in
@@ -215,12 +241,15 @@ struct WorkoutDetailSheetView: View {
                     .font(.PretendardMedium12)
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding()
+        .padding(.horizontal, SheetConstants.VHPadding)
+        .padding(.vertical, SheetConstants.VHPadding)
         .background(Color.orange01)
         .cornerRadius(5)
     }
     
+    // MARK: - 유튜브 썸네일
     private var youtubeThumbnail: some View {
         Group {
             if let url = detail.youtubeURL,

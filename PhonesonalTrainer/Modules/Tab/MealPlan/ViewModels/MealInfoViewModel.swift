@@ -41,7 +41,7 @@ class MealInfoViewModel: ObservableObject {
             id: originalMeal.id,
             name: originalMeal.name,
             amount: newAmount,
-            kcal: originalMeal.kcal * factor,
+            kcal: (originalMeal.kcal ?? 0) * factor,
             imageURL: originalMeal.imageURL
         )
         

@@ -44,10 +44,10 @@ struct MealPlanView: View {
                     caloriesSectionView
                     
                     // 식단 세그먼트
-                    MealTypeSegmentView()
+                    MealTypeSegmentView(selectedMeal: $viewModel.selectedType)
                     
                     // 식단 플랜 뷰
-                    MealListView()
+                    MealListView(selectedDate: $selectedDate, selectedMeal: viewModel.selectedType)
                     
                     // 식단 기록 뷰
                     MealRecordSectionView(viewModel: viewModel, path: $path)

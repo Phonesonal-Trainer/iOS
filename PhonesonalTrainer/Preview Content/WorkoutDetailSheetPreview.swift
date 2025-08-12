@@ -17,6 +17,8 @@ struct WorkoutDetailSheetPreview: View {
         static let baseWidth: CGFloat = 340
         static let xButtonSize: CGFloat = 20
         /// 운동 방법
+        static let chevronSize: CGFloat = 16
+        static let VHPadding: CGFloat = 20
         static let stepCircleSize: CGFloat = 20
         static let stepMainSpacing: CGFloat = 10
         static let VSpacing: CGFloat = 15
@@ -31,7 +33,7 @@ struct WorkoutDetailSheetPreview: View {
     
     var body: some View {
         ScrollView {
-            VStack {
+            VStack(spacing: SheetConstants.VSpacing) {
                 VStack(alignment: .leading) {
                     HStack {
                         Text("레그 프레스")
@@ -53,6 +55,7 @@ struct WorkoutDetailSheetPreview: View {
                         .font(.PretendardMedium16)
                         .foregroundStyle(Color.grey03)
                 }
+                .frame(width: SheetConstants.baseWidth)
                 /// 이미지
                 ZStack {
                     Rectangle().fill(Color.grey01)
@@ -61,64 +64,134 @@ struct WorkoutDetailSheetPreview: View {
                         .foregroundStyle(Color.grey03)
                 }
                 .frame(height: 180)
+                
                 .clipShape(RoundedRectangle(cornerRadius: 5))
                 
                 /// 운동 방법
-                DisclosureGroup("운동 방법", isExpanded: $isExpanded) {
-                    VStack(alignment: .leading, spacing: SheetConstants.VSpacing) {
-                        VStack {
-                            HStack(alignment: .top, spacing: SheetConstants.stepMainSpacing) {
-                                Text("1")
-                                    .font(.PretendardMedium12)
-                                    .foregroundStyle(Color.orange05)
-                                    .background(
-                                        Image(systemName: "circle.fill")
-                                            .resizable()
-                                            .foregroundStyle(Color.orange02)
-                                            .frame(width: SheetConstants.stepCircleSize, height: SheetConstants.stepCircleSize)
-                                    )
-                                VStack(alignment: .leading, spacing: 5) {
-                                    Text("등을 등받이에 밀착시키고 앉는다.")
-                                        .font(.PretendardMedium16)
-                                        .foregroundStyle(Color.grey06)
+                // 헤터 (토글 버튼)
+                VStack(spacing: 0) {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.6)) { isExpanded.toggle()}  // 애니메이션 넣을지 말지 고민...
+                } label: {
+                    HStack {
+                        Text("운동 방법")
+                            .font(.PretendardSemiBold18)
+                            .foregroundStyle(Color.grey06)
+                        Spacer()
+                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                            .frame(width: SheetConstants.chevronSize)
+                            .foregroundStyle(Color.grey03)
+                    }
+                }
+                .padding(.horizontal, SheetConstants.VHPadding)
+                .padding(.vertical, SheetConstants.VHPadding)
+                .contentShape(Rectangle()) // 탭 영역 확대
+                
+                if isExpanded {
+                            VStack {
+                                // === 여기부터 네가 만든 스텝 UI ===
+                                VStack(alignment: .leading, spacing: 16) {
+                                    // Step 1
+                                    HStack(alignment: .top, spacing: SheetConstants.stepMainSpacing) {
+                                        ZStack {
+                                            Circle().fill(Color.orange02).frame(width: SheetConstants.stepCircleSize, height: SheetConstants.stepCircleSize)
+                                            Text("1")
+                                                .font(.PretendardMedium12)
+                                                .foregroundStyle(Color.orange05)
+                                        }
+                                        VStack(alignment: .leading, spacing: 5) {
+                                            Text("등을 등받이에 밀착시키고 앉는다.")
+                                                .font(.PretendardMedium16)
+                                                .foregroundStyle(Color.grey06)
+                                        }
+                                    }
+                                    // Step 2
+                                    HStack(alignment: .top, spacing: SheetConstants.stepMainSpacing) {
+                                        ZStack {
+                                            Circle().fill(Color.orange02).frame(width: SheetConstants.stepCircleSize, height: SheetConstants.stepCircleSize)
+                                            Text("2")
+                                                .font(.PretendardMedium12)
+                                                .foregroundStyle(Color.orange05)
+                                        }
+                                        VStack(alignment: .leading, spacing: 5) {
+                                            Text("발을 어깨 너비로 벌려 올린다.")
+                                                .font(.PretendardMedium16)
+                                                .foregroundStyle(Color.grey06)
+
+                                            Text("이 때, 발끝은 살짝 바깥으로 향하도록 한다.")
+                                                .font(.PretendardRegular14)
+                                                .foregroundStyle(Color.grey03)
+                                        }
+                                    }
                                 }
+                                // === 여기까지 스텝 UI ===
                             }
-                        }
-                        VStack {
-                            HStack(alignment: .top, spacing: SheetConstants.stepMainSpacing) {
-                                Text("2")
-                                    .font(.PretendardMedium12)
-                                    .foregroundStyle(Color.orange05)
-                                    .background(
-                                        Image(systemName: "circle.fill")
-                                            .resizable()
-                                            .foregroundStyle(Color.orange02)
-                                            .frame(width: SheetConstants.stepCircleSize, height: SheetConstants.stepCircleSize)
-                                    )
-                                VStack(alignment: .leading, spacing: 5) {
-                                    Text("발을 어깨 너비로 벌려 올린다.")
-                                        .font(.PretendardMedium16)
-                                        .foregroundStyle(Color.grey06)
-                                    
-                                    Text("이 때, 발끝은 살짝 바깥으로 향하도록 한다.")
-                                        .font(.PretendardRegular14)
-                                        .foregroundStyle(Color.grey03)
-                                }
-                            }
+                            .padding(.horizontal, SheetConstants.VHPadding)
+                            .padding(.bottom, SheetConstants.VHPadding)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
-                    .frame(width: 300)
+                
+                    .background(
+                        RoundedRectangle(cornerRadius: 5)
+                            .fill(Color.grey00)
+                            .shadow(color: .black.opacity(0.1), radius: 2)
+                    )
+                    .padding(.top, 15)
+                     // 바깥 여백이 필요하면
+            
+                VStack(alignment: .leading, spacing: SheetConstants.VSpacing) {
+                    HStack(spacing: 0) {
+                        Image("AlertIcon2")
+                            .resizable()
+                            .frame(width: SheetConstants.alertIconSize, height: SheetConstants.alertIconSize)
+                            .padding(.trailing, 5)
+                        
+                        Text("유의사항")
+                            .font(.PretendardSemiBold14)
+                            .foregroundStyle(Color.grey03)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    VStack(alignment: .leading, spacing: SheetConstants.cautionTextSpacing) {
+                        HStack {
+                            Text("•")
+                                .foregroundStyle(Color.grey02)
+                            Text("무릎이 안쪽으로 모이지 않도록 유의하세요.")
+                                .foregroundStyle(Color.grey03)
+                                .multilineTextAlignment(.leading)
+                        }
+                        .font(.PretendardMedium12)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    
                 }
-                .font(.PretendardSemiBold18)
-                .foregroundStyle(Color.grey06)
-                .padding(.horizontal)
-                .background(
-                    RoundedRectangle(cornerRadius: 5)
-                        .fill(Color.grey00)
-                        .shadow(color: Color.black.opacity(0.1), radius: 2)
-                )
-                .frame(width: 340)
+                .padding(.horizontal, SheetConstants.VHPadding)
+                .padding(.vertical, SheetConstants.VHPadding)
+                
+                .background(Color.orange01)
+                .cornerRadius(5)
+                
+                /// 유튜브 썸네일
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8).fill(Color.grey01)
+                    HStack(spacing: 8) {
+                        Image(systemName: "play.rectangle.fill")
+                            .foregroundStyle(.red)
+                        Text("동영상 보기")
+                            .font(.PretendardMedium12)
+                            .foregroundStyle(Color.grey05)
+                    }
+                    
+                }
+                
+                .frame( height: SheetConstants.thumbHeight)
+                .clipShape(RoundedRectangle(cornerRadius: 5))
             }
+            .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.horizontal, 25)
+            
+            
         }
     }
 }

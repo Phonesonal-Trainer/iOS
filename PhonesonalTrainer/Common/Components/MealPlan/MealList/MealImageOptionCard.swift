@@ -75,7 +75,7 @@ struct MealImageOptionCard: View {
     
     /// 식단 칼로리 표시
     private var mealKcal: some View {
-        Text("\(formatKcal(item.kcal)) kcal")
+        Text("\(formatKcal(item.kcal ?? 0)) kcal")
             .font(.PretendardMedium18)
             .foregroundStyle(.orange05)
     }

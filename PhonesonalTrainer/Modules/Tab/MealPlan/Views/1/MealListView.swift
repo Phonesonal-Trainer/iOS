@@ -8,8 +8,11 @@
 import SwiftUI
 
 struct MealListView: View {
-    @StateObject private var mealviewModel = MealListViewModel()
-    @StateObject private var viewModel = MealCheckListViewModel()
+    @Binding var selectedDate: Date
+    let selectedMeal: MealType
+    
+    @StateObject private var viewModel = MealListViewModel()
+    
     
     // MARK: - Constants(상수 정의)
     fileprivate enum MealListConstants {
@@ -28,11 +31,17 @@ struct MealListView: View {
                 .font(.PretendardMedium18)
                 .foregroundStyle(.grey06)
             
+            if viewModel.isLoading {
+                ProgressView().frame(height: MealListConstants.mealListHeight)
+            } else if let msg = viewModel.errorMessage {
+                Text(msg).foregroundStyle(.red)
+            }
+            
             VStack(spacing: 0) {
-                ForEach(Array(mealviewModel.mealItems.enumerated()), id: \.1.id) { index, meal in
+                ForEach(Array(viewModel.mealItems.enumerated()), id: \.1.id) { index, meal in
                     MealImageOptionCard(item: meal, showImage: true)
                                 
-                    if index != mealviewModel.mealItems.count - 1 {
+                    if index != viewModel.mealItems.count - 1 {
                         Divider()
                         
                     }
@@ -47,9 +56,10 @@ struct MealListView: View {
             .shadow(color: Color.black.opacity(0.1), radius: 2)
             .frame(width: MealListConstants.mealListWidth)
         }
+        .task { await viewModel.load(date: selectedDate, mealType: selectedMeal) }
+        .onChange(of: selectedMeal) { _ in Task { await viewModel.load(date: selectedDate, mealType: selectedMeal) } }
+        .onChange(of: selectedDate) { _ in Task { await viewModel.load(date: selectedDate, mealType: selectedMeal) } }
     }
 }
 
-#Preview {
-    MealListView()
-}
+
