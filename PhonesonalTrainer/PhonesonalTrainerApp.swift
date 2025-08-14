@@ -11,9 +11,12 @@ import SwiftUI
 struct PhonesonalTrainerApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate // ✅ 필수!
 
+    @StateObject private var userProfile = UserProfileViewModel()
+    
     var body: some Scene {
         WindowGroup {
             OnboardingStartView()
+                .environmentObject(userProfile)
         }
     }
 }

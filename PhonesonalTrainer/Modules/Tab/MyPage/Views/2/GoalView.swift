@@ -45,8 +45,8 @@ struct GoalView: View {
                 Spacer()
             }
             Text("목표 수치")
-                .font(.PretendardMedium18)
-                .foregroundStyle(.grey05)
+                .font(.PretendardMedium22)
+                .foregroundStyle(.grey06)
         }
         .padding(.horizontal, 25)
         .frame(height: 56)

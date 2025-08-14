@@ -79,7 +79,7 @@ struct RecommendGoalView: View {
 
             HStack(spacing: 8) {
                 Text("\(from) → \(to)")
-                    .font(.PretendardMedium18)
+                    .font(.PretendardMedium16)
                     .foregroundStyle(highlight ? .orange05 : .grey05) // 몸무게만 주황
                     .lineLimit(1)
                     .minimumScaleFactor(0.9)
@@ -112,7 +112,7 @@ struct RecommendGoalView: View {
             Spacer(minLength: 8)
 
             Text(tag)
-                .font(.PretendardMedium18)
+                .font(.PretendardMedium16)
                 .foregroundStyle(.grey05)
                 .lineLimit(1)
                 .minimumScaleFactor(0.9)

@@ -1,7 +1,5 @@
-//
 //  MyPageView.swift
 //  PhonesonalTrainer
-//
 
 import SwiftUI
 
@@ -9,12 +7,12 @@ struct MyPageView: View {
     // 팝업 상태
     @State private var showReset = false
     @State private var showLogout = false
-
+    @State private var goToProfile = false
+    @EnvironmentObject var user: UserProfileViewModel
     // GoalView 이동 상태
     @State private var goToGoalView = false
 
     // ===== 더미 값=====
-    private let dummyName = "서연"
     private let dummyGoalText = "목표 체중 60kg"
     private let dummyDurationText = "3주차"
     private let dummySignUpDate = Date().addingTimeInterval(-60*60*24*21) // 3주 전
@@ -34,11 +32,13 @@ struct MyPageView: View {
         fatFrom: "30%", fatTo: "22%", fatDiff: "-8%p",
         skeletalTag: "유지 또는 소폭 증가"
     )
+
     private let dummyWorkout = WorkoutGoalsUIModel(
         routine: "주 3회 / 1시간",
         anaerobic: "주 3회 / 40분",
         aerobic: "주 2회 / 20분"
     )
+
     private let dummyMeal = MealGoalsUIModel(
         nutrient: "고단백/저지방",
         amount: "1300 ~ 1400 kcal"
@@ -52,15 +52,21 @@ struct MyPageView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     // 1) 헤더
                     MyPageHeaderView(
-                        name: dummyName,
+                        name: user.name,
                         goalText: dummyGoalText,
                         durationText: dummyDurationText,
-                        onChevronTap: { }
+                        onChevronTap: {
+                            goToProfile = true
+                        }
                     )
 
                     Spacer().frame(height: 25)
 
-                    Rectangle().fill(Color.grey01).frame(height: 10)
+                    Rectangle()
+                        .fill(Color.grey01)
+                        .frame(height: 10)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, -25)
 
                     Spacer().frame(height: 25)
 
@@ -140,6 +146,9 @@ struct MyPageView: View {
         )
         .animation(.easeInOut(duration: 0.2), value: showReset)
         .animation(.easeInOut(duration: 0.2), value: showLogout)
+        .navigationDestination(isPresented: $goToProfile) {
+            MyProfileView()
+        }
     }
 }
 
@@ -147,5 +156,6 @@ struct MyPageView: View {
 #Preview {
     NavigationStack {
         MyPageView()
-    }
+        }
+    .environmentObject(UserProfileViewModel())
 }
