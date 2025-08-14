@@ -21,6 +21,7 @@ struct FoodPlanItem: Decodable, Identifiable {
     let mealTime: String
     let date: String
     let quantity: Int
+    let calories: Double
     let complete: String?
     let weekNumber: Int?
     let imageUrl: String?

@@ -9,7 +9,8 @@ import SwiftUI
 
 struct MealCheckboxCard: View {
     let item: MealModel
-    
+    let selectedDate: Date
+    let mealType: MealType
     @ObservedObject var viewModel: MealCheckListViewModel
     
     // MARK: - Constants(상수 정의)
@@ -25,9 +26,9 @@ struct MealCheckboxCard: View {
     var body: some View {
         // 좌측에 체크박스 보여주기 (식단 기록 상세 뷰에서)
         HStack(spacing: MealCardConstants.imageTextSpacing) {
-            Button(action: {
-                viewModel.toggleSelection(of: item)
-            }) {
+            Button {
+                Task { await viewModel.toggle(meal: item, date: selectedDate, mealType: mealType)}
+            } label: {
                 Image(systemName: "checkmark.circle.fill")
                     .resizable()
                     .foregroundStyle(viewModel.isSelected(item) ? Color.orange05 : Color.grey02)

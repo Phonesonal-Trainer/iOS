@@ -103,17 +103,46 @@ class WorkoutListViewModel: ObservableObject {
     }
 
     // MARK: - 직접 추가한 운동 기록
-    func addRecordedWorkout(name: String, category: WorkoutType, kcal: Double) {
-        let newWorkout = WorkoutModel(
-            id: Int.random(in: 10_000...99_999),  // 서버 ID 아님. 직접 추가한 운동은 고유 id 생성
-            exerciseId: Int.random(in: 10_000...99_999),   // **얘도 랜덤으로 id 만드는게 맞을까?***
-            name: name,
-            bodyPart: .unknown,
-            muscleGroups: [],
-            category: category,
-            status: .recorded,
-            kcalBurned: kcal
-        )
-        workouts.append(newWorkout)
+    func addRecordedWorkout(name: String, category: WorkoutType, kcal: Double?) {
+        Task {
+            do {
+                let body = CreateCustomUserExerciseRequest(
+                    exerciseName: name,
+                    kcal: kcal ?? 0,
+                    exerciseType: category.rawValue
+                )
+                var req = URLRequest(url: URL(string: "http://43.203.60.2:8080/exercise/userExercise/custom")!)
+                req.httpMethod = "POST"
+                req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                req.httpBody = try JSONEncoder().encode(body)
+
+                let (data, resp) = try await URLSession.shared.data(for: req)
+                guard let http = resp as? HTTPURLResponse, (200...299).contains(http.statusCode) else { throw URLError(.badServerResponse) }
+                let decoded = try JSONDecoder().decode(CreateCustomUserExerciseResponse.self, from: data)
+                let created = decoded.result
+
+                // 상세 있으면 시도 → 실패해도 fallback append
+                let model: WorkoutModel
+                if created.exerciseId != 0, let detail = try? await fetchExerciseDetail(id: created.exerciseId) {
+                    model = WorkoutModel(userExercise: created, exerciseDetail: detail)
+                } else {
+                    model = WorkoutModel(
+                        id: created.userExerciseId,
+                        exerciseId: created.exerciseId,
+                        name: created.exerciseName,
+                        bodyPart: .unknown,
+                        muscleGroups: [],
+                        category: WorkoutType(rawValue: created.exerciseType) ?? category,
+                            status: .recorded,
+                            kcalBurned: created.caloriesBurned,
+                            exerciseSets: []
+                    )
+                }
+                self.workouts.append(model)      // 로컬 반영으로 끝 (재조회 X)
+
+            } catch {
+                print("❌ 직접 추가 저장 실패:", error)
+            }
+        }
     }
 }

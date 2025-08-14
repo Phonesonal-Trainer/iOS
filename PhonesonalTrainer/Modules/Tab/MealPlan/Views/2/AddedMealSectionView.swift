@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+extension Notification.Name {
+    static let userMealsDidChange = Notification.Name("UserMealsDidChange")
+}
+
 struct AddedMealSectionView: View {
     @ObservedObject var viewModel: AddedMealViewModel
     @Binding var path: [MealPlanRoute]
@@ -14,7 +18,15 @@ struct AddedMealSectionView: View {
     // 바인딩으로 상태 전달 받기
     @Binding var selectedMealViewModel: MealInfoViewModel?
     @Binding var showPopup: Bool
+    @Binding var showDeletePopup: Bool
     
+    // 조회 파라미터
+    @Binding var selectedDate: Date
+    let mealType: MealType
+    
+    @Binding var pendingDelete: MealRecordEntry?
+    
+    // MARK: - 상수 정의
     fileprivate enum AddedMealSectionConstants {
         static let basicWidth: CGFloat = 340
         static let VSpacing: CGFloat = 20
@@ -28,6 +40,7 @@ struct AddedMealSectionView: View {
         static let deleteButtonSize: CGFloat = 20
     }
     
+    // MARK: - Body
     var body: some View {
         VStack(alignment: .leading, spacing: AddedMealSectionConstants.VSpacing) {
             Text("추가 식단")
@@ -41,10 +54,34 @@ struct AddedMealSectionView: View {
             }
             
             // 추가된 식단 리스트
-            addedMeal
+            if viewModel.isLoading {
+                ProgressView().padding(.vertical, 10)
+            } else if let msg = viewModel.errorMessage {
+                Text(msg)
+                    .font(.PretendardMedium14)
+                    .foregroundStyle(Color.red)
+                    .padding(.vertical, 10)
+            } else if viewModel.addedMeals.isEmpty {
+                EmptyView()
+            } else {
+                addedMeal
+            }
         }
         .frame(maxWidth: AddedMealSectionConstants.basicWidth)
-        
+        .task { await viewModel.load(date: selectedDate, mealType: mealType) }
+        .onChange(of: selectedDate) {
+            Task {
+                await viewModel.load(date: selectedDate, mealType: mealType)
+            }
+        }
+        .onChange(of: mealType) {
+            Task {
+                await viewModel.load(date: selectedDate, mealType: mealType)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .userMealsDidChange)) { _ in
+            Task { await viewModel.load(date: selectedDate, mealType: mealType) }
+        }
     }
     
     // MARK: - 서치 바 버튼
@@ -79,24 +116,29 @@ struct AddedMealSectionView: View {
                         .frame(width: AddedMealSectionConstants.mealCardWidth)
                         .contentShape(Rectangle())
                         .onTapGesture {
-                            selectedMealViewModel = MealInfoViewModel(meal: entry.meal, nutrient: entry.nutrient, isFavorite: false)
+                            selectedMealViewModel = MealInfoViewModel(entry: entry, isFavorite: false)
                             withAnimation {
                                 showPopup = true
                             }
                         }
                         
                     
-                    Button(action: {    // 추가 식단 데이터에서 삭제
-                        withAnimation(.easeInOut(duration: 0.3)){
-                            viewModel.deleteMeal(entry)
+                    Button {
+                        pendingDelete = entry
+                        withAnimation {
+                            showDeletePopup = true
                         }
-                    }) {
+                    } label: {
                         Image(systemName: "xmark.circle.fill")
                             .resizable()
-                            .frame(width: AddedMealSectionConstants.deleteButtonSize, height: AddedMealSectionConstants.deleteButtonSize)
-                            .foregroundStyle(Color.orange05)
+                            .frame(width: AddedMealSectionConstants.deleteButtonSize,
+                                   height: AddedMealSectionConstants.deleteButtonSize)
+                            .foregroundStyle(
+                                viewModel.deleting.contains(entry.recordId) ? Color.grey03 : Color.orange05
+                            )
                     }
                     .buttonStyle(.plain)
+                    .disabled(viewModel.deleting.contains(entry.recordId))
                 }
                 .padding(.horizontal, AddedMealSectionConstants.mealCardHorizontalPadding)
                 .frame(height: AddedMealSectionConstants.mealCardHeight)

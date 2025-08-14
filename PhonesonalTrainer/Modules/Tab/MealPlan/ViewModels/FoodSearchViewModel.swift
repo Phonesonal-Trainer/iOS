@@ -8,14 +8,27 @@
 import Foundation
 import SwiftUI
 
+@MainActor
 class FoodSearchViewModel: ObservableObject {
+    // MARK: - Property
     @Published var searchText: String = ""    // 서치바
     @Published var selectedSort: SortType = .frequency    // 정렬
     @Published var currentPage: Int = 1      // 식단 아이템 paging view
-    
-    @Published var meals: [MealModel] = []  // API에서 받아올 예정. -> 배열에 저장
+    @Published var allFoods: [MealModel] = []
     @Published var selectedMealIDs: Set<UUID> = []   // 사용자가 어떤 식단을 체크했는지 상태 관리
+    
+    @Published var isLoading = false
+    @Published var errorMessage: String?
+    
+    private let service: FoodServiceType
+    private let favorites: FavoritesStore
 
+    init(favorites: FavoritesStore, service: FoodServiceType = FoodService()) {
+        self.favorites = favorites
+        self.service = service
+    }
+
+    // MARK: - 함수
     func toggleSelection(of meal: MealModel) {   // 선택/해제 토글 함수
         if selectedMealIDs.contains(meal.id) {
             selectedMealIDs.remove(meal.id)
@@ -31,33 +44,17 @@ class FoodSearchViewModel: ObservableObject {
     // 그리드에 사용
     let itemsPerPage = 8
     
-    // 추후에 백엔드와 연결시 allFoods를 API 호출 결과로 대체.
-    @Published var allFoods: [MealModel] = [
-        MealModel(name: "닭가슴살", amount: 100, kcal: 110, imageURL: "temp_image"),
-        MealModel(name: "삶은 달걀", amount: 50, kcal: 68, imageURL: "temp_image"),
-        MealModel(name: "토마토", amount: 100, kcal: 14, imageURL: "temp_image"),
-        MealModel(name: "방울토마토", amount: 13, kcal: 2, imageURL: "temp_image"),
-        MealModel(name: "바나나", amount: 100, kcal: 93, imageURL: "temp_image"),
-        MealModel(name: "야채샐러드", amount: 150, kcal: 148, imageURL: "temp_image"),
-        MealModel(name: "사과", amount: 150, kcal: 57, imageURL: "temp_image"),
-        MealModel(name: "블루베리", amount: 28, kcal: 16, imageURL: "temp_image"),
-        MealModel(name: "단백질바", amount: 50, kcal: 249, imageURL: "temp_image"),
-        MealModel(name: "포케", amount: 230, kcal: 221, imageURL: "temp_image"),
-        MealModel(name: "스테비아방울토마토", amount: 15, kcal: 6.8, imageURL: "temp_image"),
-        MealModel(name: "찐고구마", amount: 200, kcal: 277, imageURL: "temp_image"),
-        MealModel(name: "계란 프라이", amount: 46, kcal: 89, imageURL: "temp_image"),
-        MealModel(name: "토마토 스파게티", amount: 200, kcal: 370, imageURL: "temp_image"),
-        MealModel(name: "단백질 쉐이크", amount: 30, kcal: 110, imageURL: "temp_image"),
-        MealModel(name: "아몬드", amount: 6, kcal: 40, imageURL: "temp_image")
-    ]
-    
+    // 즐겨찾기 순 정렬
     var filteredFoods: [MealModel] {
-        let sorted = selectedSort == .frequency ? allFoods : allFoods.reversed() // 예시
-        if searchText.isEmpty {
-            return sorted
-        } else {
-            return sorted.filter { $0.name.contains(searchText) }
+        // 기본 정렬(빈도)
+        var base = (selectedSort == .frequency) ? allFoods : allFoods
+        // 즐겨찾기 순일 때는 favorite 먼저 오도록 정렬/필터
+        if selectedSort == .favorite {
+            base = allFoods
+                .filter { favorites.contains($0.foodId) }   // 즐겨찾기만 보여주려면 필터
+                .sorted { $0.name < $1.name }    // 2차 정렬 기준(원하는대로)
         }
+        return searchText.isEmpty ? base : base.filter { $0.name.contains(searchText) }
     }
     
     var pagedFoods: [MealModel] {
@@ -86,5 +83,35 @@ class FoodSearchViewModel: ObservableObject {
     func selectSort(_ sort: SortType) {
         selectedSort = sort
         currentPage = 1 // 페이지 초기화 -> out of range 방지용
+    }
+    
+    // 검색
+    func fetchFoods(token: String? = nil) async {
+        isLoading = true
+        errorMessage = nil
+        defer { isLoading = false }
+        do {
+            let foods = try await service.searchFoods(keyword: searchText, sort: selectedSort, token: token)
+            self.allFoods = foods
+            self.currentPage = 1
+        } catch {
+            self.allFoods = []
+            self.errorMessage = "식단 검색 실패: \(error.localizedDescription)"
+        }
+    }
+
+    // 저장 (다건 선택 → 개별 POST)
+    func saveSelected(date: Date, mealType: MealType, token: String? = nil) async throws {
+        let targets = allFoods.filter { selectedMealIDs.contains($0.id) }
+        guard !targets.isEmpty else { return }
+
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            for m in targets {
+                group.addTask { _ = try await self.service.addUserMealFromFood(foodId: m.foodId, date: date, mealTime: mealType, token: token) }
+            }
+            try await group.waitForAll()
+        }
+
+        NotificationCenter.default.post(name: .userMealsDidChange, object: nil)
     }
 }

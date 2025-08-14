@@ -13,6 +13,9 @@ struct MealInfoPopup: View {
     @Binding var isPresented: Bool   // 팝업창 닫기
     @Binding var showEditPopup: Bool   // 수정 팝업창 띄우기
     
+    let foodService: FoodServiceType
+    @ObservedObject var favoritesStore: FavoritesStore   // 변화 구독하려면 ObservedObject
+    
     // MARK: - 상수 정의
     fileprivate enum MealInfoConstants {
         static let width: CGFloat = 340  // 배경 너비
@@ -82,10 +85,9 @@ struct MealInfoPopup: View {
                     .font(.PretendardSemiBold22)
                     .foregroundStyle(Color.grey06)
                 
-                Button(action: {
-                    viewModel.toggleFavorite()
-                    // 즐겨찾기 저장 로직
-                }) {
+                Button {
+                    Task { await viewModel.toggleFavorite(using: foodService, favorites: favoritesStore) }
+                } label: {
                     Image(systemName: "star.fill")
                         .foregroundStyle(viewModel.isFavorite ? Color.yellow02 : .grey02)
                         .frame(width: MealInfoConstants.favoriteButtonSize, height: MealInfoConstants.favoriteButtonSize)
