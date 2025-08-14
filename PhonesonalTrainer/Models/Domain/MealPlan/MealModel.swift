@@ -8,22 +8,53 @@
 import Foundation
 
 struct MealModel : Identifiable {
-    let id : UUID
+    var id = UUID()
+    let foodId: Int
     let name : String    // ex) "소고기"
     let amount : Int     // ex) "180g"
     let kcal : Double?      // ex) "321kcal"
-    let imageURL : String    // 이미지가 url로 오겠지..?  근데 더미데이터로 프리뷰 볼 땐 이미지 이름으로 해야할듯..
+    let imageURL : String
+    var isComplete : Bool
     
-    init(id: UUID = UUID(), name: String, amount: Int, kcal: Double? = nil, imageURL: String) {
+    init(id: UUID = UUID(), foodId: Int, name: String, amount: Int, kcal: Double? = nil, imageURL: String, isComplete: Bool = false) {
         self.id = id
+        self.foodId = foodId
         self.name = name
         self.amount = amount
         self.kcal = kcal
         self.imageURL = imageURL
+        self.isComplete = isComplete
     }
-    
-    init(name: String, amount: Int, kcal: Double? = nil, imageURL: String) {
-        self.init(id: UUID(), name: name, amount: amount, kcal: kcal, imageURL: imageURL)
-    }
-    
+    // 이게 필요할까..?
+    // init(foodId: Int, name: String, amount: Int, kcal: Double? = nil, imageURL: String, isComplete: Bool ) {
+    //     self.init(id: Int, foodId: foodId, name: name, amount: amount, kcal: kcal, imageURL: imageURL, isComplete: isComplete)
+    // }
 }
+
+extension MealModel {
+    init(api: FoodPlanItem) {
+        self.id = UUID()
+        self.foodId = api.foodId
+        self.name = api.foodName
+        self.amount = api.quantity
+        self.kcal = api.calories
+        self.imageURL = api.imageUrl ?? ""
+        self.isComplete = (api.complete == "COMPLETE")
+    }
+}
+
+extension MealModel {
+    // ✅ GET /foods/search 결과 → 앱 모델
+    init(search dto: FoodSearchItem) {
+        self.id = UUID()
+        self.foodId = dto.foodId
+        self.name = dto.name
+        // "180g" 같은 문자열에서 숫자만 뽑아 Int로(서버가 "180g"처럼 줄 수도 있어 보여서 안전하게 처리)
+        let num = Int(dto.servingSize.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)) ?? 0
+        self.amount = num
+        self.kcal = dto.calorie
+        self.imageURL = dto.imageUrl ?? ""
+        self.isComplete = false
+    }
+}
+    

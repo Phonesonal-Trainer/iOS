@@ -87,11 +87,11 @@ struct ManualAddWorkoutView: View {
                         text: "추가하기",
                         textColor: addButtonTextColor
                     ) {
-                        if isFormValid , let kcal = kcalBurnedValue, let category = selectedCategory {
+                        if isFormValid, let category = selectedCategory {
                             viewModel.addRecordedWorkout(
                                 name: workoutName,
                                 category: category,
-                                kcal: kcal
+                                kcal: kcalBurnedValue
                             )
                             dismiss()
                         }

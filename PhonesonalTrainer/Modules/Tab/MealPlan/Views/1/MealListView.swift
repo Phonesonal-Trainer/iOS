@@ -57,8 +57,16 @@ struct MealListView: View {
             .frame(width: MealListConstants.mealListWidth)
         }
         .task { await viewModel.load(date: selectedDate, mealType: selectedMeal) }
-        .onChange(of: selectedMeal) { _ in Task { await viewModel.load(date: selectedDate, mealType: selectedMeal) } }
-        .onChange(of: selectedDate) { _ in Task { await viewModel.load(date: selectedDate, mealType: selectedMeal) } }
+        .onChange(of: selectedMeal) {
+            Task {
+                await viewModel.load(date: selectedDate, mealType: selectedMeal)
+            }
+        }
+        .onChange(of: selectedDate) {
+            Task {
+                await viewModel.load(date: selectedDate, mealType: selectedMeal)
+            }
+        }
     }
 }
 

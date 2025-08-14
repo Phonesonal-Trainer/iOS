@@ -14,6 +14,7 @@ struct MealPlanView: View {
     @Binding var path: [MealPlanRoute]
     @State private var selectedDate: Date = Date()
     @StateObject private var viewModel = MealPlanViewModel()
+    @StateObject private var favoritesStore = FavoritesStore()
     
     // MARK: - Constants
     fileprivate enum MealPlanConstants {
@@ -58,11 +59,15 @@ struct MealPlanView: View {
         .navigationDestination(for: MealPlanRoute.self) { route in
             switch route {
             case .mealRecord:
-                MealRecordDetailView(mealType: type ,path: $path)
+                MealRecordDetailView(mealType: type, selectedDate: selectedDate, path: $path, favoritesStore: favoritesStore)
             case .foodSearch:
-                FoodSearchView(path: $path)
+                FoodSearchView(path: $path, favorites: favoritesStore, selectedDate: selectedDate, mealType: viewModel.selectedType)
             case .manualAdd:
-                ManualAddMealView()
+                ManualAddMealView(
+                    selectedDate: selectedDate,
+                    mealType: viewModel.selectedType,
+                    token: nil // 필요 시 전달
+                )
             }
         }
     }

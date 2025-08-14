@@ -11,15 +11,16 @@
 import SwiftUI
 
 struct MealCheckListView: View {
-    @StateObject private var mealviewModel = MealListViewModel()
-    @StateObject private var viewModel = MealCheckListViewModel()
+    @Binding var selectedDate: Date
+    let mealType: MealType
+    
+    @StateObject private var listVM = MealListViewModel()
+    @StateObject private var checkVM = MealCheckListViewModel()
     
     // MARK: - Constants(상수 정의)
     fileprivate enum MealListConstants {
-        static let mealCardLeadingPadding: CGFloat = 20
-        static let mealCardTrailingPadding: CGFloat = 20
-        static let mealCardTopPadding: CGFloat = 10
-        static let mealCardBottomPadding: CGFloat = 10
+        static let mealCardHPadding: CGFloat = 20
+        static let mealCardVPadding: CGFloat = 10
         static let mealListWidth: CGFloat = 340
         static let mealListHeight: CGFloat = 215
     }
@@ -32,28 +33,40 @@ struct MealCheckListView: View {
                 .foregroundStyle(.grey06)
             
             VStack(spacing: 0) {
-                ForEach(Array(mealviewModel.mealItems.enumerated()), id: \.1.id) { index, meal in
-                    MealCheckboxCard(item: meal, viewModel: viewModel)
+                ForEach(Array(listVM.mealItems.enumerated()), id: \.1.id) { _, meal in
+                    MealCheckboxCard(item: meal, selectedDate: selectedDate, mealType: mealType, viewModel: checkVM)
                                 
-                    if index != mealviewModel.mealItems.count - 1 {
-                        Divider()
-                        
-                    }
+                    if meal.id != listVM.mealItems.last?.id { Divider() }
+                                    
                 }
-                .padding(.leading, MealListConstants.mealCardLeadingPadding)
-                .padding(.trailing, MealListConstants.mealCardTrailingPadding)
+                .padding(.horizontal, MealListConstants.mealCardHPadding)
             }
-            .padding(.top, MealListConstants.mealCardTopPadding)
-            .padding(.bottom, MealListConstants.mealCardBottomPadding)
+            .padding(.vertical, MealListConstants.mealCardVPadding)
             .background(Color.white)
             .cornerRadius(5)
             .shadow(color: Color.black.opacity(0.1), radius: 2)
             .frame(width: MealListConstants.mealListWidth)
         }
         .frame(maxWidth: .infinity)
+        .task {
+            await listVM.load(date: selectedDate, mealType: mealType)
+            checkVM.syncSelection(from: listVM.mealItems)
+        }
+        .onChange(of: selectedDate) {
+            Task {
+                await listVM.load(date: selectedDate, mealType: mealType)
+                checkVM.syncSelection(from: listVM.mealItems)
+            }
+        }
+        .onChange(of: mealType) {
+            Task {
+                await listVM.load(date: selectedDate, mealType: mealType)
+                checkVM.syncSelection(from: listVM.mealItems)
+            }
+        }
     }
 }
 
-#Preview {
-    MealCheckListView()
-}
+// #Preview {
+//     MealCheckListView()
+// }

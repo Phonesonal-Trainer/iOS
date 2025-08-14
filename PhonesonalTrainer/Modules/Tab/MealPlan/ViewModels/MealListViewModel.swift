@@ -37,15 +37,7 @@ final class MealListViewModel: ObservableObject {
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             let decoded = try JSONDecoder().decode(FoodPlansResponse.self, from: data)
-
-            self.mealItems = decoded.result.map {
-                MealModel(
-                    name: $0.foodName,
-                    amount: $0.quantity,
-                    kcal: nil,                       // 서버에 없으므로 nil
-                    imageURL: $0.imageUrl ?? ""
-                )
-            }
+            self.mealItems = decoded.result.map(MealModel.init(api:))
         } catch {
             self.errorMessage = "불러오기 실패: \(error.localizedDescription)"
             self.mealItems = []
