@@ -10,8 +10,8 @@ import SwiftUI
 struct WorkoutListCard: View {
     // MARK: - Property
     let workout: WorkoutModel
+    var onInfoTap: () -> Void
     
-    @State private var showDetailSheet = false
     
     // MARK: - 상수 정의
     fileprivate enum WorkoutListCardConstants {
@@ -41,7 +41,7 @@ struct WorkoutListCard: View {
                         .resizable()
                         .frame(width: WorkoutListCardConstants.searchIconSize, height: WorkoutListCardConstants.searchIconSize)
                         .onTapGesture {
-                            showDetailSheet = true
+                            onInfoTap()
                         }
                 }
                 
@@ -64,10 +64,6 @@ struct WorkoutListCard: View {
                 .frame(maxWidth: .infinity)
                 .shadow(color: Color.black.opacity(0.1), radius: 2)
         )
-        .sheet(isPresented: $showDetailSheet) {
-            WorkoutDetailSheetView(workout: workout)
-        }
-        
     }
     
     // MARK: - 운동 상태에 따라 다르게 나타나는 버튼
@@ -108,17 +104,13 @@ struct WorkoutListCard: View {
                     .font(.PretendardRegular14)
                     .foregroundStyle(Color.grey04)
             } else {
-                // 나중에 데이터 받은걸로 수정
-                Text("1세트 nkg, 2세트 nkg, 3세트 nkg")
+                // 세트 번호 + 무게 나열
+                let setTexts = workout.exerciseSets.map { "\($0.setNumber)세트 \($0.weight)kg" }
+                Text(setTexts.joined(separator: ", "))
                     .font(.PretendardRegular14)
                     .foregroundStyle(Color.grey04)
             }
-            
             Spacer()
         }
     }
-}
-
-#Preview {
-    WorkoutListCard(workout: WorkoutModel(name: "힙 쓰러스트", bodyPart: "하체", muscleGroups: [], category: .anaerobic, status: .inProgress, imageURL: ""))
 }

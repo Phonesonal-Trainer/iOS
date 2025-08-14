@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MealTypeSegmentView: View {
-    @State private var selectedMeal: MealType = .breakfast
+    @Binding var selectedMeal: MealType
     @Namespace private var underlineAnimation
     
     var body: some View {
@@ -48,7 +48,4 @@ struct MealTypeSegmentView: View {
                 .frame(height: 1)
         }
     }
-}
-#Preview {
-    MealTypeSegmentView()
 }

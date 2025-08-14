@@ -9,7 +9,7 @@ import SwiftUI
 
 struct WorkoutCard: View {
     // MARK: - Property
-    let item: WorkoutModel
+    let item: SearchWorkoutModel
     
     @ObservedObject var viewModel: WorkoutSearchViewModel
     
@@ -36,7 +36,7 @@ struct WorkoutCard: View {
             Spacer()
             
             Button(action: {
-                viewModel.toggleSelection(of: item)
+                viewModel.toggleSelection(item)
             }) {
                 Image(systemName: "checkmark.circle.fill")
                     .resizable()
@@ -72,7 +72,7 @@ struct WorkoutCard: View {
                 .foregroundStyle(Color.grey02)
                 .frame(width: WorkoutCardConstants.dotSize, height: WorkoutCardConstants.dotSize)
             
-            Text(item.bodyPart)
+            Text(item.bodyPart.displayName)
                 .font(.PretendardRegular12)
                 .foregroundStyle(Color.grey03)
         }

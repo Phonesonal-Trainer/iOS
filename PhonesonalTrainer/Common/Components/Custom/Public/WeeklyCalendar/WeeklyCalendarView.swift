@@ -7,17 +7,20 @@
 
 import SwiftUI
 
-struct WeeklyCalendarView: View {
+ struct WeeklyCalendarView: View {
+    @Binding var selectedDate: Date
+     
     @State private var currentWeekOffset: Int
     
-    init() {
+    init(selectedDate: Binding<Date>) {
+        _selectedDate = selectedDate
         let calendar = Calendar.current
         let startDate = Calendar.current.date(from: DateComponents(year: 2025, month: 7, day: 28))!
         let weeks = calendar.dateComponents([.weekOfYear], from: startDate, to: Date()).weekOfYear ?? 0
         _currentWeekOffset = State(initialValue: max(0, weeks))
     }
     
-    @State private var selectedDate: Date = Date()
+    
     // 월요일부터 시작
     private var calendar: Calendar {
         var cal = Calendar.current
@@ -149,6 +152,4 @@ struct WeeklyCalendarView: View {
     }
 }
 
-#Preview {
-    WeeklyCalendarView()
-}
+
