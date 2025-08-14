@@ -38,7 +38,7 @@ struct WorkoutRoutineView: View {
             .background(Color.grey00)
             .zIndex(1)
             
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: WorkoutRoutineConstants.VSpacing) {
                     topContent
                     

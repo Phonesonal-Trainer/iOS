@@ -17,6 +17,11 @@ struct MealCheckListView: View {
     @StateObject private var listVM = MealListViewModel()
     @StateObject private var checkVM = MealCheckListViewModel()
     
+    // 숨김 여부
+    private var shouldHide: Bool {
+        DietPlanVisibility.shouldHide(date: selectedDate) || mealType == .snack
+    }
+    
     // MARK: - Constants(상수 정의)
     fileprivate enum MealListConstants {
         static let mealCardHPadding: CGFloat = 20
@@ -28,40 +33,48 @@ struct MealCheckListView: View {
     // MARK: - Body
     var body: some View {
         VStack(alignment: .leading, spacing: 15) {
-            Text("식단 플랜")
-                .font(.PretendardMedium18)
-                .foregroundStyle(.grey06)
-            
-            VStack(spacing: 0) {
-                ForEach(Array(listVM.mealItems.enumerated()), id: \.1.id) { _, meal in
-                    MealCheckboxCard(item: meal, selectedDate: selectedDate, mealType: mealType, viewModel: checkVM)
-                                
-                    if meal.id != listVM.mealItems.last?.id { Divider() }
+            if !shouldHide {
+                Text("식단 플랜")
+                    .font(.PretendardMedium18)
+                    .foregroundStyle(.grey06)
+                
+                VStack(spacing: 0) {
+                    ForEach(Array(listVM.mealItems.enumerated()), id: \.1.id) { _, meal in
+                        MealCheckboxCard(item: meal, selectedDate: selectedDate, mealType: mealType, viewModel: checkVM)
                                     
+                        if meal.id != listVM.mealItems.last?.id { Divider() }
+                                        
+                    }
+                    .padding(.horizontal, MealListConstants.mealCardHPadding)
                 }
-                .padding(.horizontal, MealListConstants.mealCardHPadding)
+                .padding(.vertical, MealListConstants.mealCardVPadding)
+                .background(Color.white)
+                .cornerRadius(5)
+                .shadow(color: Color.black.opacity(0.1), radius: 2)
+                .frame(width: MealListConstants.mealListWidth)
             }
-            .padding(.vertical, MealListConstants.mealCardVPadding)
-            .background(Color.white)
-            .cornerRadius(5)
-            .shadow(color: Color.black.opacity(0.1), radius: 2)
-            .frame(width: MealListConstants.mealListWidth)
         }
         .frame(maxWidth: .infinity)
         .task {
-            await listVM.load(date: selectedDate, mealType: mealType)
-            checkVM.syncSelection(from: listVM.mealItems)
+            if !shouldHide {
+                await listVM.load(date: selectedDate, mealType: mealType)
+                checkVM.syncSelection(from: listVM.mealItems)
+            }
         }
         .onChange(of: selectedDate) {
             Task {
-                await listVM.load(date: selectedDate, mealType: mealType)
-                checkVM.syncSelection(from: listVM.mealItems)
+                if !shouldHide {
+                    await listVM.load(date: selectedDate, mealType: mealType)
+                    checkVM.syncSelection(from: listVM.mealItems)
+                }
             }
         }
         .onChange(of: mealType) {
             Task {
-                await listVM.load(date: selectedDate, mealType: mealType)
-                checkVM.syncSelection(from: listVM.mealItems)
+                if !shouldHide {
+                    await listVM.load(date: selectedDate, mealType: mealType)
+                    checkVM.syncSelection(from: listVM.mealItems)
+                }
             }
         }
     }

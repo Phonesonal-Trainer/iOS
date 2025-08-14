@@ -39,7 +39,7 @@ struct MealPlanView: View {
             .background(Color.grey00)
             .zIndex(1)
             
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: MealPlanConstants.scrollViewSpacing) {
                     // 총 섭취 칼로리
                     caloriesSectionView
@@ -47,10 +47,12 @@ struct MealPlanView: View {
                     // 식단 세그먼트
                     MealTypeSegmentView(selectedMeal: $viewModel.selectedType)
                     
-                    // 식단 플랜 뷰
-                    MealListView(selectedDate: $selectedDate, selectedMeal: viewModel.selectedType)
+                    // 식단 플랜 뷰  -> 간식이면 생략
+                    if viewModel.selectedType != .snack {
+                        MealListView(selectedDate: $selectedDate, selectedMeal: viewModel.selectedType)
+                    }
                     
-                    // 식단 기록 뷰
+                    // 식단 기록 뷰 (그대로 노출)
                     MealRecordSectionView(viewModel: viewModel, path: $path)
                 }
             }

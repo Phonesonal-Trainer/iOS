@@ -29,6 +29,23 @@ class WorkoutListViewModel: ObservableObject {
         }
         return Dictionary(grouping: filtered, by: { $0.category })
     }
+    
+    // MARK: - 운동 추천 생성 ai API 연동
+    func generateRecommendations() async -> Bool {
+        do {
+            var req = URLRequest(url: URL(string: "http://43.203.60.2:8080/exercise-recommendation/generate")!)
+            req.httpMethod = "POST"
+            req.addAuthToken()
+
+            let (data, resp) = try await URLSession.shared.data(for: req)
+            guard let http = resp as? HTTPURLResponse, (200...299).contains(http.statusCode) else { return false }
+            let decoded = try JSONDecoder().decode(GenerateWorkoutRecommendationResponse.self, from: data)
+            return decoded.isSuccess
+        } catch {
+            print("❌ 추천 생성 실패:", error)
+            return false
+        }
+    }
 
     // MARK: - API 연동
     func loadWorkouts(for date: Date) {
@@ -38,8 +55,11 @@ class WorkoutListViewModel: ObservableObject {
                 guard var urlComponents = URLComponents(string: "http://43.203.60.2:8080/exercise/userExercises") else { return }
                 urlComponents.queryItems = [URLQueryItem(name: "exerciseDate", value: dateString)]
                 guard let url = urlComponents.url else { return }
+                
+                var req = URLRequest(url: url)
+                req.addAuthToken()
 
-                let (data, _) = try await URLSession.shared.data(from: url)
+                let (data, _) = try await URLSession.shared.data(for: req)
                 let decoded = try JSONDecoder().decode(UserExerciseResponse.self, from: data)
 
                 var resultModels: [WorkoutModel] = []
@@ -91,8 +111,11 @@ class WorkoutListViewModel: ObservableObject {
         guard let url = URL(string: "http://43.203.60.2:8080/exercises/\(id)") else {
             throw URLError(.badURL)
         }
+        
+        var req = URLRequest(url: url)
+        req.addAuthToken()
 
-        let (data, _) = try await URLSession.shared.data(from: url)
+        let (data, _) = try await URLSession.shared.data(for: req)
         let decoded = try JSONDecoder().decode(ExerciseDetailResponse.self, from: data)
 
         guard decoded.isSuccess else {
@@ -114,6 +137,7 @@ class WorkoutListViewModel: ObservableObject {
                 var req = URLRequest(url: URL(string: "http://43.203.60.2:8080/exercise/userExercise/custom")!)
                 req.httpMethod = "POST"
                 req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                req.addAuthToken()
                 req.httpBody = try JSONEncoder().encode(body)
 
                 let (data, resp) = try await URLSession.shared.data(for: req)

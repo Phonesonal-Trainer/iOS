@@ -51,7 +51,7 @@ struct WorkoutSearchView: View {
                 .shadow(color: Color.black.opacity(0.1), radius: 2)
                 .zIndex(1)
             
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: WorkoutSearchConstants.VSpacing) {
                     // 서치바 + 운동 그리드
                     middleContent

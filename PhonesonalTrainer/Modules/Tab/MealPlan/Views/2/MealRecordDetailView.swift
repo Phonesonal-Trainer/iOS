@@ -49,7 +49,7 @@ struct MealRecordDetailView: View {
                 .shadow(color: Color.black.opacity(0.1), radius: 2)
                 .zIndex(1)
                 
-                ScrollView {
+                ScrollView(showsIndicators: false) {
                     VStack(spacing: MealRecordDetailConstant.vSpacing) {
                         // 이미지 업로드 (서버에 업로드) -> 공용 컴포넌트 고려
                         ImageUploadButton(image: $uploadedImage, isLocal: false)
@@ -57,7 +57,9 @@ struct MealRecordDetailView: View {
                         
                         RecordInfoView()
                         
-                        MealCheckListView(selectedDate: .constant(selectedDate), mealType: mealType)
+                        if mealType != .snack {
+                            MealCheckListView(selectedDate: .constant(selectedDate), mealType: mealType)
+                        }
                         
                         
                         AddedMealSectionView(

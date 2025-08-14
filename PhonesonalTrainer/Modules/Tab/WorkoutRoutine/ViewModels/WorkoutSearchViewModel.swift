@@ -39,7 +39,11 @@ final class WorkoutSearchViewModel: ObservableObject {
         Task {
             do {
                 guard let url = URL(string: "http://43.203.60.2:8080/exercises/list") else { return }
-                let (data, _) = try await URLSession.shared.data(from: url)
+                
+                var req = URLRequest(url: url)
+                req.addAuthToken()
+                
+                let (data, _) = try await URLSession.shared.data(for: req)
                 let decoded = try JSONDecoder().decode(ExerciseListResponse.self, from: data)
                 guard decoded.isSuccess else { throw URLError(.badServerResponse) }
                 self.allWorkouts = decoded.result.map(SearchWorkoutModel.init(dto:))
@@ -65,7 +69,7 @@ final class WorkoutSearchViewModel: ObservableObject {
                             let url = URL(string: "http://43.203.60.2:8080/exercise/\(id)/userExercise")!
                             var req = URLRequest(url: url)
                             req.httpMethod = "POST"
-                            // req.setValue("Bearer ...", forHTTPHeaderField: "Authorization") // 필요 시 로그인 관련된..?
+                            req.addAuthToken()
                             _ = try await URLSession.shared.data(for: req)
                         }
                     }

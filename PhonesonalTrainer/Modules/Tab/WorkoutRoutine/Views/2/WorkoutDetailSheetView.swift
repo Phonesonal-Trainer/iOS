@@ -63,7 +63,7 @@ struct WorkoutDetailSheetView: View {
     
     // MARK: - Body
     var body: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             VStack {
                 /// 상단
                 VStack(alignment: .leading) {

@@ -73,7 +73,7 @@ struct ManualAddMealView: View {
                 .shadow(color: Color.black.opacity(0.1), radius: 2)
                 .zIndex(1)
             
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: ManualAddMealConstants.VSpacing) {
                     /// 텍스트 입력란 부분
                     VStack(spacing: ManualAddMealConstants.VSpacing) {
