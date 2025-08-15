@@ -13,7 +13,8 @@ final class FoodService: FoodServiceType {
         let url = URL(string: "http://43.203.60.2:8080/foods/\(foodId)/favorite")!
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
-        if let token { req.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
+        req.addAuthToken()
+        
         let (data, resp) = try await URLSession.shared.data(for: req)
         guard (resp as? HTTPURLResponse).map({ (200...299).contains($0.statusCode) }) == true else {
             let msg = (try? JSONDecoder().decode(ToggleFavoriteResponse.self, from: data).message) ?? "즐겨찾기 변경 실패"
@@ -31,7 +32,7 @@ final class FoodService: FoodServiceType {
         
         guard let url = comps.url else { throw URLError(.badURL) }
         var req = URLRequest(url: url)
-        if let token { req.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization") } // 필요 시
+        req.addAuthToken()
 
         let (data, resp) = try await URLSession.shared.data(for: req)
         let status = (resp as? HTTPURLResponse)?.statusCode ?? -1
@@ -51,7 +52,7 @@ final class FoodService: FoodServiceType {
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
         req.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        if let token { req.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
+        req.addAuthToken()
 
         let body = AddUserMealFromFoodRequest(
             foodId: foodId,
@@ -86,7 +87,7 @@ final class FoodService: FoodServiceType {
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
         req.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        if let token { req.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
+        req.addAuthToken()
 
         let body = AddCustomUserMealRequest(
             name: name,
@@ -106,5 +107,29 @@ final class FoodService: FoodServiceType {
             throw NSError(domain: "AddCustomMeal", code: status, userInfo: [NSLocalizedDescriptionKey: msg])
         }
         _ = try? JSONDecoder().decode(AddCustomUserMealResponse.self, from: data) // 성공 시 메시지 확인용(선택)
+    }
+    
+    // GET /foods/nutrition-summary?date=YYYY-MM-DD[&goalPeriod=...]
+    func fetchNutritionSummary(date: String,
+                               goalPeriod: String? = nil,
+                               token: String? = nil) async throws -> NutritionSummaryResponse {
+        var comps = URLComponents(string: "http://43.203.60.2:8080/foods/nutrition-summary")!
+        var items = [URLQueryItem(name: "date", value: date)]
+        if let goalPeriod { items.append(URLQueryItem(name: "goalPeriod", value: goalPeriod)) }
+        comps.queryItems = items
+        
+        var req = URLRequest(url: comps.url!)
+        req.httpMethod = "GET"
+        req.addAuthToken()
+        req.addValue("application/json", forHTTPHeaderField: "Accept")
+        
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        guard let http = resp as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
+            // 서버가 에러 메시지를 JSON으로 줄 경우를 대비한 디코딩 시도
+            let text = String(data: data, encoding: .utf8) ?? "unknown error"
+            throw NSError(domain: "NutritionSummary", code: (resp as? HTTPURLResponse)?.statusCode ?? -1,
+                          userInfo: [NSLocalizedDescriptionKey: "요청 실패: \(text)"])
+        }
+        return try JSONDecoder().decode(NutritionSummaryResponse.self, from: data)
     }
 }

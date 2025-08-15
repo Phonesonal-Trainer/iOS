@@ -101,4 +101,5 @@ struct OnboardingStartView: View {
 
 #Preview {
     OnboardingStartView()
+        .environmentObject(WorkoutListViewModel())
 }

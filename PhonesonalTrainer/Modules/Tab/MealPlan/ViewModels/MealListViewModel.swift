@@ -35,7 +35,10 @@ final class MealListViewModel: ObservableObject {
         }
 
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            var req = URLRequest(url: url)
+            req.addAuthToken() // ← 여기서 토큰 추가
+
+            let (data, _) = try await URLSession.shared.data(for: req)
             let decoded = try JSONDecoder().decode(FoodPlansResponse.self, from: data)
             self.mealItems = decoded.result.map(MealModel.init(api:))
         } catch {

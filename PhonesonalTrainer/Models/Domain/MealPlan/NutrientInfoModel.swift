@@ -11,16 +11,26 @@
 import Foundation
 
 /// Codable 프로토콜로 인해 인코딩 + 디코딩 둘 다 쉽게 됨.
-struct NutrientInfoModel: Decodable {
-    let mealType: String?   // 식단 정보 뷰에서 재사용하기 위해서 옵셔널로 둠.
+struct NutrientInfoModel: Identifiable, Codable {
+    var id: UUID = .init()
+    let mealType: String?   // "아침", "점심", "간식", "저녁"
     let kcal: Double
     let carb: Double
     let protein: Double
     let fat: Double
-    
-    /// 디코딩할 때마다 새로운 UUID 가 생성되지 않기 위해
-    /// 직접 CodingKeys를 지정하여 id를 제외.
-    private enum CodingKeys: String, CodingKey {
-        case mealType, kcal, carb, protein, fat
+    let imageUrl: String?
+    let status: MealStatus
+}
+
+// 서버 응답의 각 식사 카드 -> 화면 모델 변환용
+extension NutrientInfoModel {
+    init(mealType: String, from s: MealCardSummary) {
+        self.mealType = mealType
+        self.kcal = s.calorie
+        self.carb = s.carb
+        self.protein = s.protein
+        self.fat = s.fat
+        self.imageUrl = s.imageUrl
+        self.status = s.status
     }
 }

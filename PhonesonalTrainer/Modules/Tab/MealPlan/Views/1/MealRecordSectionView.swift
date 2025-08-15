@@ -20,13 +20,12 @@ fileprivate enum MealRecordConstants {
 struct MealRecordSectionView: View {
     @ObservedObject var viewModel: MealPlanViewModel
     @Binding var path: [MealPlanRoute]
+    let token: String?
+    let goalPeriod: String?
     
     
     // MARK: - Body
     var body: some View {
-        let type = viewModel.selectedType
-        let state = viewModel.mealRecordState(for: type)
-        
         VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: MealRecordConstants.titleHSpacing, content: {
                 Text("식단 기록")
@@ -42,16 +41,35 @@ struct MealRecordSectionView: View {
                 }
             })
             
-            switch state {
-            case .none:
-                EmptyMealRecordView()
-            case .noImage:
-                RecordInfoView()
-            case .withImage:
-                RecordWithImageView()
+            if viewModel.isLoading {
+                ProgressView().frame(height: MealRecordConstants.recordInfoHeight)
+            } else if let msg = viewModel.errorMessage {
+                Text(msg).foregroundStyle(.red)
+            } else {
+                let type = viewModel.selectedType
+                let state = viewModel.state(for: type)
+
+                if state == .none {
+                    EmptyMealRecordView()
+                } else if let model = viewModel.item(for: type) {
+                    // 이미지 유무는 카드 내부에서 판단
+                    NutrientInfoCard(Nutrient: model)
+                } else {
+                    EmptyMealRecordView()
+                }
             }
         }
         .padding(.horizontal)
+        // 날짜가 바뀌면 API 재호출
+        .task(id: viewModel.selectedDate) {
+            await viewModel.load(goalPeriod: goalPeriod, token: token)
+        }
+        // 첫 진입 시 한 번 로드 (필요 시)
+        .task {
+            if viewModel.items.isEmpty {
+                await viewModel.load(goalPeriod: goalPeriod, token: token)
+            }
+        }
     }
 }
 
@@ -70,33 +88,4 @@ struct EmptyMealRecordView: View {
     }
 }
 
-/// 기록 O, 이미지 X
-struct RecordInfoView: View {
-    var body: some View {
-        /// 기록 상세 화면에서도 등장하는 화면
-        ZStack {
-            RoundedRectangle(cornerRadius: 5)
-                .fill(Color(.grey00))
-                .frame(width: MealRecordConstants.recordSectionWidth, height: MealRecordConstants.recordInfoHeight)
-                .shadow(color: Color.black.opacity(0.1), radius: 2)
-            
-            NutrientInfoCard(Nutrient: NutrientInfoModel(mealType: "아침", kcal: 1234, carb: 111, protein: 111, fat: 111))
-        }
-    }
-}
-
-/// 기록 O, 이미지 O
-struct RecordWithImageView: View {
-    var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 5)
-                .fill(Color(.grey00))
-                .frame(width: MealRecordConstants.recordSectionWidth)
-                .shadow(color: Color.black.opacity(0.1), radius: 2)
-            
-            NutrientInfoCard(Nutrient: NutrientInfoModel(mealType: "아침", kcal: 1234, carb: 111, protein: 111, fat: 111))
-            //NutrientInfoCard 에 이미지 추가할까 어떻게 구현하지 걍 아예 새로 해야되나
-        }
-    }
-}
 

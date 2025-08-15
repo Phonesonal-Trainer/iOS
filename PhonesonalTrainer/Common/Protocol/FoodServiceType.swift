@@ -13,4 +13,7 @@ protocol FoodServiceType {
     func addUserMealFromFood(foodId: Int, date: Date, mealTime: MealType, token: String?) async throws -> UserMealItem
     func addCustomUserMeal(name: String, calorie: Double, carb: Double, protein: Double, fat: Double,
                                date: Date, mealTime: MealType, token: String?) async throws
+    func fetchNutritionSummary(date: String,
+                                   goalPeriod: String?,
+                                   token: String?) async throws -> NutritionSummaryResponse
 }

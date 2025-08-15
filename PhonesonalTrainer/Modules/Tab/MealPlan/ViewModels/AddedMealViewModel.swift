@@ -34,8 +34,7 @@ final class AddedMealViewModel: ObservableObject {
 
         do {
             var req = URLRequest(url: url)
-            // 토큰 필요 시:  **토큰이 필요할까..
-            if let token { req.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
+            req.addAuthToken()
 
             let (data, _) = try await URLSession.shared.data(for: req)
             let decoded = try JSONDecoder().decode(UserMealsResponse.self, from: data)
@@ -60,7 +59,7 @@ final class AddedMealViewModel: ObservableObject {
         do {
             var req = URLRequest(url: url)
             req.httpMethod = "DELETE"
-            if let token { req.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
+            req.addAuthToken()
 
             // 응답 바디는 쓰지 않아도 되지만, 필요하면 BasicResponse로 디코드 가능
             let (data, response) = try await URLSession.shared.data(for: req)
@@ -94,7 +93,7 @@ final class AddedMealViewModel: ObservableObject {
         var req = URLRequest(url: url)
         req.httpMethod = "PATCH"
         req.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        if let token { req.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
+        req.addAuthToken()
         req.httpBody = try JSONEncoder().encode(UpdateUserMealQuantityRequest(quantity: quantity))
 
         let (data, resp) = try await URLSession.shared.data(for: req)

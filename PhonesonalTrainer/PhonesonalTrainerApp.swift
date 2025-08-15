@@ -14,6 +14,7 @@ struct PhonesonalTrainerApp: App {
     @StateObject private var userProfile = UserProfileViewModel()
     @StateObject private var weightStore = BodyWeightStore()
     @StateObject private var bodyPhoto = BodyPhotoStore()     // ✅ 눈바디 로컬 저장소
+    @StateObject private var workoutListVM = WorkoutListViewModel()
 
     var body: some Scene {
         WindowGroup {
@@ -30,6 +31,7 @@ struct PhonesonalTrainerApp: App {
             .environmentObject(userProfile)
             .environmentObject(weightStore)
             .environmentObject(bodyPhoto) // ✅ BodyPhotoStore 주입
+            .environmentObject(workoutListVM)
             .task {
                 // 저장된 userId가 있으면 몸무게 스토어 설정
                 let saved = UserDefaults.standard.integer(forKey: "userId")

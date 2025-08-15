@@ -10,7 +10,8 @@ import SwiftUI
 struct MealRecordDetailView: View {
     // MARK: - Property
     let mealType: MealType // 추후 model이나 viewModel을 넣는 것을 고려
-    let selectedDate: Date 
+    let selectedDate: Date
+    let model: NutrientInfoModel
     @State private var uploadedImage: UIImage? = nil  // 이미지 업로드
     @StateObject private var viewModel = AddedMealViewModel()
     @Environment(\.dismiss) private var dismiss // 뒤로가기 액션
@@ -29,6 +30,7 @@ struct MealRecordDetailView: View {
     fileprivate enum MealRecordDetailConstant {
         static let basicWidth: CGFloat = 340
         static let vSpacing: CGFloat = 25
+        static let recordInfoHeight: CGFloat = 118     // 이미지 없는 기록 높이
     }
     
     // MARK: - Body
@@ -54,8 +56,15 @@ struct MealRecordDetailView: View {
                         // 이미지 업로드 (서버에 업로드) -> 공용 컴포넌트 고려
                         ImageUploadButton(image: $uploadedImage, isLocal: false)
                             .padding(.top, MealRecordDetailConstant.vSpacing)
-                        
-                        RecordInfoView()
+                        // 탄단지 총합 부분
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 5)
+                                .fill(Color(.grey01))
+                                .frame(width: MealRecordDetailConstant.basicWidth, height: MealRecordDetailConstant.recordInfoHeight)
+                                .shadow(color: Color.black.opacity(0.1), radius: 2)
+                            
+                            NutrientInfoCard(Nutrient: model)
+                        }
                         
                         if mealType != .snack {
                             MealCheckListView(selectedDate: .constant(selectedDate), mealType: mealType)

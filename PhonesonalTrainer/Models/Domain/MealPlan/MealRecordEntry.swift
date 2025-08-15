@@ -28,12 +28,26 @@ extension MealRecordEntry {
             imageURL: api.imageUrl ?? "",
             isComplete: true                    // ‘추가 식단’은 이미 섭취로 기록된 리스트이므로 true 가 자연스러움
         )
+        // 이미지 유무에 따라 카드 상태 추정 (개별 기록이므로 NONE은 아님)
+        let status: MealStatus = {
+            if let url = api.imageUrl, !url.isEmpty { return .withImage }
+            else { return .noImage }
+        }()
+
+        // ✅ NutrientInfoModel은 id를 갖는다. 여기서 생성한 id는 이후 update에서도 유지할 것.
         self.nutrient = NutrientInfoModel(
-            mealType: api.mealTime,
+            mealType: api.mealTime,     // 필요 시 한국어 레이블로 변환해도 됨
             kcal: api.calorie,
             carb: api.carb,
             protein: api.protein,
-            fat: api.fat
+            fat: api.fat,
+            imageUrl: api.imageUrl,
+            status: status
         )
+
+        // 만약 original* 값을 내부에서 별도로 보관한다면 여기서 스냅샷을 저장해 두세요.
+        //self.originalMeal = self.meal
+        //self.originalNutrient = self.nutrient
+        //self.originalAmount = self.meal.amount
     }
 }

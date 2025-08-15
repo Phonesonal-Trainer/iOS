@@ -53,7 +53,7 @@ struct MealPlanView: View {
                     }
                     
                     // 식단 기록 뷰 (그대로 노출)
-                    MealRecordSectionView(viewModel: viewModel, path: $path)
+                    MealRecordSectionView(viewModel: viewModel, path: $path, token: nil, goalPeriod: nil)
                 }
             }
         }
@@ -61,7 +61,17 @@ struct MealPlanView: View {
         .navigationDestination(for: MealPlanRoute.self) { route in
             switch route {
             case .mealRecord:
-                MealRecordDetailView(mealType: type, selectedDate: selectedDate, path: $path, favoritesStore: favoritesStore)
+                if let model = viewModel.item(for: viewModel.selectedType) {
+                    MealRecordDetailView(
+                        mealType: type,
+                        selectedDate: selectedDate, model: model,
+                        path: $path,
+                        favoritesStore: favoritesStore
+                    )
+                } else {
+                    // 모델이 없으면 비어있는 상태 보여주기
+                    Text("이 날짜엔 기록이 없어요.")
+                }
             case .foodSearch:
                 FoodSearchView(path: $path, favorites: favoritesStore, selectedDate: selectedDate, mealType: viewModel.selectedType)
             case .manualAdd:
