@@ -12,7 +12,9 @@ struct MealPlanView: View {
     let screenWidth = UIScreen.main.bounds.width
     
     @Binding var path: [MealPlanRoute]
+    @State private var selectedDate: Date = Date()
     @StateObject private var viewModel = MealPlanViewModel()
+    @StateObject private var favoritesStore = FavoritesStore()
     
     // MARK: - Constants
     fileprivate enum MealPlanConstants {
@@ -29,7 +31,7 @@ struct MealPlanView: View {
                     .foregroundStyle(.grey05)
                     .padding(.bottom, 20)
                 
-                WeeklyCalendarView()
+                WeeklyCalendarView(selectedDate: $selectedDate)
                 
                 /// 일단 divider 로 구현해둠
                 Divider()
@@ -37,18 +39,20 @@ struct MealPlanView: View {
             .background(Color.grey00)
             .zIndex(1)
             
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: MealPlanConstants.scrollViewSpacing) {
                     // 총 섭취 칼로리
                     caloriesSectionView
                     
                     // 식단 세그먼트
-                    MealTypeSegmentView()
+                    MealTypeSegmentView(selectedMeal: $viewModel.selectedType)
                     
-                    // 식단 플랜 뷰
-                    MealListView()
+                    // 식단 플랜 뷰  -> 간식이면 생략
+                    if viewModel.selectedType != .snack {
+                        MealListView(selectedDate: $selectedDate, selectedMeal: viewModel.selectedType)
+                    }
                     
-                    // 식단 기록 뷰
+                    // 식단 기록 뷰 (그대로 노출)
                     MealRecordSectionView(viewModel: viewModel, path: $path)
                 }
             }
@@ -57,11 +61,15 @@ struct MealPlanView: View {
         .navigationDestination(for: MealPlanRoute.self) { route in
             switch route {
             case .mealRecord:
-                MealRecordDetailView(mealType: type ,path: $path)
+                MealRecordDetailView(mealType: type, selectedDate: selectedDate, path: $path, favoritesStore: favoritesStore)
             case .foodSearch:
-                FoodSearchView(path: $path)
+                FoodSearchView(path: $path, favorites: favoritesStore, selectedDate: selectedDate, mealType: viewModel.selectedType)
             case .manualAdd:
-                ManualAddMealView()
+                ManualAddMealView(
+                    selectedDate: selectedDate,
+                    mealType: viewModel.selectedType,
+                    token: nil // 필요 시 전달
+                )
             }
         }
     }

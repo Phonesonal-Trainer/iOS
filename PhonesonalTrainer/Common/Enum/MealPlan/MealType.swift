@@ -15,16 +15,21 @@ import SwiftUI
 /// - 'snack' : 간식
 ///
 /// `SegmentAttr` 프로토콜을 채택하여 각 항목의 제목(`segmentTitle`)과 스타일(`segmentFont`)을 세그먼트 UI에서 통일되게 사용.
-enum MealType: String, SegmentAttr {
-    case breakfast = "아침"
-    case lunch = "점심"
-    case dinner = "저녁"
-    case snack = "간식"
+enum MealType: String, CaseIterable, SegmentAttr {
+    case breakfast = "BREAKFAST"
+    case lunch = "LUNCH"
+    case dinner = "DINNER"
+    case snack = "SNACK"
     
     var segmentTitle: String {
-        self.rawValue
+        switch self {
+        case .breakfast: return "아침"
+        case .lunch:     return "점심"
+        case .dinner:    return "저녁"
+        case .snack:     return "간식"
+        }
     }
-    
+
     var segmentFont: Font {
         return .PretendardMedium18
     }

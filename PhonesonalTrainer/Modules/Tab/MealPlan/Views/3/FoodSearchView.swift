@@ -10,9 +10,24 @@ import SwiftUI
 struct FoodSearchView: View {
     
     // MARK: - Property
-    @StateObject private var viewModel = FoodSearchViewModel()
+    @ObservedObject var favorites: FavoritesStore
+    @StateObject private var viewModel : FoodSearchViewModel
     @Environment(\.dismiss) private var dismiss // 뒤로가기
     @Binding var path: [MealPlanRoute]
+    
+    let selectedDate: Date
+    let mealType: MealType
+    var token: String? = nil
+    
+    init(path: Binding<[MealPlanRoute]>, favorites: FavoritesStore, selectedDate: Date, mealType: MealType, token: String? = nil) {
+        self._path = path
+        self.favorites = favorites
+        self.selectedDate = selectedDate
+        self.mealType = mealType
+        self.token = token
+        _viewModel = StateObject(wrappedValue: FoodSearchViewModel(favorites: favorites))
+    }
+
     
     // MARK: - 상수 정의
     fileprivate enum FoodSearchConstants {
@@ -52,7 +67,7 @@ struct FoodSearchView: View {
                 .shadow(color: Color.black.opacity(0.1), radius: 2)
                 .zIndex(1)
             
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: FoodSearchConstants.VSpacing) {
                     /// 서치바 + 정렬 선택 세그먼트 + 음식 그리드
                     middleContent
@@ -67,10 +82,7 @@ struct FoodSearchView: View {
                         text: "저장하기",
                         textColor: saveButtonTextColor
                     ) {
-                        if isValid {
-                            // 선택한 음식 정보 저장
-                            dismiss()
-                        }
+                        saveAction()
                     }
                     .disabled(!isValid)
                     .frame(width: FoodSearchConstants.baseWidth)
@@ -79,6 +91,14 @@ struct FoodSearchView: View {
         }
         .background(Color.background)
         .navigationBarBackButtonHidden(true)
+        .task { await viewModel.fetchFoods() }
+        .onChange(of: viewModel.selectedSort) {
+            Task { await viewModel.fetchFoods() }
+        }
+        .onChange(of: viewModel.searchText) {
+            // 간단 디바운스가 필요하면 DispatchQueue.main.asyncAfter로 넣어줘도 OK
+            Task { await viewModel.fetchFoods() }
+        }
     }
     
     // MARK: - 상단 제목
@@ -206,10 +226,22 @@ struct FoodSearchView: View {
             .resizable()
             .frame(width: FoodSearchConstants.baseWidth, height: FoodSearchConstants.noticeHeight)
     }
-}
-
-#Preview {
-    StatefulPreviewWrapper([MealPlanRoute]()) { path in
-        FoodSearchView(path: path)
+    
+    // MARK: - 저장하기 버튼 액션
+    private func saveAction() {
+        Task {
+            do {
+                try await viewModel.saveSelected(date: selectedDate, mealType: mealType, token: token)
+                dismiss()
+            } catch {
+                print("저장 실패:", error.localizedDescription)
+            }
+        }
     }
 }
+
+// #Preview {
+//     StatefulPreviewWrapper([MealPlanRoute]()) { path in
+//         FoodSearchView(path: path)
+//  }
+// }

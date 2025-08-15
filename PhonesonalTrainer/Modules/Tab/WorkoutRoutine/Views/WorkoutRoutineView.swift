@@ -11,6 +11,8 @@ struct WorkoutRoutineView: View {
     // MARK: - Property
     @Binding var path: [WorkoutRoutineRoute]
     
+    @State private var selectedDate: Date = Date()                  //  상위로 올린 날짜 상태
+    @StateObject private var listVM = WorkoutListViewModel()
     
     // MARK: - 상수 정의
     fileprivate enum WorkoutRoutineConstants {
@@ -28,7 +30,7 @@ struct WorkoutRoutineView: View {
                     .foregroundStyle(.grey05)
                     .padding(.bottom, 20)
                 
-                WeeklyCalendarView()
+                WeeklyCalendarView(selectedDate: $selectedDate)
                 
                 /// 일단 divider 로 구현해둠
                 Divider()
@@ -36,11 +38,11 @@ struct WorkoutRoutineView: View {
             .background(Color.grey00)
             .zIndex(1)
             
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: WorkoutRoutineConstants.VSpacing) {
                     topContent
                     
-                    WorkoutListView()
+                    WorkoutListView(viewModel: listVM, selectedDate: selectedDate)
                 }
             }
         }

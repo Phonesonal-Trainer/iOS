@@ -62,7 +62,7 @@ struct ManualAddWorkoutView: View {
                 .shadow(color: Color.black.opacity(0.1), radius: 2)
                 .zIndex(1)
             
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: ManualAddWorkoutConstants.VSpacing) {
                     /// 텍스트 입력란 부분
                     VStack(spacing: ManualAddWorkoutConstants.VSpacing) {
@@ -87,11 +87,11 @@ struct ManualAddWorkoutView: View {
                         text: "추가하기",
                         textColor: addButtonTextColor
                     ) {
-                        if isFormValid , let kcal = kcalBurnedValue, let category = selectedCategory {
+                        if isFormValid, let category = selectedCategory {
                             viewModel.addRecordedWorkout(
                                 name: workoutName,
                                 category: category,
-                                kcal: kcal
+                                kcal: kcalBurnedValue
                             )
                             dismiss()
                         }

@@ -11,6 +11,8 @@ import SwiftUI
 struct PhonesonalTrainerApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate // ✅ 필수!
 
+    @StateObject private var userProfile = UserProfileViewModel()
+    
     var body: some Scene {
         WindowGroup {
             // ✅ 이미 로그인된 경우 온보딩 입력 화면으로 시작

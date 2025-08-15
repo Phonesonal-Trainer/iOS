@@ -10,10 +10,14 @@ import SwiftUI
 struct OnboradingDiagnosisView: View {
     let nickname: String
     let diagnosis: DiagnosisInputModel  // 수정된 모델 사용
+    
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var workoutListVM: WorkoutListViewModel
 
     @State private var goToBodyRecord = false
-    @Environment(\.dismiss) private var dismiss
-
+    @State private var isStarting = false
+    @State private var showError = false
+    
     private var metrics: [(String, MetricChange)] {
         [
             ("몸무게", diagnosis.weightChange),
@@ -149,7 +153,20 @@ struct OnboradingDiagnosisView: View {
 
                     // 시작하기 버튼
                     Button(action: {
-                        goToBodyRecord = true
+                        Task {
+                            isStarting = true
+                            async let okExercise = workoutListVM.generateRecommendations()     // 운동 추천 생성
+                            async let okDiet     = DietPlanAPI.generate(startDate: Date())     // 식단 플랜 생성(오늘 기준)
+                            
+                            let (a, b) = await (okExercise, okDiet)
+                            isStarting = false
+
+                            if a && b {
+                                goToBodyRecord = true
+                            } else {
+                                showError = true
+                            }
+                        }
                     }) {
                         Text("시작하기")
                             .font(.PretendardSemiBold18)
@@ -160,11 +177,16 @@ struct OnboradingDiagnosisView: View {
                             .cornerRadius(30)
                             .padding(.horizontal)
                     }
+                    .disabled(isStarting)
                     .padding(.bottom, 20)
-                }
-
-                .navigationDestination(isPresented: $goToBodyRecord) {
-                    OnboardingBodyRecordView(viewModel: OnboardingViewModel())
+                    .alert("추천 생성 실패", isPresented: $showError) {
+                        Button("확인", role: .cancel) {}
+                    } message: {
+                        Text("네트워크 상태를 확인하고 다시 시도해 주세요.")
+                    }
+                    .navigationDestination(isPresented: $goToBodyRecord) {
+                        OnboardingBodyRecordView(viewModel: OnboardingViewModel())
+                    }
                 }
             }
             .navigationBarBackButtonHidden(true)
@@ -209,7 +231,7 @@ struct MetricRow: View {
         }
     }
 }
-
+ 
 // MARK: - Preview
 
 #Preview {

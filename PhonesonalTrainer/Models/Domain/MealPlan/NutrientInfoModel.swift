@@ -11,8 +11,7 @@
 import Foundation
 
 /// Codable 프로토콜로 인해 인코딩 + 디코딩 둘 다 쉽게 됨.
-struct NutrientInfoModel: Codable, Identifiable {
-    let id = UUID()
+struct NutrientInfoModel: Decodable {
     let mealType: String?   // 식단 정보 뷰에서 재사용하기 위해서 옵셔널로 둠.
     let kcal: Double
     let carb: Double

@@ -11,7 +11,14 @@ struct ManualAddMealView: View {
     // MARK: - Property
     @Environment(\.dismiss) var dismiss   // 뒤로가기
     
-    // MARK: - 정의
+    /// 어디에 추가할지
+    let selectedDate: Date
+    let mealType: MealType
+    var token: String? = nil
+
+    /// 서비스 주입
+    private let service: FoodServiceType = FoodService()
+
     /// 입력 받는 정보 정의
     @State private var foodName: String = ""
     @State private var foodCalories: String = ""
@@ -66,7 +73,7 @@ struct ManualAddMealView: View {
                 .shadow(color: Color.black.opacity(0.1), radius: 2)
                 .zIndex(1)
             
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: ManualAddMealConstants.VSpacing) {
                     /// 텍스트 입력란 부분
                     VStack(spacing: ManualAddMealConstants.VSpacing) {
@@ -100,20 +107,24 @@ struct ManualAddMealView: View {
                         text: "추가하기",
                         textColor: addButtonTextColor
                     ) {
-                        if isFormValid {
-                            let mealName = foodName
-                            let kcal = caloriesValue ?? 0
-                            let carb = carbValue ?? 0
-                            let protein = proteinValue ?? 0
-                            let fat = fatValue ?? 0
-
-                            // 예시: 모델 생성 (나중에 viewModel로 넘겨서 저장 로직 연결할 때 사용)
-                            let newMeal = MealModel(name: mealName, amount: 100, kcal: kcal, imageURL: "")
-                            let nutrient = NutrientInfoModel(mealType: nil, kcal: kcal, carb: carb, protein: protein, fat: fat)
-                                
-                            // TODO: 저장 로직 연결
-                                
-                            dismiss()
+                        guard isFormValid else { return }
+                            Task {
+                                do {
+                                    try await service.addCustomUserMeal(
+                                        name: foodName,
+                                        calorie: caloriesValue ?? 0,
+                                        carb: carbValue ?? 0,
+                                        protein: proteinValue ?? 0,
+                                        fat: fatValue ?? 0,
+                                        date: selectedDate,
+                                        mealTime: mealType,
+                                        token: token
+                                    )
+                                    NotificationCenter.default.post(name: .userMealsDidChange, object: nil)
+                                    dismiss()
+                            } catch {
+                                print("직접 추가 실패:", error.localizedDescription)
+                            }
                         }
                     }
                     .disabled(!isFormValid)
@@ -196,7 +207,7 @@ struct ManualAddMealView: View {
     }
 }
 
-#Preview {
-    ManualAddMealView()
-}
+// #Preview {
+//     ManualAddMealView()
+// }
 

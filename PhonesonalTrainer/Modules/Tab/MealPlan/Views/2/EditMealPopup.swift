@@ -10,8 +10,11 @@ import SwiftUI
 struct EditMealPopup: View {
     // MARK: - Property
     @ObservedObject var viewModel: MealInfoViewModel
-    @State private var isFavorite: Bool = false  // 즐겨찾기 상태
+    @ObservedObject var userMealsVM: AddedMealViewModel  // 뷰모델에 주입
     @Binding var isPresented: Bool  // 팝업창 닫기
+    
+    let foodService: FoodServiceType
+    @ObservedObject var favoritesStore: FavoritesStore
     
     // MARK: - 상수 정의
     fileprivate enum EditMealConstants {
@@ -28,15 +31,15 @@ struct EditMealPopup: View {
         static let editButtonSize: CGFloat = 18   // -/+ 버튼 사이즈
         static let buttonWidth: CGFloat = 145
     }
-    
+    /// '저장' 버튼 상태
+    var canSave: Bool { viewModel.isEditable && viewModel.hasChanges }
     /// '저장' 버튼 색상
     var saveButtonColor: Color {
-        viewModel.hasChanges ? .orange05 : .orange01
+        canSave ? .orange05 : .orange01
     }
-    
     /// '저장' 버튼 텍스트 색상
     var saveButtonTextColor: Color {
-        viewModel.hasChanges ? .grey00 : .orange03
+        canSave ? .grey00 : .orange03
     }
     
     // MARK: - Body
@@ -94,15 +97,15 @@ struct EditMealPopup: View {
                     .font(.PretendardSemiBold22)
                     .foregroundStyle(Color.grey06)
                 
-                Button(action: {
-                    viewModel.toggleFavorite()
-                    // 즐겨찾기 저장 로직
-                }) {
+                Button {
+                    Task { await viewModel.toggleFavorite(using: foodService, favorites: favoritesStore) }
+                } label: {
                     Image(systemName: "star.fill")
                         .foregroundStyle(viewModel.isFavorite ? Color.yellow02 : .grey02)
                         .frame(width: EditMealConstants.favoriteButtonSize, height: EditMealConstants.favoriteButtonSize)
                 }
                 .buttonStyle(.plain)
+                .disabled(viewModel.isTogglingFavorite)
             }
             editMeal
         }
@@ -119,8 +122,9 @@ struct EditMealPopup: View {
                     .resizable()
                     .frame(width: EditMealConstants.editButtonSize, height: EditMealConstants.editButtonSize)
             }
+            .disabled(!viewModel.isEditable)
             /// 식단 양 + 칼로리
-            Text("\(viewModel.meal.amount)g (\(formatKcal(viewModel.meal.kcal))kcal)")
+            Text("\(viewModel.meal.amount)g (\(formatKcal(viewModel.meal.kcal ?? 0))kcal)")
                 .font(.PretendardMedium18)
                 .foregroundStyle(Color.grey03)
             /// '+' 버튼
@@ -131,6 +135,7 @@ struct EditMealPopup: View {
                     .resizable()
                     .frame(width: EditMealConstants.editButtonSize, height: EditMealConstants.editButtonSize)
             }
+            .disabled(!viewModel.isEditable)
         }
     }
     
@@ -144,7 +149,21 @@ struct EditMealPopup: View {
             .frame(width: EditMealConstants.buttonWidth)
             
             SubButton(color: saveButtonColor, text: "확인", textColor: saveButtonTextColor) {
-                isPresented = false   // 뒤로가기
+                Task {
+                    // PATCH 호출
+                    do {
+                        try await userMealsVM.updateQuantity(
+                            recordId: viewModel.recordId,
+                            quantity: viewModel.meal.amount
+                        )
+                        // 성공 → 원본 갱신(다음 편집 기준값 일치), 팝업 닫기
+                        viewModel.originalAmount = viewModel.meal.amount
+                        isPresented = false
+                    } catch {
+                        // 실패 시 토스트/에러 처리 원하는 방식으로
+                        // 예) userMealsVM.errorMessage에 세팅되어 있을 것
+                    }
+                }
             }
             .disabled(!viewModel.hasChanges)
             .frame(width: EditMealConstants.buttonWidth)

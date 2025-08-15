@@ -10,10 +10,37 @@
 
 import Foundation
 
-class MealListViewModel: ObservableObject {
-    @Published var mealItems: [MealModel] = [
-        MealModel(name: "소고기", amount: 180, kcal: 321, imageURL: "temp_image"),
-        MealModel(name: "소고기", amount: 180, kcal: 321, imageURL: "temp_image"),
-        MealModel(name: "소고기", amount: 180, kcal: 321, imageURL: "temp_image")
-    ]
+@MainActor
+final class MealListViewModel: ObservableObject {
+    @Published var mealItems: [MealModel] = []
+    @Published var isLoading = false
+    @Published var errorMessage: String?
+
+    func load(date: Date, mealType: MealType) async {
+        isLoading = true
+        errorMessage = nil
+        defer { isLoading = false }
+
+        let dateString = DateFormatter.dateOnly.string(from: date)
+
+        var comps = URLComponents(string: "http://43.203.60.2:8080/food/plans")!
+        comps.queryItems = [
+            .init(name: "date", value: dateString),
+            .init(name: "mealTime", value: mealType.rawValue)
+        ]
+
+        guard let url = comps.url else {
+            errorMessage = "유효하지 않은 URL"
+            return
+        }
+
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let decoded = try JSONDecoder().decode(FoodPlansResponse.self, from: data)
+            self.mealItems = decoded.result.map(MealModel.init(api:))
+        } catch {
+            self.errorMessage = "불러오기 실패: \(error.localizedDescription)"
+            self.mealItems = []
+        }
+    }
 }

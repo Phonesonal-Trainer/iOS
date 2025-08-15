@@ -23,18 +23,19 @@ struct StopWorkoutPopup: View {
     
     // MARK: - Body
     var body: some View {
-        VStack(spacing: StopPopupConstants.VSpacing) {
-            image
-            
-            textContent
-            
-            buttons
-        }
-        .background(
+        ZStack{
             RoundedRectangle(cornerRadius: 10)
                 .fill(Color.grey00)
                 .frame(width: StopPopupConstants.width, height: StopPopupConstants.height)
-        )
+            
+            VStack(spacing: StopPopupConstants.VSpacing) {
+                image
+                
+                textContent
+                
+                buttons
+            }
+        }
     }
     
     // MARK: - 이미지
@@ -84,7 +85,7 @@ struct StopWorkoutPopup: View {
             ) {
                 // 지금까지 운동하던거 그만하고 첫 화면으로 돌아가기... path.append..?
             }
-            
+            .frame(width: StopPopupConstants.buttonWidth)
         }
     }
 }
