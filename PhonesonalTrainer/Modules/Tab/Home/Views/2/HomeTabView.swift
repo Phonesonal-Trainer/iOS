@@ -38,11 +38,7 @@ struct HomeTabView: View {
         if selectedTab == .workout {
             WorkoutSectionView()
         } else {
-            MealPlanSectionView(
-                carbs: 111,
-                protein: 111,
-                fat: 111
-            )
+            MealPlanSectionView()
         }
         
     }

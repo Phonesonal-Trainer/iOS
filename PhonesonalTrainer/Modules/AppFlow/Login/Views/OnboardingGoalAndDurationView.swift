@@ -112,6 +112,9 @@ struct OnboardingGoalAndDurationView: View {
                         textColor: isFormValid ? .white : .grey02
                     ) {
                         if isFormValid {
+                            // ViewModel에 목표와 기간 저장
+                            viewModel.purpose = selectedGoal?.rawValue ?? ""
+                            viewModel.deadline = durationToDays(selectedDuration)
                             navigateToNext = true
                         }
                     }
@@ -145,6 +148,18 @@ struct OnboardingGoalAndDurationView: View {
                 OnboardingBodyInfoInputView(viewModel: viewModel)
             }
             .navigationBarBackButtonHidden(true)
+        }
+    }
+    
+    // MARK: - Helper Functions
+    private func durationToDays(_ duration: Duration) -> Int {
+        switch duration {
+        case .oneMonth:
+            return 30
+        case .threeMonths:
+            return 90
+        case .sixMonths:
+            return 180
         }
     }
 }

@@ -18,6 +18,7 @@ struct OnboardingBodyInfoInputView: View {
 
     @State private var shakeHeight = false
     @State private var shakeWeight = false
+    @State private var showErrorAlert = false
 
     private let totalPages = 4
     private let currentPage = 2
@@ -165,11 +166,27 @@ struct OnboardingBodyInfoInputView: View {
             // 하단 버튼
             MainButton(
                 color: isFormFilled ? .grey05 : .grey01,
-                text: "다음",
+                text: (viewModel.isLoading || viewModel.isDiagnosisLoading) ? "로딩 중..." : "다음",
                 textColor: isFormFilled ? .white : .grey02
             ) {
                 if isHeightValid && isWeightValid {
-                    goToDiagnosis = true
+                    // 회원가입 및 진단 API 호출
+                    viewModel.signup { signupSuccess in
+                        if signupSuccess {
+                            // 회원가입 성공 후 진단 API 호출
+                            viewModel.fetchDiagnosis { diagnosisSuccess in
+                                if diagnosisSuccess {
+                                    goToDiagnosis = true
+                                } else {
+                                    // 진단 실패 시에도 다음 화면으로 이동 (기본 데이터로)
+                                    print("⚠️ 진단 API 실패, 기본 데이터로 진행")
+                                    goToDiagnosis = true
+                                }
+                            }
+                        } else {
+                            showErrorAlert = true
+                        }
+                    }
                 } else {
                     if !isHeightValid {
                         withAnimation { shakeHeight = true }
@@ -187,7 +204,7 @@ struct OnboardingBodyInfoInputView: View {
                     }
                 }
             }
-            .disabled(!isFormFilled)
+            .disabled(!isFormFilled || viewModel.isLoading)
             .padding(.horizontal)
             .padding(.bottom, 20)
         }
@@ -196,8 +213,13 @@ struct OnboardingBodyInfoInputView: View {
         .navigationDestination(isPresented: $goToDiagnosis) {
             OnboradingDiagnosisView(
                 nickname: viewModel.nickname,
-                diagnosis: viewModel.toDiagnosisModel()
+                diagnosis: viewModel.diagnosisResult ?? viewModel.toDiagnosisModel()
             )
+        }
+        .alert("회원가입 오류", isPresented: $showErrorAlert) {
+            Button("확인", role: .cancel) { }
+        } message: {
+            Text(viewModel.errorMessage ?? "회원가입 중 오류가 발생했습니다.")
         }
     }
 

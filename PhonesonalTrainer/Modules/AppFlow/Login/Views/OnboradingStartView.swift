@@ -11,6 +11,7 @@ import KakaoSDKUser
 struct OnboardingStartView: View {
     @StateObject private var viewModel = AuthViewModel()
     @State private var navigateToNext = false
+    @State private var showKakaoWebView = false
 
     var body: some View {
         NavigationStack {
@@ -54,9 +55,9 @@ struct OnboardingStartView: View {
                                 .frame(width: 50, height: 50)
                         }
 
-                        // ✅ 카카오 로그인 버튼
+                        // ✅ 카카오 로그인 버튼 (WebView 방식)
                         Button(action: {
-                            viewModel.loginWithKakao()
+                            showKakaoWebView = true
                         }) {
                             Image("카카오로그인")
                                 .resizable()
@@ -83,7 +84,16 @@ struct OnboardingStartView: View {
             }
             // ✅ 로그인 성공 시 OnboardingInfoInputView로 이동
             .navigationDestination(isPresented: $navigateToNext) {
-                OnboardingInfoInputView(viewModel: OnboardingViewModel())
+                let onboardingViewModel = OnboardingViewModel()
+                onboardingViewModel.tempToken = viewModel.tempToken
+                return OnboardingInfoInputView(viewModel: onboardingViewModel)
+            }
+            // 카카오 WebView 표시
+            .sheet(isPresented: $showKakaoWebView) {
+                KakaoLoginWebViewScreen(authViewModel: viewModel)
+                    .onDisappear {
+                        print("WebView 닫힘 - 로그인 상태: \(viewModel.isLoggedIn)")
+                    }
             }
         }
     }

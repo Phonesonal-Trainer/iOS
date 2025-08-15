@@ -10,17 +10,41 @@ import SwiftUI
 struct KakaoLoginWebViewScreen: View {
     @Environment(\.dismiss) var dismiss
     @State private var showWebView = true
+    @ObservedObject var authViewModel: AuthViewModel
 
     private let loginURL = URL(string: "http://43.203.60.2:8080/oauth2/authorization/kakao-prod")!
+    
+    init(authViewModel: AuthViewModel = AuthViewModel()) {
+        self.authViewModel = authViewModel
+    }
 
     var body: some View {
         VStack {
             if showWebView {
-                WebView(url: loginURL) { code in
-                    print("✅ 인증 코드: \(code)")
+                WebView(url: loginURL) { responseData in
+                    print("✅ 받은 데이터: \(responseData)")
+                    
+                    // 에러 메시지가 포함되어 있는지 확인
+                    if responseData.contains("400") || responseData.contains("error") || responseData.contains("실패") {
+                        print("💥 로그인 에러 감지: \(responseData)")
+                        showWebView = false
+                        // 에러 상황에서도 화면 닫기
+                        DispatchQueue.main.async {
+                            dismiss()
+                        }
+                        return
+                    }
+                    
                     showWebView = false
-                    // ✅ 인증 코드로 백엔드에 POST 요청 보내기
-                    sendCodeToServer(code: code)
+                    
+                    // JSON 응답인지 확인하고 파싱 시도
+                    if responseData.contains("{") && responseData.contains("}") {
+                        // JSON 응답 처리
+                        handleKakaoResponse(jsonString: responseData)
+                    } else {
+                        // 기존 방식: 인증 코드로 처리
+                        sendCodeToServer(code: responseData)
+                    }
                 }
             }
         }
@@ -61,16 +85,63 @@ struct KakaoLoginWebViewScreen: View {
                         let result = try decoder.decode(KakaoLoginResponse.self, from: data)
                         print("✅ 서버 응답: \(result)")
                         DispatchQueue.main.async {
+                            // AuthViewModel 업데이트
+                            self.authViewModel.isLoggedIn = result.isSuccess
+                            self.authViewModel.isNewUser = result.result.newUser
+                            self.authViewModel.tempToken = result.result.tempToken
+                            self.authViewModel.accessToken = result.result.accessToken
                             dismiss()
                         }
                     } catch {
                         print("❌ 디코딩 실패: \(error)")
+                        if let dataString = String(data: data, encoding: .utf8) {
+                            print("📄 서버 응답 내용: \(dataString)")
+                        }
                     }
                 }
             } else {
                 print("❌ 서버 응답 코드 오류: \(httpResponse.statusCode)")
+                if let data = data, let errorMessage = String(data: data, encoding: .utf8) {
+                    print("💥 에러 메시지: \(errorMessage)")
+                }
             }
         }.resume()
     }
+    
+    func handleKakaoResponse(jsonString: String) {
+        print("🔄 JSON 응답 처리 시작: \(jsonString)")
+        
+        guard let data = jsonString.data(using: .utf8) else {
+            print("❌ JSON 문자열을 Data로 변환 실패")
+            return
+        }
+        
+        do {
+            let decoder = JSONDecoder()
+            let result = try decoder.decode(KakaoLoginResponse.self, from: data)
+                                    print("✅ JSON 파싱 성공: \(result)")
+            
+            DispatchQueue.main.async {
+                // AuthViewModel 업데이트
+                self.authViewModel.isLoggedIn = result.isSuccess
+                self.authViewModel.isNewUser = result.result.newUser
+                self.authViewModel.tempToken = result.result.tempToken
+                self.authViewModel.accessToken = result.result.accessToken
+                self.dismiss()
+            }
+        } catch {
+            print("❌ JSON 디코딩 실패: \(error)")
+            print("📄 원본 JSON: \(jsonString)")
+            
+            // 디코딩 실패 시에도 화면 닫기 (사용자 경험 개선)
+            DispatchQueue.main.async {
+                self.dismiss()
+            }
+        }
+    }
 
+}
+
+#Preview{
+    KakaoLoginWebViewScreen()
 }

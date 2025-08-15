@@ -4,15 +4,13 @@ import SwiftUI
 struct MyInfoView: View {
     // ✅ 외부에서 바인딩으로 관리(부모의 단일 상태를 공유)
     @Binding var name: String
+    @Binding var heightCm: Int
+    var age: Int               // ✅ 표시용
+    var genderText: String     // ✅ 표시용
 
     // 편집 버튼 탭을 부모에게 알리는 콜백 (부모가 네비게이션 수행)
     let onTapEditName: () -> Void
     let onTapEditHeight: () -> Void
-
-    // 더미 데이터 (API 붙이기 전)
-    @State private var age: Int = 25
-    @State private var gender: String = "여성"
-    @State private var heightCm: Int = 165
 
     // "닉네임" 라벨 폭을 측정해서 모든 라벨에 공통 적용
     @State private var labelWidth: CGFloat = 0
@@ -33,7 +31,7 @@ struct MyInfoView: View {
                         .font(.PretendardMedium18)
                         .foregroundColor(.grey05)
 
-                    Button(action: { onTapEditName() }) {
+                    Button(action: onTapEditName) {
                         Text("수정")
                             .font(.PretendardMedium12)
                             .foregroundStyle(.orange05)
@@ -52,9 +50,9 @@ struct MyInfoView: View {
                     .foregroundColor(.grey05)
             }
 
-            // 성별
+            // 성별 (✅ genderText 사용)
             row(label: "성별") {
-                Text(gender)
+                Text(genderText)
                     .font(.PretendardMedium18)
                     .foregroundColor(.grey05)
             }
@@ -66,7 +64,7 @@ struct MyInfoView: View {
                         .font(.PretendardMedium18)
                         .foregroundColor(.grey05)
 
-                    Button(action: { onTapEditHeight() }) {
+                    Button(action: onTapEditHeight) {
                         Text("수정")
                             .font(.PretendardMedium12)
                             .foregroundStyle(.orange05)
@@ -133,6 +131,9 @@ private struct TextWidthReader: UIViewRepresentable {
     NavigationStack {
         MyInfoView(
             name: .constant("서연"),
+            heightCm: .constant(165),
+            age: 25,
+            genderText: "여성",
             onTapEditName: {},
             onTapEditHeight: {}
         )

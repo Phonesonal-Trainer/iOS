@@ -1,47 +1,59 @@
-//
 //  HomeView.swift
 //  PhonesonalTrainer
-//
-//  Created by 조상은 on 7/15/25.
 //
 import SwiftUI
 
 struct HomeScreenView: View {
     @Binding var path: [HomeRoute]
+
+    // 홈 뷰모델
+    @StateObject private var vm = HomeViewModel()
+
+    // 전역 스토어들 (App에서 environmentObject 주입 필요)
+    @EnvironmentObject var weightStore: BodyWeightStore
+    @EnvironmentObject var bodyPhoto: BodyPhotoStore
+    @EnvironmentObject var my: MyPageViewModel     // ⬅️ 추가
+
+    // 팝업 상태
     @State private var showWeightPopup = false
     @State private var weightText = ""
 
-    @State private var currentWeight: Double = 70 // 팝업에서 변경될 몸무게 상태
-
-    // 예시 날짜
-    let startDate = Date().addingTimeInterval(-60*60*24*30)
-    let currentDate = Date()
-
     var body: some View {
         ZStack {
-            // 회색 배경
-            Color(.grey01)
-                .ignoresSafeArea()
+            Color.grey01.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 ScrollView {
                     VStack(spacing: 25) {
-                        HomeHeaderView(startDate: startDate, currentDate: currentDate)
+                        // 헤더 (아바타 탭 → 마이페이지)
+                        HomeHeaderView(
+                            week: vm.presentWeek,
+                            dateText: vm.koreanDate.isEmpty ? vm.dateString : vm.koreanDate,
+                            onAvatarTap: { path.append(.myPage) }
+                        )
+                        .environmentObject(my)
 
-                        TrainerCommentView()
+                        // 코멘트
+                        TrainerCommentView(comment: vm.comment)
 
+                        // 탭 (vm 주입)
                         HomeTabView()
+                            .environmentObject(vm)
 
+                        // ✅ 오늘 상태 (WeightInfoView 포함)
                         DailyStatusView(
-                            currentWeight: currentWeight,
-                            goalWeight: 60.0,
-                            totalCalorie: 1300,
-                            calorieGoal: 2000,
+                            currentWeight: weightStore.currentWeight,
+                            goalWeight: weightStore.goalWeight,
+                            todayCalories: vm.todayCalories,
+                            targetCalories: vm.targetCalories,
                             onWeightTap: {
+                                // 팝업 열기 전에 현재 값 채워주기
+                                weightText = String(format: "%.1f", weightStore.currentWeight)
                                 showWeightPopup = true
                             }
                         )
 
+                        // ✅ 눈바디 (환경객체 기반)
                         BodyPicView()
 
                         Spacer(minLength: 80)
@@ -50,28 +62,44 @@ struct HomeScreenView: View {
                     .padding(.vertical, 20)
                 }
                 .scrollIndicators(.hidden)
-
-               
             }
 
-            // 팝업
+            // ✅ 몸무게 입력 팝업
             if showWeightPopup {
-                Color("black00")
-                    .opacity(0.5)
-                    .ignoresSafeArea()
+                Color.black.opacity(0.5).ignoresSafeArea()
+                    .onTapGesture { showWeightPopup = false }
 
                 WeightPopupView(
                     weightText: $weightText,
-                    onCancel: {
-                        showWeightPopup = false
-                    },
+                    onCancel: { showWeightPopup = false },
                     onSave: { newWeight in
-                        currentWeight = newWeight //여기서 갱신됨
-                        weightText = ""
-                        showWeightPopup = false
+                        Task { @MainActor in
+                            let ok = await weightStore.save(newWeight)   // 서버 저장(비동기)
+                            if ok {
+                                // UI 상태 업데이트
+                                weightText = ""
+                                showWeightPopup = false
+
+                                // 최신 데이터 재조회
+                                await weightStore.refresh()
+                                await vm.refreshAfterWeightChange()
+                            }
+                        }
                     }
                 )
             }
+        }
+        .task {
+            let userId = UserDefaults.standard.integer(forKey: "userId")
+
+            // 홈 데이터
+            await vm.load(userId: userId)
+
+            // 몸무게 동기화
+            await weightStore.refresh()
+
+            // ✅ 눈바디 동기화 (서버 → 로컬 today 저장)
+            await bodyPhoto.syncTodayFromServer(userId: userId)
         }
     }
 }
@@ -79,5 +107,8 @@ struct HomeScreenView: View {
 #Preview {
     StatefulPreviewWrapper([HomeRoute]()) { path in
         HomeScreenView(path: path)
+            .environmentObject(BodyWeightStore())
+            .environmentObject(BodyPhotoStore())
+            .environmentObject(MyPageViewModel()) // ⬅️ 교체: UserProfileViewModel() → MyPageViewModel()
     }
 }
