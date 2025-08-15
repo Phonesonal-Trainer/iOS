@@ -1,4 +1,3 @@
-//
 //  HomeView.swift
 //  PhonesonalTrainer
 //
@@ -13,6 +12,7 @@ struct HomeScreenView: View {
     // 전역 스토어들 (App에서 environmentObject 주입 필요)
     @EnvironmentObject var weightStore: BodyWeightStore
     @EnvironmentObject var bodyPhoto: BodyPhotoStore
+    @EnvironmentObject var my: MyPageViewModel     // ⬅️ 추가
 
     // 팝업 상태
     @State private var showWeightPopup = false
@@ -25,11 +25,13 @@ struct HomeScreenView: View {
             VStack(spacing: 0) {
                 ScrollView {
                     VStack(spacing: 25) {
-                        // 헤더
+                        // 헤더 (아바타 탭 → 마이페이지)
                         HomeHeaderView(
                             week: vm.presentWeek,
-                            dateText: vm.koreanDate.isEmpty ? vm.dateString : vm.koreanDate
+                            dateText: vm.koreanDate.isEmpty ? vm.dateString : vm.koreanDate,
+                            onAvatarTap: { path.append(.myPage) }
                         )
+                        .environmentObject(my)
 
                         // 코멘트
                         TrainerCommentView(comment: vm.comment)
@@ -98,8 +100,6 @@ struct HomeScreenView: View {
 
             // ✅ 눈바디 동기화 (서버 → 로컬 today 저장)
             await bodyPhoto.syncTodayFromServer(userId: userId)
-            // BodyPicView는 onAppear에서 todayImage를 읽으므로,
-            // 위에서 저장되면 즉시 반영됨 (별도 호출 불필요)
         }
     }
 }
@@ -109,6 +109,6 @@ struct HomeScreenView: View {
         HomeScreenView(path: path)
             .environmentObject(BodyWeightStore())
             .environmentObject(BodyPhotoStore())
-            .environmentObject(UserProfileViewModel())
+            .environmentObject(MyPageViewModel()) // ⬅️ 교체: UserProfileViewModel() → MyPageViewModel()
     }
 }

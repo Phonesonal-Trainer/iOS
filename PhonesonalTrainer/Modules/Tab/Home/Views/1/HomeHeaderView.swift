@@ -1,4 +1,3 @@
-//
 //  HomeHeaderView.swift
 //  PhonesonalTrainer
 //
@@ -14,13 +13,21 @@ struct HomeHeaderView: View {
     }
     private let mode: Mode
 
+    // ⬇️ 아바타 탭 콜백 (마이페이지로 이동)
+    private let onAvatarTap: (() -> Void)?
+
+    // ⬇️ 전역 아바타 접근
+    @EnvironmentObject private var my: MyPageViewModel
+
     // 기존 초기화(프리뷰/과거 코드 호환)
-    init(startDate: Date, currentDate: Date) {
+    init(startDate: Date, currentDate: Date, onAvatarTap: (() -> Void)? = nil) {
         self.mode = .computed(startDate: startDate, currentDate: currentDate)
+        self.onAvatarTap = onAvatarTap
     }
     // 신규: 서버 값으로 바로 주입
-    init(week: Int, dateText: String) {
+    init(week: Int, dateText: String, onAvatarTap: (() -> Void)? = nil) {
         self.mode = .direct(week: week, dateText: dateText)
+        self.onAvatarTap = onAvatarTap
     }
 
     var body: some View {
@@ -34,9 +41,23 @@ struct HomeHeaderView: View {
                     .foregroundStyle(.grey05)
             }
             Spacer()
-            Image("logo")
-                .resizable()
+
+            // ✅ 아바타(동그란 이미지) - 탭하면 마이페이지로
+            Button(action: { onAvatarTap?() }) {
+                Group {
+                    if let img = my.avatarImage {
+                        Image(uiImage: img).resizable().scaledToFill()
+                    } else if let ui = UIImage(named: "logo") {
+                        Image(uiImage: ui).resizable().scaledToFill()
+                    } else {
+                        Image(systemName: "person.crop.circle.fill").resizable().scaledToFill()
+                    }
+                }
                 .frame(width: 56, height: 56)
+                .clipShape(Circle())
+                .overlay(Circle().stroke(Color(.systemGray4), lineWidth: 1))
+            }
+            .buttonStyle(.plain)
         }
         .frame(width: 340, height: 56)
         .padding(.horizontal, 25)
@@ -77,6 +98,8 @@ struct HomeHeaderView: View {
 #Preview {
     HomeHeaderView(
         startDate: Calendar.current.date(byAdding: .day, value: -21, to: Date())!, // 3주 전
-        currentDate: Date()
+        currentDate: Date(),
+        onAvatarTap: { print("move to MyPage") }
     )
+    .environmentObject(MyPageViewModel())
 }

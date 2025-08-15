@@ -10,7 +10,7 @@ import Foundation
 
 /// Home(마이페이지로 가는거 + 마이페이지 내부에서) 화면에서 일어나는 navigation 흐름
 enum HomeRoute: Hashable {
-    
+    case myPage
 }
 /// WorkoutRoutine 화면에서 일어나는 navigation 흐름
 enum WorkoutRoutineRoute: Hashable {

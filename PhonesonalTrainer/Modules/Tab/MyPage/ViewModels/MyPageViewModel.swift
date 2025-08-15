@@ -17,7 +17,12 @@ final class MyPageViewModel: ObservableObject {
             let saved = UserDefaults.standard.integer(forKey: "userId")
             return saved == 0 ? nil : saved
         }()
-
+    
+    //  프로필 아바타(전역 공유)
+        @Published var avatarImage: UIImage? = nil
+        private let avatarFileName = "profile_avatar.jpg"
+    
+    
     // 진행 바
     @Published var signUpDate: Date = Date()
     @Published var targetWeeks: Int = 0
@@ -47,6 +52,43 @@ final class MyPageViewModel: ObservableObject {
     // 상태
     @Published var isLoading = false
     @Published var errorText: String?
+    
+    
+    init() {
+        loadAvatarFromDisk()
+    }
+
+    // MARK: - Avatar I/O
+    func setAvatar(_ image: UIImage?) {
+        self.avatarImage = image
+        if let img = image {
+            saveAvatarToDisk(img)
+        } else {
+            removeAvatarFromDisk()
+        }
+    }
+
+    private func avatarFileURL() -> URL {
+        let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        return dir.appendingPathComponent(avatarFileName)
+    }
+    private func saveAvatarToDisk(_ image: UIImage) {
+        if let data = image.jpegData(compressionQuality: 0.9) {
+            try? data.write(to: avatarFileURL(), options: .atomic)
+        }
+    }
+    private func loadAvatarFromDisk() {
+        let url = avatarFileURL()
+        if let data = try? Data(contentsOf: url), let img = UIImage(data: data) {
+            self.avatarImage = img
+        } else {
+            self.avatarImage = nil
+        }
+    }
+    private func removeAvatarFromDisk() {
+        try? FileManager.default.removeItem(at: avatarFileURL())
+    }
+
 
     func load() async {
         isLoading = true
