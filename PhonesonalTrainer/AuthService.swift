@@ -51,7 +51,7 @@ final class AuthService {
                 
                 // ✅ accessToken 저장 (optional 처리)
                 if let result = decoded.result {
-                    UserDefaults.standard.set(result.accessToken, forKey: "accessToken")
+                    UserDefaults.standard.set(result.accessToken, forKey: "authToken")
                     UserDefaults.standard.set(result.refreshToken, forKey: "refreshToken")
                 }
 

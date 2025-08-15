@@ -55,10 +55,12 @@ struct CalorieProgressWorkoutView: View {
                     Text(viewModel.badgeText)
                         .font(.custom("Pretendard-Medium", size: 12))
                         .foregroundColor(.orange05)
-                        .frame(width: 96, height: 22)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
                         .background(Color.orange01)
                         .cornerRadius(30)
-                        .multilineTextAlignment(.center) // 박스 안 텍스트는 가운데
+                        .frame(width: 96, height: 22)
+                        .multilineTextAlignment(.center) // 중앙 정렬 추가 
                 }
             }
             .frame(width: 108) // 전체 박스 정렬 기준
