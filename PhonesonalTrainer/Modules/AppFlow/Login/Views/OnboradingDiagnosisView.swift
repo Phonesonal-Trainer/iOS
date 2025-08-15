@@ -12,11 +12,66 @@ struct OnboradingDiagnosisView: View {
     let diagnosis: DiagnosisInputModel  // 수정된 모델 사용
     
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var workoutListVM: WorkoutListViewModel
+    @StateObject private var workoutListVM = WorkoutListViewModel()
 
     @State private var goToBodyRecord = false
     @State private var isStarting = false
     @State private var showError = false
+    
+    // ✅ 운동 추천 생성 API 호출 함수
+    private func generateExerciseRecommendation(completion: @escaping (Bool) -> Void) {
+        guard let url = URL(string: "http://43.203.60.2:8080/exercises-recommandtion/generate") else {
+            print("❌ 운동 추천 API URL 생성 실패")
+            completion(false)
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Authorization 헤더 추가
+        if let accessToken = UserDefaults.standard.string(forKey: "accessToken") {
+            request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+            print("🔑 운동 추천 API Authorization 헤더 추가")
+        }
+        
+        print("🚀 운동 추천 API 요청 시작")
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("❌ 운동 추천 API 에러: \(error)")
+                    completion(false)
+                    return
+                }
+                
+                guard let data = data else {
+                    print("❌ 운동 추천 API 데이터 없음")
+                    completion(false)
+                    return
+                }
+                
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("📡 운동 추천 API 응답: \(responseString)")
+                }
+                
+                do {
+                    let exerciseResponse = try JSONDecoder().decode(ExerciseRecommendationResponse.self, from: data)
+                    if exerciseResponse.isSuccess {
+                        print("✅ 운동 추천 API 성공: \(exerciseResponse.result)")
+                        completion(true)
+                    } else {
+                        print("❌ 운동 추천 API 실패: \(exerciseResponse.message)")
+                        completion(false)
+                    }
+                } catch {
+                    print("❌ 운동 추천 API 파싱 실패: \(error)")
+                    completion(false)
+                }
+            }
+        }.resume()
+    }
     
     private var metrics: [(String, MetricChange)] {
         [
@@ -60,7 +115,7 @@ struct OnboradingDiagnosisView: View {
                             // 진단 코멘트 박스
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack(spacing: 6) {
-                                    Image("코멘트아이콘")
+                                    Image("피드백아이콘")
                                         .resizable()
                                         .frame(width: 16, height: 16)
                                     Text("폰스널 트레이너의 진단")
@@ -153,18 +208,22 @@ struct OnboradingDiagnosisView: View {
 
                     // 시작하기 버튼
                     Button(action: {
-                        Task {
-                            isStarting = true
-                            async let okExercise = workoutListVM.generateRecommendations()     // 운동 추천 생성
-                            async let okDiet     = DietPlanAPI.generate(startDate: Date())     // 식단 플랜 생성(오늘 기준)
+                        isStarting = true
+                        
+                        // 새로운 운동 추천 API 호출 (실패해도 계속 진행)
+                        generateExerciseRecommendation { exerciseSuccess in
+                            print("🏋️ 운동 추천 API 결과: \(exerciseSuccess ? "성공" : "실패")")
                             
-                            let (a, b) = await (okExercise, okDiet)
-                            isStarting = false
-
-                            if a && b {
+                            Task {
+                                // 식단 플랜 생성(기존 유지)
+                                let dietSuccess = await DietPlanAPI.generate(startDate: Date())
+                                print("🍽️ 식단 플랜 API 결과: \(dietSuccess ? "성공" : "실패")")
+                                
+                                isStarting = false
+                                
+                                // API 성공 여부와 관계없이 홈화면으로 이동
+                                print("🚀 API 결과와 관계없이 홈화면으로 이동")
                                 goToBodyRecord = true
-                            } else {
-                                showError = true
                             }
                         }
                     }) {

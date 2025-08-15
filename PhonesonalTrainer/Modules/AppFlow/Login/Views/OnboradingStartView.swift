@@ -84,15 +84,25 @@ struct OnboardingStartView: View {
             }
             // ✅ 로그인 성공 시 OnboardingInfoInputView로 이동
             .navigationDestination(isPresented: $navigateToNext) {
-                let onboardingViewModel = OnboardingViewModel()
-                onboardingViewModel.tempToken = viewModel.tempToken
-                return OnboardingInfoInputView(viewModel: onboardingViewModel)
+                // 모든 사용자를 온보딩으로 이동
+                OnboardingInfoInputView(viewModel: {
+                    let onboardingViewModel = OnboardingViewModel()
+                    onboardingViewModel.tempToken = viewModel.tempToken
+                    return onboardingViewModel
+                }())
             }
             // 카카오 WebView 표시
             .sheet(isPresented: $showKakaoWebView) {
                 KakaoLoginWebViewScreen(authViewModel: viewModel)
                     .onDisappear {
-                        print("WebView 닫힘 - 로그인 상태: \(viewModel.isLoggedIn)")
+                        // WebView 닫힌 후 잠시 기다려서 상태 확인
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            print("WebView 닫힘 - 로그인 상태: \(viewModel.isLoggedIn)")
+                            if viewModel.isLoggedIn {
+                                print("✅ 지연 후 로그인 확인 → 온보딩 이동")
+                                navigateToNext = true
+                            }
+                        }
                     }
             }
         }

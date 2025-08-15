@@ -46,6 +46,7 @@ struct ImageUploadButton: View {
                         if let data = try? await newItem.loadTransferable(type: Data.self),
                            let uiImage = UIImage(data: data) {
                             self.image = uiImage
+                            print("📷 이미지 선택 완료 (로컬 저장: \(isLocal))")
                             if !isLocal {
                                 // 서버 업로드 로직 예시
                                 print("서버로 업로드할 예정: \(uiImage)")
