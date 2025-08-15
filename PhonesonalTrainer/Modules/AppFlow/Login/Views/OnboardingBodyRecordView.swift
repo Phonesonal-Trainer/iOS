@@ -4,7 +4,6 @@
 //
 //  Created by Sua Cho on 7/24/25.
 
-
 import SwiftUI
 
 struct OnboardingBodyRecordView: View {
@@ -16,8 +15,7 @@ struct OnboardingBodyRecordView: View {
 
     @State private var uploadedImage: UIImage? = nil
     @State private var showDeleteAlert = false
-    @State private var navigateToHome = false
-    @State private var dummyPath: [HomeRoute] = [] // ✅ HomeScreenView용 임시 path
+    @State private var navigateToHome = false   // ← MainTabView로 전환 트리거
 
     // ✅ API 상태 처리용
     @State private var isLoading = false
@@ -30,9 +28,9 @@ struct OnboardingBodyRecordView: View {
                 contentView
                     .navigationBarBackButtonHidden(true)
 
-                // ✅ NavigationLink → Home 이동
+                // ✅ MainTabView로 이동
                 NavigationLink(
-                    destination: HomeScreenView(path: $dummyPath),
+                    destination: MainTabView(),   // ⬅️ 변경: HomeScreenView -> MainTabView
                     isActive: $navigateToHome
                 ) {
                     EmptyView()
@@ -171,11 +169,11 @@ struct OnboardingBodyRecordView: View {
             ) {
                 if let image = uploadedImage {
                     isLoading = true
-                    
+
                     // ✅ 1단계: 0주차 눈바디 로컬 저장
                     bodyPhoto.saveWeek0(image: image)
                     print("📸 0주차 눈바디 로컬 저장 완료")
-                    
+
                     // ✅ 2단계: 회원가입 진행 (기존 로직 유지)
                     AuthService.shared.signup(with: viewModel, tempToken: viewModel.tempToken) { result in
                         DispatchQueue.main.async {
@@ -183,11 +181,11 @@ struct OnboardingBodyRecordView: View {
                             switch result {
                             case .success:
                                 print("🎉 회원가입 성공 및 0주차 눈바디 저장 완료")
-                                navigateToHome = true
+                                navigateToHome = true      // ← MainTabView로 이동 트리거
                             case .failure(let error):
                                 print("❌ 회원가입 실패: \(error.localizedDescription) → 홈으로 이동")
                                 // 회원가입 실패해도 이미지는 저장되었으므로 홈으로 이동
-                                navigateToHome = true
+                                navigateToHome = true      // ← 실패 시에도 MainTabView로 이동
                             }
                         }
                     }
@@ -207,4 +205,5 @@ struct OnboardingBodyRecordView: View {
 
 #Preview {
     OnboardingBodyRecordView(viewModel: OnboardingViewModel())
+        .environmentObject(BodyPhotoStore())
 }
