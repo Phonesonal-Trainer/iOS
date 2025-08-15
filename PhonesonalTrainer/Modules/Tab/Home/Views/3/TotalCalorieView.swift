@@ -7,11 +7,11 @@
 import SwiftUI
 
 struct TotalCalorieView: View {
-    let totalCalorie: Int      // 현재 칼로리
-    let calorieGoal: Int       // 목표 칼로리
+    let todayCalories: Int      // 현재 칼로리
+    let targetCalories: Int       // 목표 칼로리
 
     var body: some View {
-       // let diff = totalCalorie - calorieGoal // 목표 - 현재
+       // let diff = todayCalories - targetCalories // 목표 - 현재
        // let diffText = String(format: "%+d kcal", diff)
 
         VStack(alignment: .leading, spacing: 0) {
@@ -32,14 +32,14 @@ struct TotalCalorieView: View {
 
             // 중간 현재/목표 칼로리
             HStack(alignment: .firstTextBaseline, spacing: 4) {
-                            Text("\(totalCalorie)")
+                            Text("\(todayCalories)")
                                 .font(.system(size: 24, weight: .semibold))
                                 .foregroundColor(.grey05)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.8)
                                 .layoutPriority(1)
 
-                            Text("/ \(calorieGoal)")
+                            Text("/ \(targetCalories)")
                                 .font(.system(size: 18))
                                 .foregroundColor(.grey02)
                                 .lineLimit(1)
@@ -62,7 +62,7 @@ struct TotalCalorieView: View {
     }
 }
 #Preview {
-    TotalCalorieView(totalCalorie: 1234, calorieGoal: 2345)
+    TotalCalorieView(todayCalories: 1234, targetCalories: 2345)
         .previewLayout(.sizeThatFits)
 }
 

@@ -2,16 +2,15 @@
 //  CalorieProgressWorkoutViewModel.swift
 //  PhonesonalTrainer
 //
-//  Created by 조상은 on 7/28/25.
-//
+
 import Foundation
 import SwiftUI
 
+@MainActor
 final class CalorieProgressWorkoutViewModel: ObservableObject {
-    @Published var kcal: Int
-    @Published var goal: Int
+    @Published var kcal: Int      // todayBurnedCalories
+    @Published var goal: Int      // todayRecommendBurnedCalories
 
-    // Double 타입으로 변경 (0.0 ~ 9.99)
     var percentage: Double {
         guard goal > 0 else { return 0 }
         return min(Double(kcal) / Double(goal), 9.99)
@@ -30,5 +29,10 @@ final class CalorieProgressWorkoutViewModel: ObservableObject {
         self.kcal = kcal
         self.goal = goal
     }
-}
 
+    // 홈 API 값으로 갱신
+    func apply(kcal: Int, goal: Int) {
+        self.kcal = kcal
+        self.goal = goal
+    }
+}

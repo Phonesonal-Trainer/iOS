@@ -9,8 +9,8 @@ import SwiftUI
 struct DailyStatusView: View {
     let currentWeight: Double
     let goalWeight: Double
-    let totalCalorie: Int
-    let calorieGoal: Int
+    let todayCalories: Int
+    let targetCalories: Int
     let onWeightTap: () -> Void
 
     var body: some View {
@@ -29,8 +29,8 @@ struct DailyStatusView: View {
                     onTap: onWeightTap
                 )
                 TotalCalorieView(
-                    totalCalorie: totalCalorie,
-                    calorieGoal: calorieGoal
+                    todayCalories: todayCalories,
+                    targetCalories: targetCalories
                 )
             }
         }
@@ -41,8 +41,8 @@ struct DailyStatusView: View {
     DailyStatusView(
         currentWeight: 65.3,
         goalWeight: 60.0,
-        totalCalorie: 1450,
-        calorieGoal: 1800,
+        todayCalories: 1450,
+        targetCalories: 1800,
         onWeightTap: {
             print("몸무게 팝업 띄우기")  // 실제 앱에서는 팝업 띄우는 로직 연결
         }

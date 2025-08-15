@@ -14,12 +14,15 @@ struct MyProfileView: View {
     @State private var goEditName = false
     @State private var goEditHeight = false
 
-    // ✅ @Published user.name 에 대한 Binding (로컬 @State 제거)
+    // 에러 얼럿 제어
+    @State private var showError = false
+
+    // ✅ 바인딩
     private var nameBinding: Binding<String> {
-        Binding(
-            get: { user.name },
-            set: { user.name = $0 }
-        )
+        .init(get: { user.name }, set: { user.name = $0 })
+    }
+    private var heightBinding: Binding<Int> {
+        .init(get: { user.heightCm }, set: { user.heightCm = $0 })
     }
 
     var body: some View {
@@ -32,22 +35,25 @@ struct MyProfileView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 25) {
 
-                        // 1) 아바타 블록 (중앙 정렬) — 단일 소스: user.name
+                        // 1) 아바타 블록
                         HStack {
                             Spacer()
                             ProfileAvatarBlock(name: user.name)
                             Spacer()
                         }
 
-                        // 2) 구분 박스 (가로 꽉)
+                        // 2) 구분 박스
                         Rectangle()
                             .fill(Color.grey01)
                             .frame(height: 10)
                             .padding(.horizontal, -25)
 
-                        // 3) 내 정보 — 표시용은 바인딩으로, 수정 버튼 콜백은 여기서 처리
+                        // 3) 내 정보
                         MyInfoView(
                             name: nameBinding,
+                            heightCm: heightBinding,
+                            age: user.age,
+                            genderText: user.genderKo,
                             onTapEditName: { goEditName = true },
                             onTapEditHeight: { goEditHeight = true }
                         )
@@ -60,20 +66,43 @@ struct MyProfileView: View {
         }
         .navigationBarBackButtonHidden(true)
 
-        // ✅ 목적지는 부모가 선언 (같은 스택에서 push)
+        // 프로필 조회는 화면 들어올 때 한 번
+        .task { await user.fetchProfile() }
+
+        // 네비
         .navigationDestination(isPresented: $goEditName) {
             EditNameView(originalName: user.name) { newName in
-                user.name = newName       // 단일 소스 업데이트 → 전 화면 즉시 반영
-                // TODO: API updateName(newName)
+                Task { await user.updateName(newName) }
             }
         }
         .navigationDestination(isPresented: $goEditHeight) {
-            EditHeightView(originalHeight: 165) { newHeight in
-                // TODO: height도 공통 VM 만들면 여기서 갱신
+            EditHeightView(originalHeight: user.heightCm) { newHeight in
+                Task { await user.updateHeight(newHeight) }
+            }
+        }
+
+        // 에러 얼럿
+        .onChange(of: user.lastError) { _, err in
+            showError = (err != nil)
+        }
+        .alert("실패", isPresented: $showError, presenting: user.lastError) { _ in
+            Button("확인", role: .cancel) { }
+        } message: { err in
+            Text(err)
+        }
+
+        // 로딩 오버레이
+        .overlay {
+            if user.isLoading {
+                ZStack {
+                    Color.black.opacity(0.05).ignoresSafeArea()
+                    ProgressView().scaleEffect(1.2)
+                }
             }
         }
     }
 
+    // ✅ body 바깥(동일 struct 스코프)에 있어야 함
     private var topBar: some View {
         ZStack {
             HStack {
@@ -97,6 +126,6 @@ struct MyProfileView: View {
 #Preview {
     NavigationStack {
         MyProfileView()
-            .environmentObject(UserProfileViewModel()) // ✅ 프리뷰에도 주입 필수
+            .environmentObject(UserProfileViewModel()) // ✅ 프리뷰에도 주입
     }
 }

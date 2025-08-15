@@ -14,12 +14,12 @@ struct WeeksProgressView: View {
     var now: Date = Date()        // 테스트/프리뷰용 현재시각 주입 가능
 
     // 계산 값
-    private var elapsedWeeks: Int {
+    private var togetherWeeks: Int {
         max(0, min(weeksBetween(signUpDate, now), targetWeeks))
     }
     private var progress: CGFloat {
         guard targetWeeks > 0 else { return 0 }
-        return CGFloat(elapsedWeeks) / CGFloat(targetWeeks)
+        return CGFloat(togetherWeeks) / CGFloat(targetWeeks)
     }
 
     var body: some View {
@@ -31,7 +31,7 @@ struct WeeksProgressView: View {
 
             // 4주차 / 15주차
             HStack(spacing: 5) {
-                Text("\(elapsedWeeks)주차")
+                Text("\(togetherWeeks)주차")
                     .font(.PretendardSemiBold20)
                     .foregroundStyle(.orange05)
 
