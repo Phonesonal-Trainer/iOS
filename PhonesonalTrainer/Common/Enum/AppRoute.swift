@@ -25,5 +25,5 @@ enum MealPlanRoute: Hashable {
 }
 /// Report 화면에서 일어나는 navigation 흐름
 enum ReportRoute: Hashable {
-    
+    case feedback
 }
