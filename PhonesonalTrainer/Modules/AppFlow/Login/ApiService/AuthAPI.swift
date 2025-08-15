@@ -22,38 +22,40 @@ class AuthAPI {
         
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
-        urlRequest.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        // form data 생성
-        var formData = URLComponents()
-        formData.queryItems = [
-            URLQueryItem(name: "tempToken", value: request.tempToken),
-            URLQueryItem(name: "nickname", value: request.nickname),
-            URLQueryItem(name: "age", value: String(request.age)),
-            URLQueryItem(name: "gender", value: request.gender),
-            URLQueryItem(name: "purpose", value: request.purpose),
-            URLQueryItem(name: "deadline", value: String(request.deadline)),
-            URLQueryItem(name: "height", value: String(request.height)),
-            URLQueryItem(name: "weight", value: String(request.weight))
+        // JSON 데이터 생성
+        var jsonBody: [String: Any] = [
+            "tempToken": request.tempToken,
+            "nickname": request.nickname,
+            "age": request.age,
+            "gender": request.gender,
+            "purpose": request.purpose,
+            "deadline": request.deadline,
+            "height": request.height,
+            "weight": request.weight
         ]
         
+        // 옵셔널 필드 추가
         if let bodyFatRate = request.bodyFatRate {
-            formData.queryItems?.append(URLQueryItem(name: "bodyFatRate", value: String(bodyFatRate)))
+            jsonBody["bodyFatRate"] = bodyFatRate
         }
         
         if let muscleMass = request.muscleMass {
-            formData.queryItems?.append(URLQueryItem(name: "muscleMass", value: String(muscleMass)))
+            jsonBody["muscleMass"] = muscleMass
         }
         
-        urlRequest.httpBody = formData.query?.data(using: .utf8)
+        do {
+            urlRequest.httpBody = try JSONSerialization.data(withJSONObject: jsonBody)
+        } catch {
+            return Fail(error: error).eraseToAnyPublisher()
+        }
         
         // 디버깅을 위한 로깅
         print("🚀 Signup Request URL: \(url)")
         print("🚀 HTTP Method: \(urlRequest.httpMethod ?? "Unknown")")
         print("🚀 Headers: \(urlRequest.allHTTPHeaderFields ?? [:])")
-        if let bodyString = formData.query {
-            print("🚀 Signup Request Body: \(bodyString)")
-        }
+        print("🚀 JSON Body: \(jsonBody)")
         if let bodyData = urlRequest.httpBody {
             print("🚀 Body Data Size: \(bodyData.count) bytes")
         }

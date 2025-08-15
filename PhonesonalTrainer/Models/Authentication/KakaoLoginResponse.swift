@@ -18,8 +18,8 @@ struct KakaoLoginResponse: Codable {
 struct LoginResult: Codable {
     let accessToken: String
     let refreshToken: String
-    let tempToken: String
-    let user: LoginUser  // ✅ 이름 변경
+    let tempToken: String?      // null 가능
+    let user: LoginUser?        // null 가능 
     let newUser: Bool
 }
 
@@ -41,9 +41,18 @@ struct LoginUser: Codable {
     let deadline: Int
     let purpose: String
     let createdAt: String
-    let currentGoalPeriodId: Int
+    let currentGoalPeriodId: Int?
     let diagnosis: Diagnosis?
     let dailyExerciseRecord: DailyExerciseRecord?
+    
+    enum CodingKeys: String, CodingKey {
+        case id, email, name, nickname, socialType, gender
+        case height, weight, bodyFatRate, muscleMass
+        case bodyFatPercentage, skeletalMuscleWeight
+        case age, deadline, purpose, currentGoalPeriodId
+        case diagnosis, dailyExerciseRecord
+        case createdAt = "created_at"  // 백엔드 created_at → 프론트엔드 createdAt
+    }
 }
 
 
@@ -53,8 +62,8 @@ struct Diagnosis: Codable {
     let id: Int
     let targetWeight: Double
     let targetBMI: Double
-    let targetMuscleMass: String
-    let targetBodyFatRate: Double
+    let targetMuscleMass: String?          // null 가능
+    let targetBodyFatRate: Double?         // null 가능
     let recommendedNutrition: String
     let recommendedCalories: Int
     let workoutFrequency: Int

@@ -75,6 +75,59 @@ final class BodyPhotoStore: ObservableObject {
             print("❌ save error:", error)
         }
     }
+    
+    /// 0주차 눈바디 저장 (온보딩용)
+    func saveWeek0(image: UIImage) {
+        do {
+            try FileManager.default.createDirectory(
+                at: Self.folderURL(folderName: folderName),
+                withIntermediateDirectories: true,
+                attributes: nil
+            )
+        } catch {
+            print("❌ createDirectory error:", error)
+        }
+
+        let stamp = Self.timestamp(Date()) // "yyyyMMdd_HHmmss"
+        let name = "body_week0_\(stamp)_\(UUID().uuidString).jpg"
+        let url = Self.folderURL(folderName: folderName).appendingPathComponent(name)
+
+        guard let data = image.jpegData(compressionQuality: 0.9) else { return }
+        do {
+            try data.write(to: url, options: .atomic)
+            let entry = BodyPhotoEntry(
+                id: UUID(),
+                fileName: name,
+                filePath: Self.relativePath(for: url),
+                date: "week0" // 0주차 전용 키
+            )
+            // 0주차는 하나만 유지 (중복이면 교체)
+            if let idx = entries.firstIndex(where: { $0.date == "week0" }) {
+                // 기존 0주차 파일 삭제
+                let oldName = entries[idx].fileName
+                let oldUrl = Self.folderURL(folderName: folderName).appendingPathComponent(oldName)
+                try? FileManager.default.removeItem(at: oldUrl)
+                entries[idx] = entry
+            } else {
+                entries.insert(entry, at: 0)
+            }
+            persistManifest()
+            print("✅ 0주차 눈바디 저장 완료: \(name)")
+        } catch {
+            print("❌ 0주차 저장 error:", error)
+        }
+    }
+    
+    /// 0주차 눈바디 이미지 가져오기
+    func week0Image() -> UIImage? {
+        guard let e = entries.first(where: { $0.date == "week0" }) else { return nil }
+        let url = Self.folderURL(folderName: folderName).appendingPathComponent(e.fileName)
+        guard let data = try? Data(contentsOf: url) else { return nil }
+        return UIImage(data: data)
+    }
+    
+    /// 0주차 눈바디가 있는지 확인
+    var hasWeek0Photo: Bool { entries.contains { $0.date == "week0" } }
 
     /// 홈에서 "오늘 사진"만 삭제
     func deleteToday() {

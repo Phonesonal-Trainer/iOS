@@ -88,7 +88,7 @@ struct KakaoLoginWebViewScreen: View {
                             // AuthViewModel 업데이트
                             self.authViewModel.isLoggedIn = result.isSuccess
                             self.authViewModel.isNewUser = result.result.newUser
-                            self.authViewModel.tempToken = result.result.tempToken
+                            self.authViewModel.tempToken = result.result.tempToken ?? ""
                             self.authViewModel.accessToken = result.result.accessToken
                             dismiss()
                         }
@@ -124,9 +124,20 @@ struct KakaoLoginWebViewScreen: View {
             DispatchQueue.main.async {
                 // AuthViewModel 업데이트
                 self.authViewModel.isLoggedIn = result.isSuccess
-                self.authViewModel.isNewUser = result.result.newUser
-                self.authViewModel.tempToken = result.result.tempToken
+                self.authViewModel.tempToken = result.result.tempToken ?? ""
                 self.authViewModel.accessToken = result.result.accessToken
+                
+                // 기존 사용자 vs 신규 사용자 분기
+                if result.code == "EXISTING_USER" {
+                    // 기존 사용자 - 메인 화면으로 이동
+                    self.authViewModel.isNewUser = false
+                    print("✅ 기존 사용자 로그인 완료 → 메인 화면 이동")
+                } else {
+                    // 신규 사용자 - 온보딩으로 이동  
+                    self.authViewModel.isNewUser = result.result.newUser
+                    print("✅ 신규 사용자 로그인 완료 → 온보딩 이동")
+                }
+                
                 self.dismiss()
             }
         } catch {

@@ -93,8 +93,29 @@ final class OnboardingViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         
+        // accessToken이 있으면 이미 로그인된 상태이므로 바로 성공 처리
+        if let accessToken = UserDefaults.standard.string(forKey: "accessToken"), !accessToken.isEmpty {
+            print("✅ 이미 로그인된 상태 - 회원가입 건너뛰기")
+            DispatchQueue.main.async {
+                self.isLoading = false
+                completion(true)
+            }
+            return
+        }
+        
+        // tempToken이 비어있거나 기본값이면 회원가입 시도하지 않음
+        guard !tempToken.isEmpty && tempToken != "temp_token_default" else {
+            print("❌ 유효한 tempToken이 없어서 회원가입 불가")
+            DispatchQueue.main.async {
+                self.isLoading = false
+                self.errorMessage = "로그인이 필요합니다."
+                completion(false)
+            }
+            return
+        }
+        
         let request = SignupRequest(
-            tempToken: tempToken.isEmpty ? "temp_token_default" : tempToken,
+            tempToken: tempToken,
             nickname: nickname.isEmpty ? "사용자" : nickname,
             age: age > 0 ? age : 25,
             gender: convertGenderToEnglish(gender),
@@ -157,8 +178,8 @@ final class OnboardingViewModel: ObservableObject {
         isDiagnosisLoading = true
         errorMessage = nil
         
-        // API 엔드포인트 - 실제 진단 API URL로 변경 필요
-        guard let url = URL(string: "http://43.203.60.2:8080/api/diagnosis") else {
+        // API 엔드포인트 - 진단 목표 API
+        guard let url = URL(string: "http://43.203.60.2:8080/diagnosis/goals") else {
             print("❌ 진단 API URL 생성 실패")
             isDiagnosisLoading = false
             completion(false)
@@ -169,30 +190,18 @@ final class OnboardingViewModel: ObservableObject {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        // 사용자 입력 정보를 JSON으로 변환
-        let requestBody: [String: Any] = [
-            "nickname": nickname.isEmpty ? "사용자" : nickname,
-            "age": age > 0 ? age : 25,
-            "gender": convertGenderToEnglish(gender),
-            "purpose": convertPurposeToEnglish(purpose),
-            "deadline": deadline > 0 ? deadline : 30,
-            "height": Double(height) ?? 170.0,
-            "weight": Double(weight) ?? 70.0,
-            "bodyFatRate": bodyFat.isEmpty ? nil : Double(bodyFat),
-            "muscleMass": muscleMass.isEmpty ? nil : Double(muscleMass)
-        ]
-        
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
-            print("🚀 진단 API 요청 시작")
-            print("🚀 URL: \(url)")
-            print("🚀 Request Body: \(requestBody)")
-        } catch {
-            print("❌ 진단 요청 JSON 생성 실패: \(error)")
-            isDiagnosisLoading = false
-            completion(false)
-            return
+        // Authorization 헤더 추가하되 새로운 데이터 사용 강제 플래그 추가
+        if let accessToken = UserDefaults.standard.string(forKey: "accessToken") {
+            request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+            print("🔑 Authorization 헤더 추가: Bearer \(accessToken)")
+        } else {
+            print("⚠️ accessToken이 없어서 Authorization 헤더 미추가")
         }
+        
+        // 백엔드 API 스펙에 따라 No parameters로 요청
+        print("🚀 진단 API 요청 시작 (No parameters)")
+        print("🚀 URL: \(url)")
+        print("🚀 Request: Empty body")
         
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
@@ -232,6 +241,66 @@ final class OnboardingViewModel: ObservableObject {
                 } catch {
                     print("❌ 진단 API JSON 파싱 실패: \(error)")
                     self?.errorMessage = "서버 응답을 처리할 수 없습니다."
+                    completion(false)
+                }
+            }
+        }.resume()
+    }
+    
+    // ✅ 운동 추천 생성 API 호출
+    func generateExerciseRecommendation(completion: @escaping (Bool) -> Void) {
+        // API 엔드포인트
+        guard let url = URL(string: "http://43.203.60.2:8080/exercises-recommandtion/generate") else {
+            print("❌ 운동 추천 API URL 생성 실패")
+            completion(false)
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Authorization 헤더 추가
+        if let accessToken = UserDefaults.standard.string(forKey: "accessToken") {
+            request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+            print("🔑 운동 추천 API Authorization 헤더 추가: Bearer \(accessToken)")
+        } else {
+            print("⚠️ accessToken이 없어서 Authorization 헤더 미추가")
+        }
+        
+        print("🚀 운동 추천 API 요청 시작")
+        print("🚀 URL: \(url)")
+        
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("❌ 운동 추천 API 네트워크 에러: \(error)")
+                    completion(false)
+                    return
+                }
+                
+                guard let data = data else {
+                    print("❌ 운동 추천 API 데이터 없음")
+                    completion(false)
+                    return
+                }
+                
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("📡 운동 추천 API 응답: \(responseString)")
+                }
+                
+                do {
+                    let exerciseResponse = try JSONDecoder().decode(ExerciseRecommendationResponse.self, from: data)
+                    
+                    if exerciseResponse.isSuccess {
+                        print("✅ 운동 추천 API 성공: \(exerciseResponse.result)")
+                        completion(true)
+                    } else {
+                        print("❌ 운동 추천 API 실패: \(exerciseResponse.message)")
+                        completion(false)
+                    }
+                } catch {
+                    print("❌ 운동 추천 API JSON 파싱 실패: \(error)")
                     completion(false)
                 }
             }
