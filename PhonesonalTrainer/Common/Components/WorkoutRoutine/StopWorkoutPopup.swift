@@ -9,6 +9,7 @@ import SwiftUI
 
 struct StopWorkoutPopup: View {
     @Binding var isPresented: Bool   // 팝업창 닫기
+    var onConfirm: () -> Void  // 팝업 저장, 네비게이션을 상위가 처리하도록
     
     // MARK: - 상수 정의
     fileprivate enum StopPopupConstants {
@@ -77,13 +78,14 @@ struct StopWorkoutPopup: View {
                 isPresented = false
             }
             .frame(width: StopPopupConstants.buttonWidth)
+            
             /// '그만하기' 버튼
             SubButton(
                 color: .orange05,
                 text: "그만하기",
                 textColor: .grey00
             ) {
-                // 지금까지 운동하던거 그만하고 첫 화면으로 돌아가기... path.append..?
+                onConfirm()          // 저장/이동은 상위에서
             }
             .frame(width: StopPopupConstants.buttonWidth)
         }

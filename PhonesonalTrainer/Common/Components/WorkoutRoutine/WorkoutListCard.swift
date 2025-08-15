@@ -12,6 +12,9 @@ struct WorkoutListCard: View {
     let workout: WorkoutModel
     var onInfoTap: () -> Void
     
+    @Binding var path: [WorkoutRoutineRoute]
+    
+    let startIndex: Int
     
     // MARK: - 상수 정의
     fileprivate enum WorkoutListCardConstants {
@@ -72,6 +75,7 @@ struct WorkoutListCard: View {
             if workout.status == .inProgress {
                 Button(action: {
                     // 운동 타이머 화면으로 이동
+                    path.append(.workoutTimer(workoutId: workout.id, startIndex: startIndex))
                 }) {
                     Image(systemName: "arrow.right.circle.fill")
                         .resizable()

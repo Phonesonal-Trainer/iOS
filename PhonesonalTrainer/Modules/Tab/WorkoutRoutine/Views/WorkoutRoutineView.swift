@@ -42,13 +42,22 @@ struct WorkoutRoutineView: View {
                 VStack(spacing: WorkoutRoutineConstants.VSpacing) {
                     topContent
                     
-                    WorkoutListView(viewModel: listVM, selectedDate: selectedDate)
+                    WorkoutListView(viewModel: listVM, selectedDate: selectedDate, path: $path)
                 }
             }
         }
         .background(Color.background)
         .navigationDestination(for: WorkoutRoutineRoute.self) { route in
             switch route {
+            case let .workoutTimer(workoutId, startIndex):
+                WorkoutTimerView(
+                            viewModel: WorkoutTimerViewModel(
+                                workoutId: workoutId,
+                                initialModels: listVM.workouts, // ← 리스트 VM에서 오늘 플랜 주입
+                                startIndex: startIndex
+                            ),
+                            path: $path
+                        )
             case .workoutSearch:
                 WorkoutSearchView(path: $path)
             case .manualAdd:
@@ -82,8 +91,8 @@ struct WorkoutRoutineView: View {
     }
 }
 
-#Preview {
-    StatefulPreviewWrapper([WorkoutRoutineRoute]()) { path in
-        WorkoutRoutineView(path: path)
-    }
-}
+// #Preview {
+//     StatefulPreviewWrapper([WorkoutRoutineRoute]()) { path in
+//         WorkoutRoutineView(path: path)
+//     }
+// }
