@@ -1,36 +1,44 @@
-//
-//  MealPlanSectionView.swift
-//  PhonesonalTrainer
-//
-//  Created by 조상은 on 7/15/25.
-//
- 
 import SwiftUI
 
 struct MealPlanSectionView: View {
-    let carbs: Double
-    let protein: Double
-    let fat: Double
+    @EnvironmentObject var home: HomeViewModel
+    @StateObject private var mealVM = CalorieProgressMealViewModel(kcal: 0, goal: 0)
 
     var body: some View {
         VStack(spacing: 20) {
-            CalorieProgressMealView(viewModel: CalorieProgressMealViewModel(kcal: 800, goal: 1000))
-
-            NutrientView(carbs: carbs, protein: protein, fat: fat)
-    
-                    }
+            CalorieProgressMealView(viewModel: mealVM)
+            NutrientView(
+                carbs: Double(home.carb),
+                protein: Double(home.protein),
+                fat: Double(home.fat)
+            )
+        }
         .padding(20)
         .frame(width: 340, height: 244)
         .background(Color.grey00)
         .cornerRadius(5)
         .shadow(color: .black.opacity(0.1), radius: 2)
+        .onAppear {
+            mealVM.apply(
+                kcal: home.todayConsumedCalorie,
+                goal: home.todayRecommendedCalories
+            )
+        }
+        .onChange(of: home.todayConsumedCalorie) { newVal in
+            mealVM.apply(kcal: newVal, goal: home.todayRecommendedCalories)
+        }
+        .onChange(of: home.todayRecommendedCalories) { newVal in
+            mealVM.apply(kcal: home.todayConsumedCalorie, goal: newVal)
+        }
     }
 }
+
 #Preview {
-    let dummy = NutrientInfoModel(mealType: "아침", kcal: 1234, carb: 180, protein: 70, fat: 30)
-    return MealPlanSectionView(
-        carbs: dummy.carb,
-        protein: dummy.protein,
-        fat: dummy.fat
-    )
+    let dummy = HomeViewModel()
+    dummy.todayConsumedCalorie = 800
+    dummy.todayRecommendedCalories = 1000
+    dummy.carb = 180
+    dummy.protein = 70
+    dummy.fat = 30
+    return MealPlanSectionView().environmentObject(dummy)
 }

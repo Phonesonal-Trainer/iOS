@@ -10,7 +10,9 @@ import UIKit
 
 struct ProfileAvatarBlock: View {
     let name: String   // 마이페이지에서 받은 name
-
+    @EnvironmentObject var my: MyPageViewModel
+    
+    
     @State private var uploadedImage: UIImage? = nil
     @State private var showPickerOptions = false
     @State private var showPicker = false
@@ -79,11 +81,16 @@ struct ProfileAvatarBlock: View {
         }
        
         .sheet(isPresented: $showPicker) {
-            ImagePicker(sourceType: pickerSource, selectedImage: $uploadedImage)
+            ImagePicker(sourceType: pickerSource, selectedImage: Binding(
+                get: { my.avatarImage },
+                set: { new in my.setAvatar(new) }
+            )
+            )
         }
     }
 }
 
 #Preview {
     ProfileAvatarBlock(name: "서연")
+        .environmentObject(MyPageViewModel())
 }

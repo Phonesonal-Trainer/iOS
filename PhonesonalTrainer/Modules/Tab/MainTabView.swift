@@ -68,4 +68,7 @@ struct ReportView: View {
 
 #Preview {
     MainTabView()
+        .environmentObject(MyPageViewModel())  // ✅ 새로 추가된 전역
+        .environmentObject(BodyWeightStore())  // 이미 쓰고 있으면 필요
+        .environmentObject(BodyPhotoStore())   // 이미 쓰고 있으면 필요
 }
