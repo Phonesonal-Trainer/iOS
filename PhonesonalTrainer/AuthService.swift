@@ -49,9 +49,11 @@ final class AuthService {
             do {
                 let decoded = try JSONDecoder().decode(SignupResponse.self, from: data)
                 
-                // ✅ accessToken 저장
-                UserDefaults.standard.set(decoded.result.accessToken, forKey: "accessToken")
-                UserDefaults.standard.set(decoded.result.refreshToken, forKey: "refreshToken")
+                // ✅ accessToken 저장 (optional 처리)
+                if let result = decoded.result {
+                    UserDefaults.standard.set(result.accessToken, forKey: "accessToken")
+                    UserDefaults.standard.set(result.refreshToken, forKey: "refreshToken")
+                }
 
                 completion(.success(decoded))
             } catch {

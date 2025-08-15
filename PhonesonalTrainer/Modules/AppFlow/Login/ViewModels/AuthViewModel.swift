@@ -15,6 +15,8 @@ final class AuthViewModel: ObservableObject {
     @Published var isLoggedIn = false
     @Published var isNewUser = false
     @Published var loginError: String?
+    @Published var tempToken: String = ""
+    @Published var accessToken: String = ""
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "PhonesonalTrainer", category: "KakaoAuth")
 
     func loginWithKakao() {
@@ -117,11 +119,35 @@ final class AuthViewModel: ObservableObject {
 
     private func sendCodeToServer(code: String) {
         logger.info("[Kakao] 서버로 토큰 전송 시작")
-        let url = "http://43.203.60.2:8080/auth/kakao/login"
-        let parameters: [String: Any] = ["code": code]
+        logger.info("[Kakao] 전송할 토큰: \(code)")
+        
+        let url = "http://43.203.60.2:8080/auth/login/kakao"
+        let parameters: [String: Any] = ["access_token": code]
+        
+        logger.info("[Kakao] 요청 URL: \(url)")
+        logger.info("[Kakao] 요청 파라미터: \(parameters)")
 
-        AF.request(url, method: .post, parameters: parameters, encoding: JSONEncoding.default)
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(code)",
+            "Content-Type": "application/json"
+        ]
+        
+        AF.request(url, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers)
             .validate()
+            .responseData { [weak self] response in
+                // 먼저 원본 응답 확인
+                if let data = response.data, let responseString = String(data: data, encoding: .utf8) {
+                    self?.logger.info("[Kakao] 서버 원본 응답: \(responseString)")
+                }
+                
+                if let httpResponse = response.response {
+                    self?.logger.info("[Kakao] HTTP 상태 코드: \(httpResponse.statusCode)")
+                }
+                
+                if let error = response.error {
+                    self?.logger.error("[Kakao] 네트워크 에러: \(error.localizedDescription)")
+                }
+            }
             .responseDecodable(of: KakaoLoginResponse.self) { [weak self] response in
                 switch response.result {
                 case .success(let result):
@@ -138,7 +164,45 @@ final class AuthViewModel: ObservableObject {
                     }
                 case .failure(let error):
                     self?.logger.error("[Kakao] 서버 응답 오류: \(error.localizedDescription, privacy: .public)")
+                    
+                    // 첫 번째 방식 실패 시, 다른 파라미터명으로 재시도
+                    self?.logger.info("[Kakao] access_token 방식 실패, code 파라미터로 재시도")
+                    self?.sendCodeToServerFallback(code: code)
+                    
                     self?.loginError = "서버 응답 오류: \(error.localizedDescription)"
+                }
+            }
+    }
+    
+    private func sendCodeToServerFallback(code: String) {
+        logger.info("[Kakao] 서버로 토큰 전송 시작 (Fallback - code 파라미터)")
+        
+        let url = "http://43.203.60.2:8080/auth/login/kakao"
+        let parameters: [String: Any] = ["code": code]
+        
+        logger.info("[Kakao] Fallback 요청 파라미터: \(parameters)")
+
+        AF.request(url, method: .post, parameters: parameters, encoding: JSONEncoding.default)
+            .validate()
+            .responseData { [weak self] response in
+                if let data = response.data, let responseString = String(data: data, encoding: .utf8) {
+                    self?.logger.info("[Kakao] Fallback 서버 원본 응답: \(responseString)")
+                }
+                
+                if let httpResponse = response.response {
+                    self?.logger.info("[Kakao] Fallback HTTP 상태 코드: \(httpResponse.statusCode)")
+                }
+            }
+            .responseDecodable(of: KakaoLoginResponse.self) { [weak self] response in
+                switch response.result {
+                case .success(let result):
+                    self?.logger.info("[Kakao] Fallback 서버 응답 수신 성공")
+                    DispatchQueue.main.async {
+                        self?.isLoggedIn = result.isSuccess
+                        self?.isNewUser = result.result.newUser
+                    }
+                case .failure(let error):
+                    self?.logger.error("[Kakao] Fallback도 실패: \(error.localizedDescription, privacy: .public)")
                 }
             }
     }

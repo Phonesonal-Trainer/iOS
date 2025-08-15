@@ -41,7 +41,7 @@ struct WeightChartCard_Previews: PreviewProvider {
             changeFromInitial: ReportPreviewData.mockAllFilled.weekly.changeFromInitial,
             dailyWeights: ReportPreviewData.mockAllFilled.weekly.dailyWeights
         )
-        .padding()
+        //.padding()
         .background(Color.grey00)
     }
 }

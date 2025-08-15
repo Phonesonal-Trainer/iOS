@@ -4,7 +4,9 @@ struct WorkoutGoalStampCard: View {
     let achievedDays: Set<DayOfWeek>
 
     var body: some View {
-        CardContainer(background: .grey00) {
+        HStack(spacing: 0) {
+            Spacer().frame(width: 16)
+
             VStack(alignment: .leading, spacing: 16) {
                 Text("운동 목표 스탬프")
                     .font(.PretendardSemiBold18)
@@ -30,7 +32,6 @@ struct WorkoutGoalStampCard: View {
                                 .font(.PretendardRegular14)
                                 .foregroundColor(.grey03)
                         }
-                        .frame(maxWidth: .infinity)
                     }
                 }
 
@@ -45,8 +46,22 @@ struct WorkoutGoalStampCard: View {
                     )
                     .frame(height: 34)
             }
-            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 32)
+            .padding(.vertical, 20)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color.grey00)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(Color.black.opacity(0.06), lineWidth: 0.5)
+            )
+            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+
+            Spacer().frame(width: 16)
         }
+        .frame(maxWidth: .infinity, alignment: .center)
+        .background(Color.clear)
     }
 }
 

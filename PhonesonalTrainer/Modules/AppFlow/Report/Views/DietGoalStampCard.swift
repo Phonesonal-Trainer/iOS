@@ -4,54 +4,67 @@ struct DietGoalStampCard: View {
     let achievedDays: Set<DayOfWeek>
 
     var body: some View {
-        CardContainer(background: .grey00) {
-            VStack(alignment: .leading, spacing: 16) {
-                Text("식단 목표 스탬프").font(.PretendardSemiBold18)
-                HStack(spacing: 24) {
-                    ForEach(DayOfWeek.ordered, id: \.self) { day in
-                        let isAchieved = achievedDays.contains(day)
-                        VStack(spacing: 8) {
-                            ZStack {
-                                if isAchieved {
-                                    Image("식단목표스탬프")
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: 30, height: 30)
-                                        .clipShape(Circle())
-                                } else {
-                                    Circle()
-                                        .fill(Color.grey01)
-                                        .frame(width: 30, height: 30)
-                                }
-                            
+        VStack(alignment: .leading, spacing: 16) {
+            Text("식단 목표 스탬프")
+                .font(.PretendardSemiBold18)
+
+            HStack(spacing: 24) {
+                ForEach(DayOfWeek.ordered, id: \.self) { day in
+                    let isAchieved = achievedDays.contains(day)
+                    VStack(spacing: 8) {
+                        ZStack {
+                            if isAchieved {
+                                Image("식단목표스탬프")
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 30, height: 30)
+                                    .clipShape(Circle())
+                            } else {
+                                Circle()
+                                    .fill(Color.grey01)
+                                    .frame(width: 30, height: 30)
                             }
-                            Text(day.displayShortKorean)
-                                .font(.PretendardRegular14)
-                                .foregroundColor(.grey05)
                         }
-                        .frame(maxWidth: .infinity)
+                        Text(day.displayShortKorean)
+                            .font(.PretendardRegular14)
+                            .foregroundColor(.grey05)
                     }
                 }
-                RoundedRectangle(cornerRadius: 5)
-                    .fill(Color.orange02)
-                    .overlay {
-                        Text("지난 주 대비 목표 달성률이 현저하게 올랐네요!")
-                            .font(.PretendardMedium12)
-                            .foregroundColor(.grey05)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                    }
-                    .frame(height: 34)
             }
-            .frame(maxWidth: .infinity)
+
+            RoundedRectangle(cornerRadius: 5)
+                .fill(Color.orange02)
+                .overlay {
+                    Text("지난 주 대비 목표 달성률이 현저하게 올랐네요!")
+                        .font(.PretendardMedium12)
+                        .foregroundColor(.grey05)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                }
+                .frame(height: 34)
         }
+        // 내부 여백
+        .padding(.horizontal, 32)
+        .padding(.vertical, 20)
+        // ✅ 카드 배경/모양을 **여기서** 그림
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.grey00)
+        )
+        .overlay(
+            // 필요시 보더/그림자
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color.black.opacity(0.05), lineWidth: 0.5)
+        )
+        .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+        // ✅ 화면과의 바깥 여백(시각적 margin)
+        .padding(.horizontal, 16)
     }
 }
-
 struct DietGoalStampCard_Previews: PreviewProvider {
     static var previews: some View {
         DietGoalStampCard(achievedDays: [.monday, .wednesday, .friday])
-            .padding()
+            //.padding()
             .background(Color.reportBackground)
     }
 }

@@ -10,7 +10,7 @@ struct FeedbackBannerView: View {
             Button(action: action) {
                 HStack(spacing: 16) {
                     ZStack {
-                        Image("피드백아이콘")
+                        Image(isSubmitted ? "확인된피드백아이콘" : "피드백아이콘")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 36, height: 36)
