@@ -13,7 +13,12 @@ struct PhonesonalTrainerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            OnboardingStartView()
+            // ✅ 이미 로그인된 경우 온보딩 입력 화면으로 시작
+            if UserDefaults.standard.string(forKey: "accessToken") != nil {
+                OnboardingInfoInputView(viewModel: OnboardingViewModel())
+            } else {
+                OnboardingStartView()
+            }
         }
     }
 }
