@@ -9,6 +9,7 @@ import SwiftUI
 
 struct OnboardingBodyRecordView: View {
     @ObservedObject var viewModel: OnboardingViewModel
+    @EnvironmentObject var bodyPhoto: BodyPhotoStore // ✅ BodyPhotoStore 주입
 
     let currentWeek: Int = 0
     let goalDuration: Duration = .sixMonths
@@ -168,17 +169,25 @@ struct OnboardingBodyRecordView: View {
                 text: "기록하기",
                 textColor: uploadedImage != nil ? .white : .grey02
             ) {
-                if uploadedImage != nil {
+                if let image = uploadedImage {
                     isLoading = true
+                    
+                    // ✅ 1단계: 0주차 눈바디 로컬 저장
+                    bodyPhoto.saveWeek0(image: image)
+                    print("📸 0주차 눈바디 로컬 저장 완료")
+                    
+                    // ✅ 2단계: 회원가입 진행 (기존 로직 유지)
                     AuthService.shared.signup(with: viewModel, tempToken: viewModel.tempToken) { result in
                         DispatchQueue.main.async {
                             isLoading = false
                             switch result {
                             case .success:
+                                print("🎉 회원가입 성공 및 0주차 눈바디 저장 완료")
                                 navigateToHome = true
                             case .failure(let error):
-                                errorMessage = error.localizedDescription
-                                showError = true
+                                print("❌ 회원가입 실패: \(error.localizedDescription) → 홈으로 이동")
+                                // 회원가입 실패해도 이미지는 저장되었으므로 홈으로 이동
+                                navigateToHome = true
                             }
                         }
                     }

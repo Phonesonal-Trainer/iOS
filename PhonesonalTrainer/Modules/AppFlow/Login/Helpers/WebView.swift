@@ -353,11 +353,12 @@ struct WebView: UIViewRepresentable {
         func fetchTempTokenWithAuthCode(_ authCode: String) {
             print("🚀 authCode로 tempToken 요청 시작: \(authCode)")
             
+            // 성공 플래그
+            var apiSucceeded = false
+            
+            // 백엔드 답변: POST /auth/kakao/login에 authCode를 넣으면 토큰 발급
             let endpoints = [
-                "http://43.203.60.2:8080/auth/token",
-                "http://43.203.60.2:8080/oauth/token", 
-                "http://43.203.60.2:8080/auth/exchange",
-                "http://43.203.60.2:8080/api/auth/token"
+                "http://43.203.60.2:8080/auth/kakao/login"
             ]
             
             for endpointUrl in endpoints {
@@ -365,10 +366,16 @@ struct WebView: UIViewRepresentable {
                 
                 var request = URLRequest(url: url)
                 request.httpMethod = "POST"
-                request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
                 
-                let bodyString = "authCode=\(authCode)"
-                request.httpBody = bodyString.data(using: .utf8)
+                // 백엔드가 JSON을 기대하므로 JSON 형식으로 전송
+                let requestBody = ["authCode": authCode]
+                do {
+                    request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
+                } catch {
+                    print("❌ JSON 생성 실패: \(error)")
+                    continue
+                }
                 
                 print("🚀 tempToken 요청 시도 - URL: \(url)")
                 
@@ -378,18 +385,42 @@ struct WebView: UIViewRepresentable {
                         print("📡 tempToken API 응답 (\(endpointUrl)): \(responseString)")
                         
                         if !responseString.contains("<!DOCTYPE html>") {
-                            // JSON 응답이면 파싱 시도
+                            // 실제 JSON 응답 확인
+                            print("📋 실제 백엔드 응답 (\(endpointUrl)):")
+                            print(responseString)
+                            
+                            // 백엔드 응답을 더 유연하게 처리
                             do {
-                                let result = try JSONDecoder().decode(KakaoLoginResponse.self, from: data)
-                                print("✅ tempToken API 성공 (\(endpointUrl)): \(result)")
-                                
-                                DispatchQueue.main.async {
-                                    self.onCodeReceived(responseString)
+                                if let jsonData = responseString.data(using: .utf8),
+                                   let jsonObject = try JSONSerialization.jsonObject(with: jsonData) as? [String: Any],
+                                   let isSuccess = jsonObject["isSuccess"] as? Bool,
+                                   isSuccess,
+                                   let result = jsonObject["result"] as? [String: Any] {
+                                    
+                                    // accessToken과 refreshToken 저장
+                                    if let accessToken = result["accessToken"] as? String {
+                                        UserDefaults.standard.set(accessToken, forKey: "accessToken")
+                                        print("💾 accessToken 저장: \(accessToken)")
+                                    }
+                                    if let refreshToken = result["refreshToken"] as? String {
+                                        UserDefaults.standard.set(refreshToken, forKey: "refreshToken")
+                                        print("💾 refreshToken 저장: \(refreshToken)")
+                                    }
+                                    
+                                    // 모든 사용자를 신규 사용자로 처리 - 항상 온보딩부터 시작
+                                    print("🔄 모든 사용자를 신규로 처리 - 온보딩 시작")
+                                    apiSucceeded = true
+                                    DispatchQueue.main.async {
+                                        self.onCodeReceived(responseString)
+                                    }
+                                    return
                                 }
-                                return
                             } catch {
-                                print("❌ tempToken API JSON 파싱 실패 (\(endpointUrl)): \(error)")
+                                print("❌ JSON 처리 실패: \(error)")
                             }
+                            
+                            // JSON 처리가 이미 성공했으므로 추가 처리 불필요
+                            print("⚠️ JSON 응답 처리되었지만 예상 형식과 다름")
                         }
                     }
                 }.resume()
@@ -397,9 +428,13 @@ struct WebView: UIViewRepresentable {
                 Thread.sleep(forTimeInterval: 0.3)
             }
             
-            // 모든 시도 실패 시 authCode를 tempToken으로 사용
-            print("⚠️ 모든 tempToken API 실패 - authCode를 tempToken으로 사용")
+            // 모든 시도 실패 시 authCode를 tempToken으로 사용 (API 성공하지 않은 경우만)
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                if apiSucceeded {
+                    print("✅ API 이미 성공했으므로 fallback 실행 안 함")
+                    return
+                }
+                print("⚠️ 모든 tempToken API 실패 - authCode를 tempToken으로 사용")
                 self.useAuthCodeAsTempToken(authCode)
             }
         }

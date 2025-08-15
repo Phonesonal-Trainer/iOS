@@ -38,7 +38,7 @@ struct SignupUserProfile: Codable {
     let profileImageUrl: String?
     let purpose: String
     let created_at: String
-    let goalPeriod: SignupGoalPeriod?
+    let currentGoalPeriodId: Int?     // 백엔드 스펙에 맞춤
     let diagnosis: SignupDiagnosis?
     let dailyExerciseRecord: SignupDailyExerciseRecord?
 }
@@ -110,7 +110,7 @@ struct SignupDiagnosis: Codable {
     let id: Int
     let targetWeight: Double
     let targetBMI: Double
-    let targetMuscleMass: Double
+    let targetMuscleMass: String     // 백엔드 스펙에 맞춤
     let targetBodyFatRate: Double
     let recommendedNutrition: String
     let recommendedCalories: Int
