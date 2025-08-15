@@ -29,6 +29,8 @@ struct WorkoutListView: View {
     // 부모에서 주입
     @ObservedObject var viewModel: WorkoutListViewModel
     let selectedDate: Date
+    
+    @Binding var path: [WorkoutRoutineRoute]
 
     fileprivate enum WorkoutListConstants {
         static let baseWidth: CGFloat = 340
@@ -48,8 +50,8 @@ struct WorkoutListView: View {
                     if let workouts = viewModel.filteredWorkouts[type], !workouts.isEmpty {
                         Section(header: sectionHeader(for: type)) {
                             VStack(spacing: WorkoutListConstants.cardListVSpacing) {
-                                ForEach(workouts) { workout in
-                                    WorkoutListCard(workout: workout, onInfoTap: { viewModel.showDetail(for: workout) })
+                                ForEach(Array(viewModel.workouts.enumerated()), id: \.element.id) { idx, workout in
+                                    WorkoutListCard(workout: workout, onInfoTap: { viewModel.showDetail(for: workout) }, path: $path, startIndex: idx)
                                 }
                             }
                         }
