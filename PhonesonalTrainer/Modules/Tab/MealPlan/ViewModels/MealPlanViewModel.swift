@@ -13,13 +13,15 @@ class MealPlanViewModel: ObservableObject {
     @Published var items: [NutrientInfoModel] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var plannedTotalKcal: Double = 0
+    @Published var actualTotalKcal: Double = 0
 
     private let service: FoodServiceType
     init(service: FoodServiceType = FoodService()) {
         self.service = service
     }
 
-    func load(goalPeriod: String? = nil, token: String? = nil) async {
+    func load() async {
         isLoading = true
         errorMessage = nil
         defer { isLoading = false }
@@ -29,13 +31,18 @@ class MealPlanViewModel: ObservableObject {
         do {
             let res = try await service.fetchNutritionSummary(
                 date: dateString,
-                goalPeriod: goalPeriod,
-                token: token
+                token: nil  // 서비스가 addAuthToken() 쓰므로 nil 고정
             )
+            // 합계 칼로리 세팅
+            self.plannedTotalKcal = res.plannedTotalCalorie
+            self.actualTotalKcal  = res.actualTotalCalorie
+            
             items = mapToUI(res)
         } catch {
             errorMessage = "불러오기 실패: \(error.localizedDescription)"
             items = []
+            plannedTotalKcal = 0
+            actualTotalKcal = 0
         }
     }
 

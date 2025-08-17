@@ -9,13 +9,17 @@ import SwiftUI
 
 struct MealRecordDetailView: View {
     // MARK: - Property
-    let mealType: MealType // 추후 model이나 viewModel을 넣는 것을 고려
+    let mealType: MealType
     let selectedDate: Date
     let model: NutrientInfoModel
+    // 로컬 상태
     @State private var uploadedImage: UIImage? = nil  // 이미지 업로드
     @StateObject private var viewModel = AddedMealViewModel()
     @Environment(\.dismiss) private var dismiss // 뒤로가기 액션
+    //상위에서 주입
+    @ObservedObject var planVM: MealPlanViewModel
     @Binding var path: [MealPlanRoute]
+    @ObservedObject var favoritesStore: FavoritesStore
     
     @State private var selectedMealViewModel: MealInfoViewModel? = nil
     @State private var showPopup: Bool = false  // 식단 정보 팝업
@@ -24,7 +28,7 @@ struct MealRecordDetailView: View {
     @State private var pendingDelete: MealRecordEntry? = nil
     
     private let foodService: FoodServiceType = FoodService()
-    @ObservedObject var favoritesStore: FavoritesStore
+    
     
     // MARK: - 상수 정의
     fileprivate enum MealRecordDetailConstant {
@@ -54,7 +58,22 @@ struct MealRecordDetailView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: MealRecordDetailConstant.vSpacing) {
                         // 이미지 업로드 (서버에 업로드) -> 공용 컴포넌트 고려
-                        ImageUploadButton(image: $uploadedImage, isLocal: false)
+                        ImageUploadButton(image: $uploadedImage,
+                                          isLocal: false,
+                                          onUpload: { img in
+                                              try await (foodService as! FoodService).uploadMealImage(
+                                                  date: selectedDate,
+                                                  mealTime: mealType.rawValue,
+                                                  image: img,
+                                                  token: nil
+                                              )
+                                          },
+                                          onUploaded: { result in
+                                              // (선택) 낙관적 업데이트: 현재 끼 카드에 이미지/상태 즉시 반영
+                                              applyOptimisticImage(url: result.imageUrl)
+                                              // 서버 정합성 재확보
+                                              Task { await planVM.load() }
+                                          })
                             .padding(.top, MealRecordDetailConstant.vSpacing)
                         // 탄단지 총합 부분
                         ZStack {
@@ -115,6 +134,23 @@ struct MealRecordDetailView: View {
                 .transition(.scale)
                 .zIndex(2)
             }
+        }
+    }
+    /// 낙관적 업데이트: planVM.items에서 현재 끼 항목에 imageUrl/상태만 즉시 반영
+    @MainActor
+    private func applyOptimisticImage(url: String) {
+        if let idx = planVM.items.firstIndex(where: { $0.mealType == mealType.segmentTitle }) {
+            let m = planVM.items[idx]
+            planVM.items[idx] = NutrientInfoModel(
+                id: m.id,
+                mealType: m.mealType,
+                kcal: m.kcal,
+                carb: m.carb,
+                protein: m.protein,
+                fat: m.fat,
+                imageUrl: url,
+                status: .withImage
+            )
         }
     }
 }

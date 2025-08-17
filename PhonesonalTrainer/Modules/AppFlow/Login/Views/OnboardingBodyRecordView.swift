@@ -110,10 +110,10 @@ struct OnboardingBodyRecordView: View {
             .multilineTextAlignment(.center)
             .padding(.horizontal)
 
-            if let image = uploadedImage {
+            if uploadedImage != nil {
                 uploadedImagePreview
             } else {
-                ImageUploadButton(image: $uploadedImage, isLocal: true)
+                ImageUploadButton(image: $uploadedImage, isLocal: true, onUpload: nil, onUploaded: nil)
                     .padding(.vertical, 48)
             }
 

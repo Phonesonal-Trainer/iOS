@@ -30,6 +30,9 @@ struct NutritionSummaryResponse: Codable {
     let date: String
     let summary: Summary
     
+    let plannedTotalCalorie: Double
+    let actualTotalCalorie: Double
+    
     struct Summary: Codable {
         let breakfast: MealCardSummary
         let lunch: MealCardSummary

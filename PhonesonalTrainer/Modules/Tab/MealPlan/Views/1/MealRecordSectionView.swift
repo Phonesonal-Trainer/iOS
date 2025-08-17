@@ -20,9 +20,6 @@ fileprivate enum MealRecordConstants {
 struct MealRecordSectionView: View {
     @ObservedObject var viewModel: MealPlanViewModel
     @Binding var path: [MealPlanRoute]
-    let token: String?
-    let goalPeriod: String?
-    
     
     // MARK: - Body
     var body: some View {
@@ -62,12 +59,12 @@ struct MealRecordSectionView: View {
         .padding(.horizontal)
         // 날짜가 바뀌면 API 재호출
         .task(id: viewModel.selectedDate) {
-            await viewModel.load(goalPeriod: goalPeriod, token: token)
+            await viewModel.load()
         }
         // 첫 진입 시 한 번 로드 (필요 시)
         .task {
             if viewModel.items.isEmpty {
-                await viewModel.load(goalPeriod: goalPeriod, token: token)
+                await viewModel.load()
             }
         }
     }

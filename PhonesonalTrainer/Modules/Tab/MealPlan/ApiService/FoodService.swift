@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 final class FoodService: FoodServiceType {
     // MARK: - POST /foods/{foodId}/favorite
@@ -109,14 +110,11 @@ final class FoodService: FoodServiceType {
         _ = try? JSONDecoder().decode(AddCustomUserMealResponse.self, from: data) // 성공 시 메시지 확인용(선택)
     }
     
-    // GET /foods/nutrition-summary?date=YYYY-MM-DD[&goalPeriod=...]
+    // MARK: -GET /foods/nutrition-summary?date=YYYY-MM-DD[&goalPeriod=...]
     func fetchNutritionSummary(date: String,
-                               goalPeriod: String? = nil,
                                token: String? = nil) async throws -> NutritionSummaryResponse {
         var comps = URLComponents(string: "http://43.203.60.2:8080/foods/nutrition-summary")!
-        var items = [URLQueryItem(name: "date", value: date)]
-        if let goalPeriod { items.append(URLQueryItem(name: "goalPeriod", value: goalPeriod)) }
-        comps.queryItems = items
+        comps.queryItems = [URLQueryItem(name: "date", value: date)]
         
         var req = URLRequest(url: comps.url!)
         req.httpMethod = "GET"
@@ -131,5 +129,42 @@ final class FoodService: FoodServiceType {
                           userInfo: [NSLocalizedDescriptionKey: "요청 실패: \(text)"])
         }
         return try JSONDecoder().decode(NutritionSummaryResponse.self, from: data)
+    }
+    
+    // MARK: - POST /foods/meal-images?date=YYYY-MM-DD&mealTime=BREAKFAST
+    func uploadMealImage(date: Date, mealTime: String, image: UIImage, token: String? = nil) async throws -> MealImageResponse {
+        var comps = URLComponents(string: "http://43.203.60.2:8080/foods/meal-images")!
+        comps.queryItems = [
+            .init(name: "date", value: DateFormatter.dateOnly.string(from: date)),
+            .init(name: "mealTime", value: mealTime) // <- mealType.rawValue 그대로
+        ]
+        var req = URLRequest(url: comps.url!)
+        req.httpMethod = "POST"
+        req.addAuthToken()
+        
+        let boundary = "Boundary-\(UUID().uuidString)"
+        req.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        
+        guard let jpg = image.jpegData(compressionQuality: 0.9) else {
+            throw NSError(domain: "UploadImage", code: -1, userInfo: [NSLocalizedDescriptionKey: "이미지 인코딩 실패"])
+        }
+        
+        var body = Data()
+        func append(_ s: String) { body.append(Data(s.utf8)) }
+        
+        append("--\(boundary)\r\n")
+        append("Content-Disposition: form-data; name=\"file\"; filename=\"meal.jpg\"\r\n")
+        append("Content-Type: image/jpeg\r\n\r\n")
+        body.append(jpg)
+        append("\r\n")
+        append("--\(boundary)--\r\n")
+        
+        let (data, resp) = try await URLSession.shared.upload(for: req, from: body)
+        guard let http = resp as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
+            let text = String(data: data, encoding: .utf8) ?? "unknown error"
+            throw NSError(domain: "UploadImage", code: (resp as? HTTPURLResponse)?.statusCode ?? -1,
+                          userInfo: [NSLocalizedDescriptionKey: "업로드 실패: \(text)"])
+        }
+        return try JSONDecoder().decode(MealImageResponse.self, from: data)
     }
 }

@@ -9,7 +9,6 @@ import SwiftUI
 
 struct NutrientInfoCard: View {
     let Nutrient: NutrientInfoModel
-    @StateObject private var viewModel = MealPlanViewModel()
     
     // MARK: - 상수 정의
     fileprivate enum NutrientInfoConstants {

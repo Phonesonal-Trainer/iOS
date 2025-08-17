@@ -53,7 +53,7 @@ struct MealPlanView: View {
                     }
                     
                     // 식단 기록 뷰 (그대로 노출)
-                    MealRecordSectionView(viewModel: viewModel, path: $path, token: nil, goalPeriod: nil)
+                    MealRecordSectionView(viewModel: viewModel, path: $path)
                 }
             }
         }
@@ -65,6 +65,7 @@ struct MealPlanView: View {
                     MealRecordDetailView(
                         mealType: type,
                         selectedDate: selectedDate, model: model,
+                        planVM: viewModel,
                         path: $path,
                         favoritesStore: favoritesStore
                     )
@@ -92,13 +93,13 @@ struct MealPlanView: View {
                 .padding(.top, 25)
             
             HStack {
-                Text("1234 kcal")
+                Text("\(Int(viewModel.actualTotalKcal).formattedWithSeparator) kcal")
                     .font(.PretendardSemiBold22)
                     .foregroundStyle(.grey05)
                 Text("/")
                     .font(.PretendardMedium16)
                     .foregroundStyle(.orange05)
-                Text("1111 kcal")
+                Text("\(Int(viewModel.plannedTotalKcal).formattedWithSeparator) kcal")
                     .font(.PretendardMedium16)
                     .foregroundStyle(.orange05)
             }
