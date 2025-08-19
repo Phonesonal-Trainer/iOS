@@ -60,7 +60,19 @@ struct EditNameView: View {
                             .padding(.vertical, 15)
                             .offset(x: shakeOffset)
                             .onChange(of: name) { _, new in
-                                if new.count > maxLen { name = String(new.prefix(maxLen)) }
+                                // 완성된 한글, 한글 조합 중인 자모, 영어, 공백만 허용
+                                let filtered = new.filter { character in
+                                    let unicodeValue = character.unicodeScalars.first?.value ?? 0
+                                    let isHangulJamo = (0x1100 <= unicodeValue && unicodeValue <= 0x11ff)
+                                    
+                                    return character.isKorean || character.isEnglish || character.isWhitespace || isHangulJamo
+                                }
+                                
+                                if filtered.count > maxLen {
+                                    name = String(filtered.prefix(maxLen))
+                                } else {
+                                    name = filtered
+                                }
                             }
 
                         if !name.isEmpty {
@@ -116,7 +128,7 @@ struct EditNameView: View {
         .navigationBarBackButtonHidden(true)
     }
 
-    // MARK: - Top Bar (너가 준 코드 기반, 타이틀만 변경)
+    // MARK: - Top Bar
     private var topBar: some View {
         ZStack {
             HStack {
@@ -127,7 +139,7 @@ struct EditNameView: View {
                 }
                 Spacer()
             }
-            Text("닉네임 수정") // ← "목표 수치" → "닉네임 수정"
+            Text("닉네임 수정")
                 .font(.PretendardMedium22)
                 .foregroundStyle(.grey06)
         }
@@ -136,7 +148,7 @@ struct EditNameView: View {
         .background(Color.grey00)
     }
 
-    // MARK: - 흔들림 (WeightPopupView와 동일 톤)
+    // MARK: - 흔들림
     private func shakeTextField() {
         let xs: [CGFloat] = [-16, 16, -12, 12, -6, 6, 0]
         for (i, v) in xs.enumerated() {
@@ -144,6 +156,21 @@ struct EditNameView: View {
                 withAnimation(.easeInOut(duration: 0.05)) { shakeOffset = v }
             }
         }
+    }
+}
+
+// Character 확장을 통해 한글, 영문, 공백을 쉽게 확인
+private extension Character {
+    var isKorean: Bool {
+        ("가"..."힣").contains(self)
+    }
+    
+    var isEnglish: Bool {
+        ("a"..."z").contains(self) || ("A"..."Z").contains(self)
+    }
+    
+    var isWhitespace: Bool {
+        self == " "
     }
 }
 
