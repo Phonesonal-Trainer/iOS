@@ -19,7 +19,7 @@ struct DiagnosisResult: Codable {
     let weight: Double                      // 현재 몸무게
     let targetWeight: Double               // 목표 몸무게
     let targetBMI: Double                  // 목표 BMI
-    let targetMuscleMass: Double?          // 목표 골격근량 동향 (null 가능)
+    let targetMuscleMass: String?          // 목표 골격근량 동향 (null 가능)
     let bodyFatRate: Double?               // 현재 체지방률 (null 가능)
     let targetBodyFatRate: Double?         // 목표 체지방률 (null 가능)
     let recommendedNutrition: String       // 추천 영양소
@@ -64,10 +64,10 @@ extension DiagnosisResult {
         
             // 골격근량 동향 (null 처리)
     let muscleMassChange: MetricChange
-    if let targetMuscle = targetMuscleMass {
+    if let targetMuscle = targetMuscleMass, !targetMuscle.isEmpty {
         muscleMassChange = MetricChange(
             before: "-",
-            after: String(format: "%.1fkg", targetMuscle),
+            after: targetMuscle,
             diff: nil
         )
     } else {

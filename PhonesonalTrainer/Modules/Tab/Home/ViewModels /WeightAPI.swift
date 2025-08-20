@@ -27,7 +27,22 @@ enum WeightAPI {
         req.addAuthToken()
         req.setValue("application/json", forHTTPHeaderField: "Accept")
 
-        let (data, _) = try await URLSession.shared.data(for: req)
+        let (data, response) = try await URLSession.shared.data(for: req)
+        
+        // HTTP 상태 코드 확인
+        if let httpResponse = response as? HTTPURLResponse {
+            if httpResponse.statusCode >= 400 {
+                // 에러 응답인 경우에도 JSON 파싱 시도하여 에러 메시지 추출
+                if let errorMsg = try? JSONDecoder().decode(APIResponse<String>.self, from: data) {
+                    throw NSError(domain: "WeightAPI", code: httpResponse.statusCode,
+                                  userInfo: [NSLocalizedDescriptionKey: errorMsg.message ?? "서버 에러"])
+                } else {
+                    throw NSError(domain: "WeightAPI", code: httpResponse.statusCode,
+                                  userInfo: [NSLocalizedDescriptionKey: "HTTP \(httpResponse.statusCode) 에러"])
+                }
+            }
+        }
+        
         let decoded = try JSONDecoder().decode(APIResponse<WeightResultDTO>.self, from: data)
         guard decoded.isSuccess, let w = decoded.result?.weight else {
             throw NSError(domain: "WeightAPI", code: -1,
@@ -52,7 +67,22 @@ enum WeightAPI {
         let body = WeightRecordBody(weight: weight, recordDate: iso.string(from: date))
         req.httpBody = try JSONEncoder().encode(body)
 
-        let (data, _) = try await URLSession.shared.data(for: req)
+        let (data, response) = try await URLSession.shared.data(for: req)
+        
+        // HTTP 상태 코드 확인
+        if let httpResponse = response as? HTTPURLResponse {
+            if httpResponse.statusCode >= 400 {
+                // 에러 응답인 경우에도 JSON 파싱 시도하여 에러 메시지 추출
+                if let errorMsg = try? JSONDecoder().decode(APIResponse<String>.self, from: data) {
+                    throw NSError(domain: "WeightAPI", code: httpResponse.statusCode,
+                                  userInfo: [NSLocalizedDescriptionKey: errorMsg.message ?? "서버 에러"])
+                } else {
+                    throw NSError(domain: "WeightAPI", code: httpResponse.statusCode,
+                                  userInfo: [NSLocalizedDescriptionKey: "HTTP \(httpResponse.statusCode) 에러"])
+                }
+            }
+        }
+        
         let decoded = try JSONDecoder().decode(APIResponse<String>.self, from: data) // 스웨거 Example이 result: "string"
         guard decoded.isSuccess else {
             throw NSError(domain: "WeightAPI", code: -2,

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import PhotosUI
+import UIKit
 
 struct ImageUploadButton: View {
     @Binding var image: UIImage?    // 업로드할 이미지 (외부에서 Binding으로 주입)
@@ -36,7 +37,13 @@ struct ImageUploadButton: View {
                         .clipped()
                 } else {
                     VStack(spacing: 16) {
-                        Image("이미지업로드")
+                        if UIImage(named: "이미지업로드") != nil {
+                            Image("이미지업로드")
+                        } else {
+                            Image(systemName: "photo.badge.plus")
+                                .font(.system(size: 40))
+                                .foregroundStyle(.grey03)
+                        }
                         Text("이미지 업로드")
                             .font(.PretendardMedium18)
                             .foregroundColor(.grey03)

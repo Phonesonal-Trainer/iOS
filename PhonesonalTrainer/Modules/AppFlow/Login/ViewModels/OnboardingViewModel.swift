@@ -94,14 +94,16 @@ final class OnboardingViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         
-        // accessToken이 있으면 기존 사용자로 간주하고 프로필 갱신 플로우 수행
+        // accessToken이 있으면 기존 사용자로 간주하고 전체 프로필 업데이트 수행
         if let accessToken = UserDefaults.standard.string(forKey: "accessToken"), !accessToken.isEmpty {
-            print("✅ 이미 로그인된 상태 - 회원가입 스킵 대신 프로필 갱신 수행")
+            print("✅ 이미 로그인된 상태 - 전체 프로필 업데이트 수행 (진단을 위해 필요)")
             Task {
-                let success = await self.updateExistingUserProfile()
+                await self.updateExistingUserProfile()
+                // 전체 프로필을 AuthAPI.signup으로 서버에 저장 (진단 API를 위해 필요)
+                await self.callAuthAPISignupForExistingUser()
                 await MainActor.run {
                     self.isLoading = false
-                    completion(success)
+                    completion(true) // 항상 성공으로 처리하여 진단 단계로 진행
                 }
             }
             return
@@ -231,6 +233,64 @@ final class OnboardingViewModel: ObservableObject {
         return allSucceeded
     }
     
+    // ✅ 기존 사용자를 위한 전체 프로필 저장 (진단 API를 위해 필요)
+    @MainActor
+    private func callAuthAPISignupForExistingUser() async {
+        // tempToken이 없으므로 빈 문자열 또는 "existing_user" 처리
+        let request = SignupRequest(
+            tempToken: "existing_user_profile_update",
+            nickname: nickname.isEmpty ? "사용자" : nickname,
+            age: age > 0 ? age : 25,
+            gender: convertGenderToEnglish(gender),
+            purpose: convertPurposeToEnglish(purpose),
+            deadline: deadline > 0 ? deadline : 30,
+            height: Double(height) ?? 170.0,
+            weight: Double(weight) ?? 70.0,
+            bodyFatRate: bodyFat.isEmpty ? nil : Double(bodyFat),
+            muscleMass: muscleMass.isEmpty ? nil : Double(muscleMass)
+        )
+        
+        print("📋 ===== 기존 사용자 전체 프로필 업데이트 =====")
+        print("📋 nickname: \(request.nickname)")
+        print("📋 age: \(request.age)")
+        print("📋 gender: \(request.gender)")
+        print("📋 purpose: \(request.purpose)")
+        print("📋 deadline: \(request.deadline)")
+        print("📋 height: \(request.height)")
+        print("📋 weight: \(request.weight)")
+        print("📋 bodyFatRate: \(request.bodyFatRate?.description ?? "nil")")
+        print("📋 muscleMass: \(request.muscleMass?.description ?? "nil")")
+        print("📋 ===============================================")
+        
+        do {
+            let response = try await withCheckedThrowingContinuation { continuation in
+                AuthAPI.shared.signup(request: request)
+                    .sink(
+                        receiveCompletion: { completionResult in
+                            switch completionResult {
+                            case .finished:
+                                break
+                            case .failure(let error):
+                                continuation.resume(throwing: error)
+                            }
+                        },
+                        receiveValue: { response in
+                            continuation.resume(returning: response)
+                        }
+                    )
+                    .store(in: &cancellables)
+            }
+            
+            if response.isSuccess {
+                print("✅ 기존 사용자 전체 프로필 저장 성공 - 진단 API 호출 준비 완료")
+            } else {
+                print("⚠️ 기존 사용자 프로필 저장 실패하지만 진단 시도: \(response.message)")
+            }
+        } catch {
+            print("⚠️ 기존 사용자 프로필 저장 에러하지만 진단 시도: \(error.localizedDescription)")
+        }
+    }
+    
     // ✅ 진단 API 호출
     func fetchDiagnosis(completion: @escaping (Bool) -> Void) {
         isDiagnosisLoading = true
@@ -256,10 +316,33 @@ final class OnboardingViewModel: ObservableObject {
             print("⚠️ accessToken이 없어서 Authorization 헤더 미추가")
         }
         
-        // 백엔드 API 스펙에 따라 No parameters로 요청
-        print("🚀 진단 API 요청 시작 (No parameters)")
-        print("🚀 URL: \(url)")
-        print("🚀 Request: Empty body")
+        // 사용자 입력 데이터를 포함한 진단 요청 본문 생성
+        let diagnosisRequestBody: [String: Any] = [
+            "nickname": nickname.isEmpty ? "사용자" : nickname,
+            "age": age > 0 ? age : 25,
+            "gender": convertGenderToEnglish(gender),
+            "purpose": convertPurposeToEnglish(purpose),
+            "deadline": deadline > 0 ? deadline : 30,
+            "height": Double(height) ?? 170.0,
+            "weight": Double(weight) ?? 70.0,
+            "bodyFatRate": bodyFat.isEmpty ? nil : Double(bodyFat),
+            "targetMuscleMass": muscleMass.isEmpty ? nil : muscleMass
+        ]
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: diagnosisRequestBody, options: [])
+            request.httpBody = jsonData
+            
+            print("🚀 진단 API 요청 시작 (사용자 데이터 포함)")
+            print("🚀 URL: \(url)")
+            print("🚀 Request Body: \(String(data: jsonData, encoding: .utf8) ?? "인코딩 실패")")
+            print("🔍 Authentication Test: Bearer token = \(UserDefaults.standard.string(forKey: "accessToken") ?? "없음")")
+        } catch {
+            print("❌ 진단 요청 JSON 인코딩 실패: \(error)")
+            isDiagnosisLoading = false
+            completion(false)
+            return
+        }
         
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
@@ -268,6 +351,16 @@ final class OnboardingViewModel: ObservableObject {
                 if let error = error {
                     print("❌ 진단 API 네트워크 오류: \(error)")
                     self?.errorMessage = "네트워크 오류가 발생했습니다."
+                    completion(false)
+                    return
+                }
+                
+                // HTML 응답 가드 추가
+                if let httpResponse = response as? HTTPURLResponse,
+                   let contentType = httpResponse.value(forHTTPHeaderField: "Content-Type"),
+                   contentType.contains("text/html") {
+                    print("⚠️ 진단 API 응답이 HTML → 인증 문제 또는 잘못된 엔드포인트")
+                    self?.errorMessage = "인증이 필요합니다."
                     completion(false)
                     return
                 }

@@ -59,7 +59,26 @@ class WorkoutListViewModel: ObservableObject {
                 var req = URLRequest(url: url)
                 req.addAuthToken()
 
-                let (data, _) = try await URLSession.shared.data(for: req)
+                let (data, response) = try await URLSession.shared.data(for: req)
+                
+                // HTTP 상태 코드 및 응답 형식 확인
+                if let httpResponse = response as? HTTPURLResponse {
+                    if httpResponse.statusCode >= 400 {
+                        print("❌ 운동 API HTTP \(httpResponse.statusCode) 에러")
+                        if let responseString = String(data: data, encoding: .utf8) {
+                            print("📡 에러 응답: \(responseString)")
+                        }
+                        return
+                    }
+                }
+                
+                // 응답이 HTML인지 확인
+                if let responseString = String(data: data, encoding: .utf8),
+                   responseString.trimmingCharacters(in: .whitespaces).hasPrefix("<") {
+                    print("⚠️ 운동 API 응답이 HTML → 인증 문제")
+                    return
+                }
+                
                 let decoded = try JSONDecoder().decode(UserExerciseResponse.self, from: data)
 
                 var resultModels: [WorkoutModel] = []

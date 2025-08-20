@@ -29,6 +29,15 @@ struct PhonesonalTrainerApp: App {
                     OnboardingStartView()
                 }
             }
+            .onAppear {
+                // 🔧 테스트용: 앱 시작할 때마다 토큰 클리어
+                print("🔧 테스트 모드: 기존 토큰들 클리어")
+                UserDefaults.standard.removeObject(forKey: "accessToken")
+                UserDefaults.standard.removeObject(forKey: "authToken")
+                UserDefaults.standard.removeObject(forKey: "refreshToken")
+                UserDefaults.standard.removeObject(forKey: "hasCompletedOnboarding")
+                UserDefaults.standard.removeObject(forKey: "userId")
+            }
             // 🔗 공통 주입/작업은 여기 한 번만
             .environmentObject(userProfile)
             .environmentObject(myPageViewModel)
