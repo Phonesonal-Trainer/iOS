@@ -19,14 +19,16 @@ struct TimerHeader: View {
     @Binding var soundOn: Bool
     
     fileprivate enum TimerHeaderConstants {
+        static let hPadding: CGFloat = 20
         static let height: CGFloat = 68
         static let hSpacing: CGFloat = 15
-        static let hPadding: CGFloat = 75
+        static let textHPadding: CGFloat = 30
     }
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 60)
                 .fill(Color.grey05)
+                
             
             HStack(spacing:0) {
                 Text(title)
@@ -42,7 +44,7 @@ struct TimerHeader: View {
                         if type == .anaerobic {
                             // 무산소
                             VStack(alignment: .trailing, spacing: 2) {
-                                Text("\(workoutIndex)/\(totalWorkouts)")
+                                Text("\(workoutIndex + 1)/\(totalWorkouts)")
                                     .font(.PretendardMedium16)
                                     .foregroundStyle(Color.grey01)
                                 
@@ -62,10 +64,12 @@ struct TimerHeader: View {
                         SoundToggleButton(isOn: $soundOn)
                     }
                 }
-                .frame(height: TimerHeaderConstants.height)
-                .padding(.horizontal, TimerHeaderConstants.hPadding)
+                
             }
+            .frame(height: TimerHeaderConstants.height)
+            .padding(.horizontal, TimerHeaderConstants.textHPadding)
         }
+        .padding(.horizontal, TimerHeaderConstants.hPadding)
     }
 }
 

@@ -76,6 +76,7 @@ struct WorkoutSearchView: View {
                 }
             }
         }
+        .background(Color.background)
     }
     
     // MARK: - NavigationBar 상단

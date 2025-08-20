@@ -99,6 +99,7 @@ struct WorkoutDetailSheetView: View {
                 /// 유튜브 썸네일만,  클릭하면 서버 URL로 WebView
                 youtubeThumbnail
             }
+            .background(Color.background)
             .frame(maxWidth: .infinity, alignment: .center)
             .padding(.horizontal, SheetConstants.HPadding)
         }

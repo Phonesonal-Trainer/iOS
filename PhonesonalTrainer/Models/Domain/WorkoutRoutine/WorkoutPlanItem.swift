@@ -15,6 +15,7 @@ struct WorkoutPlanItem: Identifiable, Hashable {
     let totalSets: Int
     let targetReps: Int         // 무산소 기준 세트 타깃(없으면 15로 디폴트)
     let defaultWeight: Int      // 무산소용(없으면 0)
+    let setIds: [Int]           // 서버 세트 id들
 
     init(model: WorkoutModel) {
         self.id = model.id
@@ -31,5 +32,6 @@ struct WorkoutPlanItem: Identifiable, Hashable {
         let first = model.exerciseSets.first
         self.targetReps = max(1, first?.count ??  15)
         self.defaultWeight = max(0, first?.weight ?? 0)
+        self.setIds = model.exerciseSets.map { $0.setId }
     }
 }

@@ -12,7 +12,6 @@ struct WorkoutTimerView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject var viewModel: WorkoutTimerViewModel
     @Binding var path: [WorkoutRoutineRoute]
-    @State private var showStopPopup = false
     
     init(viewModel: WorkoutTimerViewModel, path: Binding<[WorkoutRoutineRoute]>) {
         _viewModel = StateObject(wrappedValue: viewModel) // ✅ 주입
@@ -20,8 +19,10 @@ struct WorkoutTimerView: View {
     }
     
     fileprivate enum C {
+        static let width: CGFloat = 340
+        static let timerVSpacing: CGFloat = 60
         static let timerSize: CGFloat = 240
-        static let middleVSpacing: CGFloat = 20
+        static let middleVSpacing: CGFloat = 30
         static let buttonHSpacing: CGFloat = 20
         static let buttonWidth: CGFloat = 260
         static let nextIconSize: CGFloat = 24
@@ -48,14 +49,13 @@ struct WorkoutTimerView: View {
                     }
                     Spacer()
                 }
-                .padding(.horizontal, 16)
-                .frame(height: 44)
-                .padding(.bottom, 10)
-                .background(Color.grey00)
+                .padding(.horizontal, 25)
+                .padding(.vertical, 10)
+                .background(Color.background)
                 .zIndex(1)
                 
                 ScrollView(showsIndicators: false) {
-                    VStack {
+                    VStack(spacing: C.timerVSpacing) {
                         // 운동 이름 + 소리
                         TimerHeader(
                             mode: headerMode,
@@ -72,6 +72,7 @@ struct WorkoutTimerView: View {
                             totalSets: viewModel.totalSets,
                             soundOn: $viewModel.soundOn
                         )
+                        .frame(width: C.width)
                         
                         VStack(spacing: C.middleVSpacing) {
                             // 원형 타이머
@@ -108,34 +109,41 @@ struct WorkoutTimerView: View {
                                 )
                             
                             // 하단: 카운트
-                            HStack(alignment: .bottom) {
-                                Text("\(min(viewModel.currentReps, viewModel.targetReps))")
-                                    .font(.PretendardSemiBold22)
-                                    .foregroundStyle(Color.orange05)
-                                Text(" / \(viewModel.targetReps)")
-                                    .font(.PretendardRegular20)
-                                    .foregroundStyle(Color.grey03)
+                            if viewModel.type == .anaerobic && viewModel.phase == .setActive {
+                                HStack(alignment: .bottom) {
+                                    Text("\(min(viewModel.currentReps, viewModel.targetReps))")
+                                        .font(.PretendardSemiBold22)
+                                        .foregroundStyle(Color.orange05)
+                                    Text(" / \(viewModel.targetReps)")
+                                        .font(.PretendardRegular20)
+                                        .foregroundStyle(Color.grey03)
+                                }
                             }
                             
                             // 버튼
                             buttons
+                                .frame(width: C.width)
+                                .padding(.horizontal, 12)
                         }
                         
                     }
+                    .frame(maxWidth: .infinity)
                 }
             }
-            if showStopPopup {
+            .background(Color.background)
+            
+            if viewModel.showStopPopup {
                 Color.black.opacity(0.5)
                     .ignoresSafeArea()
                 
                 StopWorkoutPopup(
-                    isPresented: $showStopPopup,
+                    isPresented: $viewModel.showStopPopup,
                     onConfirm: {
                         // 1) 진행상황 저장(inProgress로 유지/완료 세트까지만)
                         viewModel.confirmStop()
                         
                         // 2) 팝업 닫고 네비게이션 루트로
-                        showStopPopup = false
+                        viewModel.showStopPopup = false
                         path.removeAll()   // NavigationStack 루트(WorkoutRoutineView)로 이동
                     }
                 )
@@ -143,7 +151,7 @@ struct WorkoutTimerView: View {
                 .zIndex(2)
             }
         }
-        .onChange(of: showStopPopup) { _, newValue in
+        .onChange(of: viewModel.showStopPopup) { _, newValue in
             if !newValue, viewModel.isPaused {
                 viewModel.togglePause()  // 팝업 닫히면 타이머 재개
             }
@@ -169,31 +177,48 @@ struct WorkoutTimerView: View {
     private var buttons: some View {
         VStack {
             if viewModel.phase == .preparation || viewModel.phase == .rest {
-                HStack {
-                    VStack(spacing: 5) {
-                        Text("다음 운동")
+                if viewModel.hasNextExercise {
+                    // 다음 운동으로 이동 가능한 카드
+                    HStack {
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text("다음 운동")
+                                .font(.PretendardMedium14)
+                                .foregroundStyle(Color.grey03)
+                            // 다음 운동명
+                            Text(viewModel.nextWorkoutName)
+                                .font(.PretendardSemiBold20)
+                                .foregroundStyle(Color.grey05)
+                        }
+                        Spacer()
+                        
+                        Button{
+                            viewModel.goToNextExercise()
+                        } label: {
+                            Image("nextIcon")
+                                .resizable()
+                                .frame(width: C.nextIconSize, height: C.nextIconSize)
+                        }
+                    }
+                    .padding(.all, C.buttonHSpacing)
+                    .background(.grey00)
+                    .cornerRadius(5)
+                    .shadow(color: .black.opacity(0.1), radius: 2)
+                    .padding(.top, 60)
+                } else {
+                    // 오늘의 마지막 운동
+                    HStack {
+                        Text("오늘의 마지막 운동")
                             .font(.PretendardMedium14)
                             .foregroundStyle(Color.grey03)
-                        // 다음 운동명
-                        Text(viewModel.nextWorkoutName)
-                            .font(.PretendardSemiBold20)
-                            .foregroundStyle(Color.grey05)
+                        Spacer()
                     }
-                    Spacer()
-                    
-                    Button{
-                        viewModel.goToNextExercise()
-                    } label: {
-                        Image("nextIcon")
-                            .resizable()
-                            .frame(width: C.nextIconSize, height: C.nextIconSize)
-                    }
+                    .padding(.all, C.buttonHSpacing)
+                    .background(.grey00)
+                    .cornerRadius(5)
+                    .shadow(color: .black.opacity(0.1), radius: 2)
+                    .padding(.top, 60)
                 }
-                .padding(.all, C.buttonHSpacing)
-                .background(.grey00)
-                .cornerRadius(5)
-                .shadow(color: .black.opacity(0.1), radius: 2)
-                .padding(.top, 60)
+                
             } else if viewModel.phase == .finished {
                 SubButton(color: .orange05, text: "운동 완료", textColor: .grey00
                 ) {

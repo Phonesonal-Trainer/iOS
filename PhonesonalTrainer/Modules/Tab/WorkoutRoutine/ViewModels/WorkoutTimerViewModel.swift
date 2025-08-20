@@ -5,6 +5,7 @@
 //  Created by 강리현 on 8/15/25.
 //
 
+import Foundation
 import SwiftUI
 import Combine
 import AVFoundation
@@ -13,11 +14,20 @@ final class WorkoutTimerViewModel: ObservableObject {
     // MARK: - Input
     let workoutId: Int
     @Published var type: WorkoutType
+    private let service: WorkoutTimerService
+    
+    // 현재 세트의 setId
+    private var currentSetId: Int? {
+        guard let item = currentItem else { return nil }
+        let idx = max(0, min(currentSetIndex - 1, item.setIds.count - 1))
+        return item.setIds[idx]
+    }
+
+    private var hasStartedOnServer = false
     
     // MARK: - 오늘 플랜 & 인덱스
     @Published var plan: [WorkoutPlanItem] = []         // 오늘 운동들
     @Published private(set) var workoutIndex: Int = 0   // 0-based
-    var displayIndex: Int { workoutIndex + 1 }          // 1-based
     
     // 현재 항목 파생값
     private var currentItem: WorkoutPlanItem? {
@@ -77,8 +87,10 @@ final class WorkoutTimerViewModel: ObservableObject {
     // MARK: - Init
     init(workoutId: Int,
         initialModels: [WorkoutModel] = [],
-        startIndex: Int = 0)
+        startIndex: Int = 0,
+        service: WorkoutTimerService = .shared)
     {
+        self.service = service
         // 1) 로컬에서 먼저 계산 (self 사용 금지)
         let mappedPlan = initialModels.map { WorkoutPlanItem(model: $0) }
         let safeIndex  = min(max(0, startIndex), max(0, mappedPlan.count - 1))
@@ -146,6 +158,14 @@ final class WorkoutTimerViewModel: ObservableObject {
     
     // MARK: - Phase transitions
     func enterPreparation() {
+        // 서버에 "운동 시작"은 최초 1회만
+        if !hasStartedOnServer {
+            hasStartedOnServer = true
+            Task { [weak self] in
+                guard let self else { return }
+                _ = try? await service.startUserExercise(userExerciseId: self.workoutId)
+            }
+        }
         configurePhase(total: 60, phase: .preparation)
     }
 
@@ -179,6 +199,7 @@ final class WorkoutTimerViewModel: ObservableObject {
             persistCompletedWorkout()
         } else {
             currentSetIndex += 1
+            // 휴식 후 다음 세트 시작 API는 실제로 "다음 세트 들어갈 때" 호출
             enterSet()
         }
     }
@@ -218,7 +239,9 @@ final class WorkoutTimerViewModel: ObservableObject {
         // 라우터/상위에 "다음 운동으로" 신호 보냄(실제 구현은 환경/콜백으로)
         guard hasNextExercise else { return }
         workoutIndex += 1
-        applyCurrentItemMeta()
+        currentSetIndex = 1                     // 세트 인덱스 초기화
+        applyCurrentItemMeta()                  // 이름/세트/무게/타겟 세팅
+        enterPreparation()                      // 다음 운동의 준비 타이머로 재시작(60초 카운트업)
         // 상위 라우팅(리스트의 다음 운동 화면으로) — 실제 구현은 상위에서
         onRequestNextExercise?()
     }
@@ -253,23 +276,56 @@ final class WorkoutTimerViewModel: ObservableObject {
         // 단계 종료
         if secondsElapsed >= totalSecondsForPhase {
             switch phase {
-            case .preparation: enterSet()
-            case .setActive:   enterRest()
-            case .rest:        finishOrNext()
-            case .finished:    break
+            case .preparation:
+                enterSet()
+
+            case .setActive:
+                if type == .anaerobic { currentReps = targetReps } // 보정
+                saveOneSet()                                       //  여기서 즉시 저장
+                enterRest()
+
+            case .rest:
+                advanceToNextSetFromRest()                         // 서버 next-set
+                if currentSetIndex >= totalSets {
+                    phase = .finished
+                    stopTicking()
+                    persistCompletedWorkout()                      // 전체 완료 API
+                } else {
+                    currentSetIndex += 1
+                    enterSet()
+                }
+
+            case .finished:
+                break
             }
         }
     }
     
     // MARK: Persistence stubs
     private func saveOneSet() {
-        // WorkoutService.saveSet(workoutId, setIndex: currentSetIndex, reps: currentReps, duration: setDurationSec)
+        guard let setId = currentSetId else { return }
+        Task { [weak self] in
+            guard let self else { return }
+            _ = try? await service.completeSet(userExerciseId: self.workoutId, setId: setId)
+        }
     }
     private func persistPartialUntilCurrentSetFinished() {
         // 지금까지 완료한 세트까지만 저장. workout.status = .inProgress 유지
     }
     private func persistCompletedWorkout() {
-        // 모든 세트 완료 저장. workout.status = .done
+        Task { [weak self] in
+            guard let self else { return }
+            _ = try? await service.completeUserExercise(userExerciseId: self.workoutId)
+        }
+    }
+
+    // 휴식 ➜ 다음 세트로 넘어갈 때 서버 상태 advance
+    // 'rest' 단계가 끝나고 set으로 들어가기 직전에 호출되게 변경
+    private func advanceToNextSetFromRest() {
+        Task { [weak self] in
+            guard let self else { return }
+            _ = try? await service.startNextSet(userExerciseId: self.workoutId)
+        }
     }
 }
 
