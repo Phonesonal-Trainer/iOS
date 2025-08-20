@@ -50,65 +50,87 @@ class WorkoutListViewModel: ObservableObject {
     // MARK: - API 연동
     func loadWorkouts(for date: Date) {
         Task {
-            do {
-                let dateString = DateFormatter.dateOnly.string(from: date)
-                guard var urlComponents = URLComponents(string: "http://43.203.60.2:8080/exercise/userExercises") else { return }
-                urlComponents.queryItems = [URLQueryItem(name: "exerciseDate", value: dateString)]
-                guard let url = urlComponents.url else { return }
-                
-                var req = URLRequest(url: url)
-                req.addAuthToken()
+            await loadWorkoutsWithRetry(for: date, retryCount: 1)
+        }
+    }
+    
+    private func loadWorkoutsWithRetry(for date: Date, retryCount: Int) async {
+        do {
+            let dateString = DateFormatter.dateOnly.string(from: date)
+            guard var urlComponents = URLComponents(string: "http://43.203.60.2:8080/exercise/userExercises") else { return }
+            urlComponents.queryItems = [URLQueryItem(name: "exerciseDate", value: dateString)]
+            guard let url = urlComponents.url else { return }
+            
+            var req = URLRequest(url: url)
+            req.addAuthToken()
 
-                let (data, response) = try await URLSession.shared.data(for: req)
-                
-                // HTTP 상태 코드 및 응답 형식 확인
-                if let httpResponse = response as? HTTPURLResponse {
-                    if httpResponse.statusCode >= 400 {
-                        print("❌ 운동 API HTTP \(httpResponse.statusCode) 에러")
-                        if let responseString = String(data: data, encoding: .utf8) {
-                            print("📡 에러 응답: \(responseString)")
-                        }
-                        return
-                    }
-                }
-                
-                // 응답이 HTML인지 확인
-                if let responseString = String(data: data, encoding: .utf8),
-                   responseString.trimmingCharacters(in: .whitespaces).hasPrefix("<") {
-                    print("⚠️ 운동 API 응답이 HTML → 인증 문제")
-                    return
-                }
-                
-                let decoded = try JSONDecoder().decode(UserExerciseResponse.self, from: data)
-
-                var resultModels: [WorkoutModel] = []
-
-                try await withThrowingTaskGroup(of: WorkoutModel?.self) { group in
-                    for userExercise in decoded.result {
-                        group.addTask {
-                            do {
-                                let detail = try await self.fetchExerciseDetail(id: userExercise.exerciseId)
-                                
-                                return WorkoutModel(
-                                    userExercise: userExercise,
-                                    exerciseDetail: detail
-                                )
-                            } catch {
-                                print("❌ ExerciseDetail 실패: \(error)")
-                                return nil
-                            }
+            let (data, response) = try await URLSession.shared.data(for: req)
+            
+            // HTTP 상태 코드 및 응답 형식 확인
+            if let httpResponse = response as? HTTPURLResponse {
+                if httpResponse.statusCode >= 400 {
+                    // 401/403 에러인 경우 토큰 갱신 시도
+                    if (httpResponse.statusCode == 401 || httpResponse.statusCode == 403) && retryCount > 0 {
+                        print("🔄 운동 API 인증 에러 - 토큰 갱신 시도")
+                        if await AuthAPI.refreshToken() {
+                            print("🔄 토큰 갱신 성공 - 운동 API 재시도")
+                            await loadWorkoutsWithRetry(for: date, retryCount: retryCount - 1)
+                            return
+                        } else {
+                            print("❌ 토큰 갱신 실패 - 재로그인 필요")
+                            // 토큰 클리어
+                            UserDefaults.standard.removeObject(forKey: "accessToken")
+                            UserDefaults.standard.removeObject(forKey: "refreshToken")
+                            UserDefaults.standard.removeObject(forKey: "authToken")
+                            UserDefaults.standard.removeObject(forKey: "hasCompletedOnboarding")
+                            return
                         }
                     }
                     
-                    for try await model in group {
-                        if let model = model { resultModels.append(model) }
+                    print("❌ 운동 API HTTP \(httpResponse.statusCode) 에러")
+                    if let responseString = String(data: data, encoding: .utf8) {
+                        print("📡 에러 응답: \(responseString)")
+                    }
+                    return
+                }
+            }
+            
+            // 응답이 HTML인지 확인
+            if let responseString = String(data: data, encoding: .utf8),
+               responseString.trimmingCharacters(in: .whitespaces).hasPrefix("<") {
+                print("⚠️ 운동 API 응답이 HTML → 인증 문제")
+                return
+            }
+                
+            let decoded = try JSONDecoder().decode(UserExerciseResponse.self, from: data)
+
+            var resultModels: [WorkoutModel] = []
+
+            try await withThrowingTaskGroup(of: WorkoutModel?.self) { group in
+                for userExercise in decoded.result {
+                    group.addTask {
+                        do {
+                            let detail = try await self.fetchExerciseDetail(id: userExercise.exerciseId)
+                            
+                            return WorkoutModel(
+                                userExercise: userExercise,
+                                exerciseDetail: detail
+                            )
+                        } catch {
+                            print("❌ ExerciseDetail 실패: \(error)")
+                            return nil
+                        }
                     }
                 }
-                // 기존 운동들 초기화 후 새로 설정
-                self.workouts = resultModels
-            } catch {
-                print("❌ 운동 불러오기 실패: \(error)")
+                
+                for try await model in group {
+                    if let model = model { resultModels.append(model) }
+                }
             }
+            // 기존 운동들 초기화 후 새로 설정
+            self.workouts = resultModels
+        } catch {
+            print("❌ 운동 불러오기 실패: \(error)")
         }
     }
     
@@ -117,7 +139,7 @@ class WorkoutListViewModel: ObservableObject {
         Task {
             do {
                 let apiDetail = try await fetchExerciseDetail(id: workout.exerciseId)
-                activeDetail = WorkoutDetailModel(from: apiDetail)
+                self.activeDetail = WorkoutDetailModel(from: apiDetail)
             } catch {
                 print("❌ 상세 불러오기 실패: \(error)")
             }
@@ -125,7 +147,7 @@ class WorkoutListViewModel: ObservableObject {
     }
 
     // 실제 상세 API
-    private func fetchExerciseDetail(id: Int) async throws -> ExerciseDetail {
+    func fetchExerciseDetail(id: Int) async throws -> ExerciseDetail {
 
         guard let url = URL(string: "http://43.203.60.2:8080/exercises/\(id)") else {
             throw URLError(.badURL)
@@ -176,9 +198,9 @@ class WorkoutListViewModel: ObservableObject {
                         bodyPart: .unknown,
                         muscleGroups: [],
                         category: WorkoutType(rawValue: created.exerciseType) ?? category,
-                            status: .recorded,
-                            kcalBurned: created.caloriesBurned,
-                            exerciseSets: []
+                        status: .recorded,
+                        kcalBurned: created.caloriesBurned,
+                        exerciseSets: []
                     )
                 }
                 self.workouts.append(model)      // 로컬 반영으로 끝 (재조회 X)

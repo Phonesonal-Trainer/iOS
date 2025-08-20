@@ -30,13 +30,26 @@ struct PhonesonalTrainerApp: App {
                 }
             }
             .onAppear {
-                // 🔧 테스트용: 앱 시작할 때마다 토큰 클리어
+                // 🔧 개발 중에만 필요시 토큰 클리어 (주석 처리)
+                print("🔧 앱 onAppear - 현재 상태:")
+                print("   - accessToken: '\(accessToken)'")
+                print("   - hasCompletedOnboarding: \(hasCompletedOnboarding)")
+                
+                // 테스트를 위해 토큰들을 강제로 클리어
                 print("🔧 테스트 모드: 기존 토큰들 클리어")
                 UserDefaults.standard.removeObject(forKey: "accessToken")
                 UserDefaults.standard.removeObject(forKey: "authToken")
                 UserDefaults.standard.removeObject(forKey: "refreshToken")
                 UserDefaults.standard.removeObject(forKey: "hasCompletedOnboarding")
                 UserDefaults.standard.removeObject(forKey: "userId")
+                UserDefaults.standard.removeObject(forKey: "tempToken")
+                
+                // UserDefaults 동기화
+                UserDefaults.standard.synchronize()
+                
+                print("🔧 클리어 후 상태:")
+                print("   - accessToken: '\(UserDefaults.standard.string(forKey: "accessToken") ?? "nil")'")
+                print("   - hasCompletedOnboarding: \(UserDefaults.standard.bool(forKey: "hasCompletedOnboarding"))")
             }
             // 🔗 공통 주입/작업은 여기 한 번만
             .environmentObject(userProfile)

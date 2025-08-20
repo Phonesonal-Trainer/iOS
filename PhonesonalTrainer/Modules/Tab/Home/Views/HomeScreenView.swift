@@ -101,6 +101,15 @@ struct HomeScreenView: View {
             // ✅ 눈바디 동기화 (서버 → 로컬 today 저장)
             await bodyPhoto.syncTodayFromServer(userId: userId)
         }
+        .alert("데이터 로드 실패", isPresented: .constant(vm.errorText != nil)) {
+            Button("확인", role: .cancel) {
+                vm.errorText = nil
+            }
+        } message: {
+            if let errorText = vm.errorText {
+                Text(errorText)
+            }
+        }
     }
 }
 

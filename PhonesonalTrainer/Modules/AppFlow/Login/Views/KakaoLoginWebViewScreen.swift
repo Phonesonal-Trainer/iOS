@@ -89,12 +89,29 @@ struct KakaoLoginWebViewScreen: View {
                             self.authViewModel.isLoggedIn = result.isSuccess
                             self.authViewModel.isNewUser = result.result.newUser
                             self.authViewModel.tempToken = result.result.tempToken ?? ""
-                            self.authViewModel.accessToken = result.result.accessToken
-                            // 토큰/유저ID 저장 (전역)
-                            UserDefaults.standard.set(result.result.accessToken, forKey: "accessToken")
-                            UserDefaults.standard.set(result.result.accessToken, forKey: "authToken")
-                            UserDefaults.standard.set(result.result.refreshToken, forKey: "refreshToken")
-                            if let uid = result.result.user?.id { UserDefaults.standard.set(uid, forKey: "userId") }
+                            self.authViewModel.accessToken = result.result.accessToken ?? ""
+                            
+                            // 토큰/유저ID 저장 (전역) - Optional 처리
+                            if let accessToken = result.result.accessToken {
+                                UserDefaults.standard.set(accessToken, forKey: "accessToken")
+                                UserDefaults.standard.set(accessToken, forKey: "authToken")
+                            }
+                            if let refreshToken = result.result.refreshToken {
+                                UserDefaults.standard.set(refreshToken, forKey: "refreshToken")
+                            }
+                            if let uid = result.result.user?.id { 
+                                UserDefaults.standard.set(uid, forKey: "userId") 
+                            }
+                            
+                            // 온보딩 상태 설정
+                            if result.result.newUser {
+                                UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
+                                print("✅ 신규 사용자 로그인 완료 → 온보딩 이동")
+                            } else {
+                                UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
+                                print("✅ 기존 사용자 로그인 완료 → 메인 화면 이동")
+                            }
+                            
                             dismiss()
                         }
                     } catch {
@@ -124,24 +141,35 @@ struct KakaoLoginWebViewScreen: View {
         do {
             let decoder = JSONDecoder()
             let result = try decoder.decode(KakaoLoginResponse.self, from: data)
-                                    print("✅ JSON 파싱 성공: \(result)")
+            print("✅ JSON 파싱 성공: \(result)")
             
             DispatchQueue.main.async {
                 // AuthViewModel 업데이트
                 self.authViewModel.isLoggedIn = result.isSuccess
                 self.authViewModel.tempToken = result.result.tempToken ?? ""
-                self.authViewModel.accessToken = result.result.accessToken
+                self.authViewModel.accessToken = result.result.accessToken ?? ""
                 
                 // 기존 사용자 vs 신규 사용자 분기 (백엔드 newUser 플래그 기준)
                 self.authViewModel.isNewUser = result.result.newUser
-                // 토큰/유저ID 저장 (전역)
-                UserDefaults.standard.set(result.result.accessToken, forKey: "accessToken")
-                UserDefaults.standard.set(result.result.accessToken, forKey: "authToken")
-                UserDefaults.standard.set(result.result.refreshToken, forKey: "refreshToken")
-                if let uid = result.result.user?.id { UserDefaults.standard.set(uid, forKey: "userId") }
+                
+                // 토큰/유저ID 저장 (전역) - Optional 처리
+                if let accessToken = result.result.accessToken {
+                    UserDefaults.standard.set(accessToken, forKey: "accessToken")
+                    UserDefaults.standard.set(accessToken, forKey: "authToken")
+                }
+                if let refreshToken = result.result.refreshToken {
+                    UserDefaults.standard.set(refreshToken, forKey: "refreshToken")
+                }
+                if let uid = result.result.user?.id { 
+                    UserDefaults.standard.set(uid, forKey: "userId") 
+                }
+                
+                // 온보딩 상태 설정
                 if result.result.newUser {
+                    UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
                     print("✅ 신규 사용자 로그인 완료 → 온보딩 이동")
                 } else {
+                    UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
                     print("✅ 기존 사용자 로그인 완료 → 메인 화면 이동")
                 }
                 

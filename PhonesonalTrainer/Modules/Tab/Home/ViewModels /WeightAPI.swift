@@ -22,6 +22,10 @@ enum WeightAPI {
 
     // GET /home/{userId}/main/get-weight-record
     static func fetchCurrent(userId: Int) async throws -> Double {
+        return try await fetchCurrentWithRetry(userId: userId, retryCount: 1)
+    }
+    
+    private static func fetchCurrentWithRetry(userId: Int, retryCount: Int) async throws -> Double {
         var req = URLRequest(url: url("/home/\(userId)/main/get-weight-record"))
         req.httpMethod = "GET"
         req.addAuthToken()
@@ -32,6 +36,24 @@ enum WeightAPI {
         // HTTP 상태 코드 확인
         if let httpResponse = response as? HTTPURLResponse {
             if httpResponse.statusCode >= 400 {
+                // 401/403 에러인 경우 토큰 갱신 시도
+                if (httpResponse.statusCode == 401 || httpResponse.statusCode == 403) && retryCount > 0 {
+                    print("🔄 몸무게 API 인증 에러 - 토큰 갱신 시도")
+                    if await AuthAPI.refreshToken() {
+                        print("🔄 토큰 갱신 성공 - 몸무게 API 재시도")
+                        return try await fetchCurrentWithRetry(userId: userId, retryCount: retryCount - 1)
+                    } else {
+                        print("❌ 토큰 갱신 실패 - 재로그인 필요")
+                        // 토큰 클리어
+                        UserDefaults.standard.removeObject(forKey: "accessToken")
+                        UserDefaults.standard.removeObject(forKey: "refreshToken")
+                        UserDefaults.standard.removeObject(forKey: "authToken")
+                        UserDefaults.standard.removeObject(forKey: "hasCompletedOnboarding")
+                        throw NSError(domain: "WeightAPI", code: 401,
+                                      userInfo: [NSLocalizedDescriptionKey: "인증이 만료되었습니다. 다시 로그인해주세요."])
+                    }
+                }
+                
                 // 에러 응답인 경우에도 JSON 파싱 시도하여 에러 메시지 추출
                 if let errorMsg = try? JSONDecoder().decode(APIResponse<String>.self, from: data) {
                     throw NSError(domain: "WeightAPI", code: httpResponse.statusCode,

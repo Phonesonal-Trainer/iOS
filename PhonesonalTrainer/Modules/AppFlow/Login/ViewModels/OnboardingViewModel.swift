@@ -436,6 +436,26 @@ final class OnboardingViewModel: ObservableObject {
                     return
                 }
                 
+                // HTTP 상태 코드 확인
+                if let httpResponse = response as? HTTPURLResponse {
+                    if httpResponse.statusCode >= 400 {
+                        print("❌ 운동 추천 API HTTP \(httpResponse.statusCode) 에러")
+                        if let responseString = String(data: data, encoding: .utf8) {
+                            print("📡 에러 응답: \(responseString)")
+                        }
+                        completion(false)
+                        return
+                    }
+                }
+                
+                // 응답이 HTML인지 확인
+                if let responseString = String(data: data, encoding: .utf8),
+                   responseString.trimmingCharacters(in: .whitespaces).hasPrefix("<") {
+                    print("⚠️ 운동 추천 API 응답이 HTML → 인증 문제")
+                    completion(false)
+                    return
+                }
+                
                 if let responseString = String(data: data, encoding: .utf8) {
                     print("📡 운동 추천 API 응답: \(responseString)")
                 }

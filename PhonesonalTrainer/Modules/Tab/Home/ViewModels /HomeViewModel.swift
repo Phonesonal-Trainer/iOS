@@ -108,7 +108,55 @@ final class HomeViewModel: ObservableObject {
             self.calorieStatus = meal.calorieStatus
 
         } catch {
-            self.errorText = "홈 데이터 로드 실패: \(error.localizedDescription)"
+            print("❌ 홈 데이터 로드 실패: \(error.localizedDescription)")
+            
+            // 에러 타입에 따른 처리
+            if let nsError = error as NSError? {
+                switch nsError.code {
+                case 500:
+                    self.errorText = "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+                case 401, 403:
+                    self.errorText = "인증이 만료되었습니다. 다시 로그인해주세요."
+                    // 인증 만료 시 온보딩 화면으로 이동
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        UserDefaults.standard.removeObject(forKey: "hasCompletedOnboarding")
+                    }
+                case -1:
+                    self.errorText = "데이터를 불러올 수 없습니다. 네트워크를 확인해주세요."
+                default:
+                    self.errorText = "홈 데이터 로드 실패: \(error.localizedDescription)"
+                }
+            } else {
+                self.errorText = "홈 데이터 로드 실패: \(error.localizedDescription)"
+            }
+            
+            // 기본값으로 UI 초기화 (앱 크래시 방지)
+            self.userId = 0
+            self.targetCalories = 2000
+            self.todayCalories = 0
+            self.targetWeight = 60
+            self.comment = "데이터를 불러오는 중입니다..."
+            self.presentWeek = 1
+            self.dateString = DateFormatter().string(from: Date())
+            self.koreanDate = ""
+            
+            // 운동 데이터 기본값
+            self.todayBurnedCalories = 0
+            self.todayRecommendBurnedCalories = 300
+            self.anaerobicExerciseTime = 0
+            self.aerobicExerciseTime = 0
+            self.exercisePercentage = 0
+            self.focusedBodyPart = "전신"
+            self.exerciseStatus = "대기"
+            
+            // 식단 데이터 기본값
+            self.todayRecommendedCalories = 2000
+            self.todayConsumedCalorie = 0
+            self.carb = 0
+            self.protein = 0
+            self.fat = 0
+            self.caloriePercentage = 0
+            self.calorieStatus = "대기"
         }
     }
 }

@@ -132,4 +132,63 @@ class AuthAPI {
             .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
     }
+    
+    // 토큰 갱신 API
+    static func refreshToken() async -> Bool {
+        guard let refreshToken = UserDefaults.standard.string(forKey: "refreshToken"),
+              !refreshToken.isEmpty else {
+            print("❌ refreshToken이 없어서 갱신 불가")
+            return false
+        }
+        
+        guard let url = URL(string: "http://43.203.60.2:8080/auth/refresh") else {
+            print("❌ 토큰 갱신 API URL 생성 실패")
+            return false
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(refreshToken)", forHTTPHeaderField: "Authorization")
+        
+        print("🔄 토큰 갱신 시도")
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                if httpResponse.statusCode == 200 {
+                    // 새로운 토큰 파싱
+                    if let tokenResponse = try? JSONDecoder().decode(TokenRefreshResponse.self, from: data) {
+                        if tokenResponse.isSuccess {
+                            // 새로운 토큰 저장
+                            UserDefaults.standard.set(tokenResponse.result.accessToken, forKey: "accessToken")
+                            UserDefaults.standard.set(tokenResponse.result.refreshToken, forKey: "refreshToken")
+                            print("✅ 토큰 갱신 성공")
+                            return true
+                        }
+                    }
+                } else {
+                    print("❌ 토큰 갱신 실패: HTTP \(httpResponse.statusCode)")
+                }
+            }
+        } catch {
+            print("❌ 토큰 갱신 에러: \(error)")
+        }
+        
+        return false
+    }
+}
+
+// 토큰 갱신 응답 모델
+struct TokenRefreshResponse: Codable {
+    let isSuccess: Bool
+    let code: String
+    let message: String
+    let result: TokenRefreshResult
+}
+
+struct TokenRefreshResult: Codable {
+    let accessToken: String
+    let refreshToken: String
 }

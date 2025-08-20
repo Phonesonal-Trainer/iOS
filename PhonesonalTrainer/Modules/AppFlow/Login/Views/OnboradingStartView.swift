@@ -14,6 +14,7 @@ struct OnboardingStartView: View {
     @State private var navigateToMain = false
     @State private var showKakaoWebView = false
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
+    @AppStorage("accessToken") private var accessToken: String = ""
 
     var body: some View {
         NavigationStack {
@@ -82,9 +83,15 @@ struct OnboardingStartView: View {
             .background(Color.grey00)
             .onChange(of: viewModel.isLoggedIn) { loggedIn in
                 if loggedIn {
-                    // ✅ 테스트용: 모든 사용자 온보딩 진입 강제
-                    print("✅ 로그인 성공 · 온보딩 강제 이동")
-                    navigateToNext = true
+                    // ✅ 기존 사용자 vs 신규 사용자 분기
+                    if viewModel.isNewUser {
+                        print("✅ 신규 사용자 로그인 완료 → 온보딩 이동")
+                        navigateToNext = true
+                    } else {
+                        print("✅ 기존 사용자 로그인 완료 → 메인 화면 이동")
+                        hasCompletedOnboarding = true  // 온보딩 완료로 설정
+                        navigateToMain = true
+                    }
                 }
             }
             // ✅ 로그인 성공 시 OnboardingInfoInputView로 이동
@@ -100,11 +107,28 @@ struct OnboardingStartView: View {
             .sheet(isPresented: $showKakaoWebView) {
                 KakaoLoginWebViewScreen(authViewModel: viewModel)
                     .onDisappear {
-                        // ✅ 테스트용: WebView 닫힌 뒤에도 온보딩으로 고정
+                        // ✅ WebView 닫힌 뒤 기존/신규 사용자 분기
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            print("WebView 닫힘 - 로그인 상태: \(viewModel.isLoggedIn) → 온보딩 강제 이동")
-                            if viewModel.isLoggedIn {
-                                navigateToNext = true
+                            print("WebView 닫힘 - 로그인 상태: \(viewModel.isLoggedIn), 신규사용자: \(viewModel.isNewUser)")
+                            print("현재 온보딩 상태: \(hasCompletedOnboarding)")
+                            print("현재 accessToken: \(accessToken)")
+                            
+                            // UserDefaults에서 최신 상태 확인
+                            let currentOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
+                            let currentToken = UserDefaults.standard.string(forKey: "accessToken") ?? ""
+                            
+                            print("UserDefaults 온보딩 상태: \(currentOnboarding)")
+                            print("UserDefaults accessToken: \(currentToken)")
+                            
+                            if viewModel.isLoggedIn || !currentToken.isEmpty {
+                                if viewModel.isNewUser || !currentOnboarding {
+                                    print("→ 신규 사용자 또는 온보딩 미완료: 온보딩 이동")
+                                    navigateToNext = true
+                                } else {
+                                    print("→ 기존 사용자: 메인 화면 이동")
+                                    hasCompletedOnboarding = true
+                                    navigateToMain = true
+                                }
                             }
                         }
                     }

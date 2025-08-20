@@ -8,6 +8,8 @@
 import Foundation
 
 enum DietPlanAPI {
+    private static let baseURL = "http://43.203.60.2:8080"
+    
     static func generate(startDate: Date) async -> Bool {
         do {
             let df = DateFormatter()
@@ -43,6 +45,65 @@ enum DietPlanAPI {
             return false
         }
     }
+    
+    // 새로운 식단 추천 생성 API
+    static func generateDietRecommendation() async -> Bool {
+        guard let url = URL(string: "\(baseURL)/foods/plans/generate") else {
+            print("❌ 식단 추천 API URL 생성 실패")
+            return false
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Authorization 헤더 추가
+        if let accessToken = UserDefaults.standard.string(forKey: "accessToken") {
+            request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+            print("🔑 식단 추천 API Authorization 헤더 추가")
+        } else {
+            print("⚠️ accessToken이 없어서 Authorization 헤더 미추가")
+        }
+        
+        print("🚀 식단 추천 API 요청 시작")
+        print("🚀 URL: \(url)")
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            // HTTP 상태 코드 확인
+            if let httpResponse = response as? HTTPURLResponse {
+                if httpResponse.statusCode >= 400 {
+                    print("❌ 식단 추천 API HTTP \(httpResponse.statusCode) 에러")
+                    if let responseString = String(data: data, encoding: .utf8) {
+                        print("📡 에러 응답: \(responseString)")
+                    }
+                    return false
+                }
+            }
+            
+            // 응답이 HTML인지 확인
+            if let responseString = String(data: data, encoding: .utf8),
+               responseString.trimmingCharacters(in: .whitespaces).hasPrefix("<") {
+                print("⚠️ 식단 추천 API 응답이 HTML → 인증 문제")
+                return false
+            }
+            
+            // JSON 응답 파싱
+            let dietResponse = try JSONDecoder().decode(DietRecommendationResponse.self, from: data)
+            
+            if dietResponse.isSuccess {
+                print("✅ 식단 추천 API 성공: \(dietResponse.result)")
+                return true
+            } else {
+                print("❌ 식단 추천 API 실패: \(dietResponse.message)")
+                return false
+            }
+        } catch {
+            print("❌ 식단 추천 API 에러: \(error)")
+            return false
+        }
+    }
 }
 
 enum DietPlanVisibility {
@@ -74,4 +135,12 @@ enum DietPlanVisibility {
         let rhs = cal.startOfDay(for: start)
         return lhs < rhs   // 시작일 이전은 숨김
     }
+}
+
+// 식단 추천 API 응답 모델
+struct DietRecommendationResponse: Codable {
+    let isSuccess: Bool
+    let code: String
+    let message: String
+    let result: String
 }
