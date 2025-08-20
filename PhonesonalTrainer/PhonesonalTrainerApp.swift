@@ -10,6 +10,8 @@ import SwiftUI
 @main
 struct PhonesonalTrainerApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate // ✅ 필수!
+    @AppStorage("accessToken") private var accessToken: String = ""
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
     
     @StateObject private var userProfile = UserProfileViewModel()
     @StateObject private var myPageViewModel = MyPageViewModel()
@@ -20,14 +22,12 @@ struct PhonesonalTrainerApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                // ✅ 항상 로그인 화면부터 시작 (사용자가 로그인 선택)
-                OnboardingStartView()
-            }
-            .onAppear {
-                // 🔄 앱 시작시 기존 토큰 클리어 - 모든 사용자가 처음부터 시작
-                UserDefaults.standard.removeObject(forKey: "accessToken")
-                UserDefaults.standard.removeObject(forKey: "refreshToken")
-                print("🔄 기존 토큰 클리어 완료 - 새로운 로그인 시작")
+                // ✅ 온보딩 완료 여부까지 확인하여 메인 진입 게이트
+                if !accessToken.isEmpty && hasCompletedOnboarding {
+                    MainTabView()
+                } else {
+                    OnboardingStartView()
+                }
             }
             // 🔗 공통 주입/작업은 여기 한 번만
             .environmentObject(userProfile)

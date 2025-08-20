@@ -5,10 +5,12 @@
 //  Created by Sua Cho on 7/24/25.
 
 import SwiftUI
+import UIKit
 
 struct OnboardingBodyRecordView: View {
     @ObservedObject var viewModel: OnboardingViewModel
     @EnvironmentObject var bodyPhoto: BodyPhotoStore // ✅ BodyPhotoStore 주입
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
 
     let currentWeek: Int = 0
     let goalDuration: Duration = .sixMonths
@@ -116,7 +118,12 @@ struct OnboardingBodyRecordView: View {
             }
 
             HStack(alignment: .top, spacing: 6) {
-                Image("사진알림")
+                if UIImage(named: "사진알림") != nil {
+                    Image("사진알림")
+                } else {
+                    Image(systemName: "exclamationmark.triangle")
+                        .foregroundStyle(Color.orange05)
+                }
             }
 
             Spacer()
@@ -174,20 +181,11 @@ struct OnboardingBodyRecordView: View {
                     bodyPhoto.saveWeek0(image: image)
                     print("📸 0주차 눈바디 로컬 저장 완료")
 
-                    // ✅ 2단계: 회원가입 진행 (기존 로직 유지)
-                    AuthService.shared.signup(with: viewModel, tempToken: viewModel.tempToken) { result in
-                        DispatchQueue.main.async {
-                            isLoading = false
-                            switch result {
-                            case .success:
-                                print("🎉 회원가입 성공 및 0주차 눈바디 저장 완료")
-                                navigateToHome = true      // ← MainTabView로 이동 트리거
-                            case .failure(let error):
-                                print("❌ 회원가입 실패: \(error.localizedDescription) → 홈으로 이동")
-                                // 회원가입 실패해도 이미지는 저장되었으므로 홈으로 이동
-                                navigateToHome = true      // ← 실패 시에도 MainTabView로 이동
-                            }
-                        }
+                    // ✅ 2단계: 회원가입 API는 테스트 동안 생략하고 온보딩 완료로 처리
+                    DispatchQueue.main.async {
+                        self.isLoading = false
+                        self.hasCompletedOnboarding = true
+                        self.navigateToHome = true
                     }
                 }
             }

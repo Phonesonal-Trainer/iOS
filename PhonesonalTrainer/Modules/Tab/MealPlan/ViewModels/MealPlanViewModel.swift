@@ -6,7 +6,9 @@
 //
 
 import Foundation
+import SwiftUI
 
+@MainActor
 class MealPlanViewModel: ObservableObject {
     @Published var selectedDate: Date = .now
     @Published var selectedType: MealType = .breakfast

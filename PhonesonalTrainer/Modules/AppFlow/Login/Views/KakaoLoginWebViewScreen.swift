@@ -90,6 +90,11 @@ struct KakaoLoginWebViewScreen: View {
                             self.authViewModel.isNewUser = result.result.newUser
                             self.authViewModel.tempToken = result.result.tempToken ?? ""
                             self.authViewModel.accessToken = result.result.accessToken
+                            // 토큰/유저ID 저장 (전역)
+                            UserDefaults.standard.set(result.result.accessToken, forKey: "accessToken")
+                            UserDefaults.standard.set(result.result.accessToken, forKey: "authToken")
+                            UserDefaults.standard.set(result.result.refreshToken, forKey: "refreshToken")
+                            if let uid = result.result.user?.id { UserDefaults.standard.set(uid, forKey: "userId") }
                             dismiss()
                         }
                     } catch {
@@ -127,15 +132,17 @@ struct KakaoLoginWebViewScreen: View {
                 self.authViewModel.tempToken = result.result.tempToken ?? ""
                 self.authViewModel.accessToken = result.result.accessToken
                 
-                // 기존 사용자 vs 신규 사용자 분기
-                if result.code == "EXISTING_USER" {
-                    // 기존 사용자 - 메인 화면으로 이동
-                    self.authViewModel.isNewUser = false
-                    print("✅ 기존 사용자 로그인 완료 → 메인 화면 이동")
-                } else {
-                    // 신규 사용자 - 온보딩으로 이동  
-                    self.authViewModel.isNewUser = result.result.newUser
+                // 기존 사용자 vs 신규 사용자 분기 (백엔드 newUser 플래그 기준)
+                self.authViewModel.isNewUser = result.result.newUser
+                // 토큰/유저ID 저장 (전역)
+                UserDefaults.standard.set(result.result.accessToken, forKey: "accessToken")
+                UserDefaults.standard.set(result.result.accessToken, forKey: "authToken")
+                UserDefaults.standard.set(result.result.refreshToken, forKey: "refreshToken")
+                if let uid = result.result.user?.id { UserDefaults.standard.set(uid, forKey: "userId") }
+                if result.result.newUser {
                     print("✅ 신규 사용자 로그인 완료 → 온보딩 이동")
+                } else {
+                    print("✅ 기존 사용자 로그인 완료 → 메인 화면 이동")
                 }
                 
                 self.dismiss()

@@ -74,8 +74,7 @@ struct WebView: UIViewRepresentable {
                                     print("✅ 인증 코드 추출 성공: \(code)")
                                     self.callRealLoginAPI(code: code)
                                 } else {
-                                    print("❌ 인증 코드 추출 실패 - Fallback 사용")
-                                    self.fallbackToMockResponse()
+                                    print("❌ 인증 코드 추출 실패 - 대기")
                                 }
                             }
                         }
@@ -189,11 +188,8 @@ struct WebView: UIViewRepresentable {
                 Thread.sleep(forTimeInterval: 0.5)
             }
             
-            // 모든 엔드포인트가 실패하면 fallback
-            print("⚠️ 모든 엔드포인트 실패 - 가짜 응답으로 fallback")
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                self.fallbackToMockResponse()
-            }
+            // 모든 엔드포인트가 실패하면 중단 (가짜 응답 사용 안 함)
+            print("⚠️ 모든 엔드포인트 실패 - 중단")
         }
         
         // HTML에서 토큰 추출 시도
@@ -296,12 +292,11 @@ struct WebView: UIViewRepresentable {
                 }
             }
             
-            // 추출된 토큰이 있으면 사용, 없으면 fallback
+            // 추출된 토큰이 있으면 사용, 없으면 아무 것도 하지 않음
             if !extractedTokens.isEmpty {
                 createSuccessResponseWithRealTokens(extractedTokens)
             } else {
-                print("⚠️ 토큰 추출 실패 - Fallback 사용")
-                fallbackToMockResponse()
+                print("⚠️ 토큰 추출 실패 - 중단")
             }
         }
         
@@ -397,9 +392,10 @@ struct WebView: UIViewRepresentable {
                                    isSuccess,
                                    let result = jsonObject["result"] as? [String: Any] {
                                     
-                                    // accessToken과 refreshToken 저장
+                                    // accessToken과 refreshToken 저장 (+ authToken alias)
                                     if let accessToken = result["accessToken"] as? String {
                                         UserDefaults.standard.set(accessToken, forKey: "accessToken")
+                                        UserDefaults.standard.set(accessToken, forKey: "authToken")
                                         print("💾 accessToken 저장: \(accessToken)")
                                     }
                                     if let refreshToken = result["refreshToken"] as? String {
@@ -407,8 +403,8 @@ struct WebView: UIViewRepresentable {
                                         print("💾 refreshToken 저장: \(refreshToken)")
                                     }
                                     
-                                    // 모든 사용자를 신규 사용자로 처리 - 항상 온보딩부터 시작
-                                    print("🔄 모든 사용자를 신규로 처리 - 온보딩 시작")
+                                    // 로그인 완료 (신규/기존 여부는 서버 응답 파싱 단계에서 판단)
+                                    print("✅ 로그인 토큰 저장 완료")
                                     apiSucceeded = true
                                     DispatchQueue.main.async {
                                         self.onCodeReceived(responseString)
@@ -428,64 +424,17 @@ struct WebView: UIViewRepresentable {
                 Thread.sleep(forTimeInterval: 0.3)
             }
             
-            // 모든 시도 실패 시 authCode를 tempToken으로 사용 (API 성공하지 않은 경우만)
+            // 모든 시도 실패 시 중단
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 if apiSucceeded {
-                    print("✅ API 이미 성공했으므로 fallback 실행 안 함")
+                    print("✅ API 이미 성공했으므로 추가 작업 없음")
                     return
                 }
-                print("⚠️ 모든 tempToken API 실패 - authCode를 tempToken으로 사용")
-                self.useAuthCodeAsTempToken(authCode)
+                print("⚠️ 모든 tempToken API 실패 - 중단")
             }
         }
         
-        // authCode를 tempToken으로 직접 사용
-        func useAuthCodeAsTempToken(_ authCode: String) {
-            var extractedTokens: [String: String] = [:]
-            extractedTokens["tempToken"] = authCode
-            createSuccessResponseWithRealTokens(extractedTokens)
-        }
-        
-        // fallback 가짜 응답
-        func fallbackToMockResponse() {
-            let successResponse = """
-            {
-                "isSuccess": true,
-                "code": "0000",
-                "message": "성공",
-                "result": {
-                    "accessToken": "final_fallback_access_token",
-                    "refreshToken": "final_fallback_refresh_token", 
-                    "tempToken": "final_fallback_temp_token",
-                    "user": {
-                        "id": 999999,
-                        "email": "fallback@example.com",
-                        "name": "Fallback사용자",
-                        "nickname": "Fallback",
-                        "socialType": "KAKAO",
-                        "gender": "MALE",
-                        "height": null,
-                        "weight": null,
-                        "bodyFatRate": null,
-                        "muscleMass": null,
-                        "bodyFatPercentage": null,
-                        "skeletalMuscleWeight": null,
-                        "age": 25,
-                        "deadline": 30,
-                        "purpose": "체중감량",
-                        "createdAt": "2025-08-15T07:52:49",
-                        "currentGoalPeriodId": 1,
-                        "diagnosis": null,
-                        "dailyExerciseRecord": null
-                    },
-                    "newUser": true
-                }
-            }
-            """
-            
-            print("✅ Final Fallback 가짜 응답 사용")
-            onCodeReceived(successResponse)
-        }
+        // authCode를 tempToken으로 직접 사용하는 가짜 성공/응답은 더 이상 사용하지 않음
 
     }
 }

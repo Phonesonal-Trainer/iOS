@@ -11,7 +11,9 @@ import KakaoSDKUser
 struct OnboardingStartView: View {
     @StateObject private var viewModel = AuthViewModel()
     @State private var navigateToNext = false
+    @State private var navigateToMain = false
     @State private var showKakaoWebView = false
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -57,6 +59,8 @@ struct OnboardingStartView: View {
 
                         // ✅ 카카오 로그인 버튼 (WebView 방식)
                         Button(action: {
+                            // ✅ 테스트 목적: 로그인 시작 시 온보딩 완료 플래그 초기화
+                            hasCompletedOnboarding = false
                             showKakaoWebView = true
                         }) {
                             Image("카카오로그인")
@@ -78,7 +82,8 @@ struct OnboardingStartView: View {
             .background(Color.grey00)
             .onChange(of: viewModel.isLoggedIn) { loggedIn in
                 if loggedIn {
-                    print("✅ 로그인 성공 → 온보딩 이동")
+                    // ✅ 테스트용: 모든 사용자 온보딩 진입 강제
+                    print("✅ 로그인 성공 · 온보딩 강제 이동")
                     navigateToNext = true
                 }
             }
@@ -95,15 +100,18 @@ struct OnboardingStartView: View {
             .sheet(isPresented: $showKakaoWebView) {
                 KakaoLoginWebViewScreen(authViewModel: viewModel)
                     .onDisappear {
-                        // WebView 닫힌 후 잠시 기다려서 상태 확인
+                        // ✅ 테스트용: WebView 닫힌 뒤에도 온보딩으로 고정
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            print("WebView 닫힘 - 로그인 상태: \(viewModel.isLoggedIn)")
+                            print("WebView 닫힘 - 로그인 상태: \(viewModel.isLoggedIn) → 온보딩 강제 이동")
                             if viewModel.isLoggedIn {
-                                print("✅ 지연 후 로그인 확인 → 온보딩 이동")
                                 navigateToNext = true
                             }
                         }
                     }
+            }
+            // 기존 사용자 메인 이동
+            .navigationDestination(isPresented: $navigateToMain) {
+                MainTabView()
             }
         }
     }

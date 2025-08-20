@@ -209,20 +209,15 @@ struct OnboradingDiagnosisView: View {
                     // 시작하기 버튼
                     Button(action: {
                         isStarting = true
-                        
-                        // 새로운 운동 추천 API 호출 (실패해도 계속 진행)
-                        generateExerciseRecommendation { exerciseSuccess in
-                            print("🏋️ 운동 추천 API 결과: \(exerciseSuccess ? "성공" : "실패")")
-                            
-                            Task {
-                                // 식단 플랜 생성(기존 유지)
-                                let dietSuccess = await DietPlanAPI.generate(startDate: Date())
-                                print("🍽️ 식단 플랜 API 결과: \(dietSuccess ? "성공" : "실패")")
-                                
+                        // 시작하기 → API 성공/실패와 무관하게 다음 단계로 이동 (로그만 남김)
+                        generateExerciseRecommendation { ok in
+                            print("🏋️ 운동 추천: \(ok ? "성공" : "실패")")
+                        }
+                        Task {
+                            let ok = await DietPlanAPI.generate(startDate: Date())
+                            print("🍽️ 식단 플랜: \(ok ? "성공" : "실패")")
+                            await MainActor.run {
                                 isStarting = false
-                                
-                                // API 성공 여부와 관계없이 홈화면으로 이동
-                                print("🚀 API 결과와 관계없이 홈화면으로 이동")
                                 goToBodyRecord = true
                             }
                         }

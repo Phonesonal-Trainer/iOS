@@ -25,7 +25,13 @@ enum DietPlanAPI {
             req.httpBody = try JSONEncoder().encode(body)
 
             let (data, resp) = try await URLSession.shared.data(for: req)
-            guard let http = resp as? HTTPURLResponse, (200...299).contains(http.statusCode) else { return false }
+            guard let http = resp as? HTTPURLResponse else { return false }
+            // HTML 로그인 페이지가 오는 경우 가드
+            if let ct = http.value(forHTTPHeaderField: "Content-Type"), ct.contains("text/html") {
+                print("⚠️ 식단 플랜 응답이 HTML → 인증 필요 또는 잘못된 엔드포인트")
+                return false
+            }
+            guard (200...299).contains(http.statusCode) else { return false }
             let decoded = try JSONDecoder().decode(GenerateDietPlanResponse.self, from: data)
             if decoded.isSuccess {
                 // 프론트에서 “오늘 이전 요일 숨김” 기준으로 사용할 가시 시작일 저장

@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import SwiftUI
 
 
 
@@ -93,12 +94,15 @@ final class OnboardingViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         
-        // accessToken이 있으면 이미 로그인된 상태이므로 바로 성공 처리
+        // accessToken이 있으면 기존 사용자로 간주하고 프로필 갱신 플로우 수행
         if let accessToken = UserDefaults.standard.string(forKey: "accessToken"), !accessToken.isEmpty {
-            print("✅ 이미 로그인된 상태 - 회원가입 건너뛰기")
-            DispatchQueue.main.async {
-                self.isLoading = false
-                completion(true)
+            print("✅ 이미 로그인된 상태 - 회원가입 스킵 대신 프로필 갱신 수행")
+            Task {
+                let success = await self.updateExistingUserProfile()
+                await MainActor.run {
+                    self.isLoading = false
+                    completion(success)
+                }
             }
             return
         }
@@ -171,6 +175,60 @@ final class OnboardingViewModel: ObservableObject {
                 }
             )
             .store(in: &cancellables)
+    }
+
+    // MARK: - 기존 사용자 프로필 갱신 (닉네임/키/몸무게)
+    private func updateExistingUserProfile() async -> Bool {
+        var allSucceeded = true
+
+        // 닉네임 갱신
+        if !nickname.trimmingCharacters(in: .whitespaces).isEmpty {
+            do {
+                let _: APIResponse<String> = try await APIClient.shared.patch(
+                    path: "/mypage/nickname",
+                    queryItems: [URLQueryItem(name: "nickname", value: nickname)]
+                )
+                print("✅ 닉네임 갱신 완료: \(nickname)")
+            } catch {
+                print("❌ 닉네임 갱신 실패: \(error.localizedDescription)")
+                allSucceeded = false
+            }
+        }
+
+        // 키 갱신 (정수 cm)
+        if let hDouble = Double(height), hDouble > 0 {
+            let h = Int(hDouble.rounded())
+            do {
+                let _: APIResponse<String> = try await APIClient.shared.patch(
+                    path: "/mypage/height",
+                    queryItems: [URLQueryItem(name: "height", value: String(h))]
+                )
+                print("✅ 키 갱신 완료: \(h)cm")
+            } catch {
+                print("❌ 키 갱신 실패: \(error.localizedDescription)")
+                allSucceeded = false
+            }
+        }
+
+        // 몸무게 갱신 (홈 API로 기록) - 실패해도 온보딩 진행을 막지 않음
+        if let w = Double(weight), w > 0 {
+            let userId = UserDefaults.standard.integer(forKey: "userId")
+            if userId != 0 {
+                do {
+                    try await WeightAPI.update(userId: userId, weight: w)
+                    print("✅ 몸무게 갱신 완료: \(w)")
+                } catch {
+                    // 서버 측 오류(예: GoalPeriod null 등)는 비치명적 처리
+                    print("❌ 몸무게 갱신 실패(비치명적): \(error.localizedDescription)")
+                }
+            } else {
+                print("⚠️ userId 없음으로 몸무게 갱신 생략(비치명적)")
+            }
+        }
+
+        // TODO: 성별/나이/목적/기간/체지방/골격근량 갱신 엔드포인트가 제공되면 여기서 추가 호출
+
+        return allSucceeded
     }
     
     // ✅ 진단 API 호출
