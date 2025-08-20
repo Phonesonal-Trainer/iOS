@@ -15,7 +15,13 @@ class AuthAPI {
     private let baseURL = "http://43.203.60.2:8080"
     
     func signup(request: SignupRequest) -> AnyPublisher<SignupResponse, Error> {
-        guard let url = URL(string: "\(baseURL)/auth/signup") else {
+        // URL에 tempToken을 query parameter로 추가
+        var urlComponents = URLComponents(string: "\(baseURL)/auth/signup")!
+        urlComponents.queryItems = [
+            URLQueryItem(name: "tempToken", value: request.tempToken)
+        ]
+        
+        guard let url = urlComponents.url else {
             return Fail(error: URLError(.badURL))
                 .eraseToAnyPublisher()
         }
@@ -24,9 +30,8 @@ class AuthAPI {
         urlRequest.httpMethod = "POST"
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        // JSON 데이터 생성
+        // JSON 데이터 생성 (tempToken은 query parameter로 전송하므로 body에서 제외)
         var jsonBody: [String: Any] = [
-            "tempToken": request.tempToken,
             "nickname": request.nickname,
             "age": request.age,
             "gender": request.gender,
@@ -55,6 +60,7 @@ class AuthAPI {
         print("🚀 Signup Request URL: \(url)")
         print("🚀 HTTP Method: \(urlRequest.httpMethod ?? "Unknown")")
         print("🚀 Headers: \(urlRequest.allHTTPHeaderFields ?? [:])")
+        print("🚀 Query Parameters: tempToken=\(request.tempToken)")
         print("🚀 JSON Body: \(jsonBody)")
         if let bodyData = urlRequest.httpBody {
             print("🚀 Body Data Size: \(bodyData.count) bytes")
