@@ -63,12 +63,17 @@ final class MealInfoViewModel: ObservableObject {
             imageURL: originalMeal.imageURL
         )
         
+        // ✅ NutrientInfoModel의 id / imageUrl / status는 유지하고,
+        //    kcal/carb/protein/fat만 스케일링
         nutrient = NutrientInfoModel(
+            id: originalNutrient.id,                 // ← id 유지 (SwiftUI diff용)
             mealType: originalNutrient.mealType,
             kcal: originalNutrient.kcal * factor,
             carb: originalNutrient.carb * factor,
             protein: originalNutrient.protein * factor,
-            fat: originalNutrient.fat * factor
+            fat: originalNutrient.fat * factor,
+            imageUrl: originalNutrient.imageUrl,     // ← 이미지 유지
+            status: originalNutrient.status          // ← 상태 유지
         )
     }
     

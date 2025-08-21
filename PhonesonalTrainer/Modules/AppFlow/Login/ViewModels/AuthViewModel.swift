@@ -156,9 +156,21 @@ final class AuthViewModel: ObservableObject {
                         self?.isLoggedIn = result.isSuccess
                         self?.isNewUser = result.result.newUser
 
-                        // 필요 시 accessToken, tempToken 저장
-                        let accessToken = result.result.accessToken
-                        let tempToken = result.result.tempToken
+                        // 필요 시 accessToken, tempToken 저장 - Optional 처리
+                        let accessToken = result.result.accessToken ?? ""
+                        let tempToken = result.result.tempToken ?? ""
+                        self?.accessToken = accessToken
+                        self?.tempToken = tempToken
+                        
+                        // 온보딩 상태 설정
+                        if result.result.newUser {
+                            UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
+                            self?.logger.info("[Kakao] 신규 사용자 로그인 완료 → 온보딩 이동")
+                        } else {
+                            UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
+                            self?.logger.info("[Kakao] 기존 사용자 로그인 완료 → 메인 화면 이동")
+                        }
+                        
                         self?.logger.info("[Kakao] 서버 토큰 수신 완료 · accessToken/ tempToken 존재 여부 저장 처리 예정")
                         // -> UserDefaults나 Keychain에 저장하거나 ViewModel에 전달
                     }
@@ -200,6 +212,15 @@ final class AuthViewModel: ObservableObject {
                     DispatchQueue.main.async {
                         self?.isLoggedIn = result.isSuccess
                         self?.isNewUser = result.result.newUser
+                        
+                        // 온보딩 상태 설정
+                        if result.result.newUser {
+                            UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
+                            self?.logger.info("[Kakao] Fallback: 신규 사용자 로그인 완료 → 온보딩 이동")
+                        } else {
+                            UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
+                            self?.logger.info("[Kakao] Fallback: 기존 사용자 로그인 완료 → 메인 화면 이동")
+                        }
                     }
                 case .failure(let error):
                     self?.logger.error("[Kakao] Fallback도 실패: \(error.localizedDescription, privacy: .public)")

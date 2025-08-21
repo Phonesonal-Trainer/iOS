@@ -7,12 +7,21 @@
 
 import SwiftUI
 import PhotosUI
+import UIKit
 
 struct ImageUploadButton: View {
     @Binding var image: UIImage?    // 업로드할 이미지 (외부에서 Binding으로 주입)
     @State private var showImagePicker = false
     @State private var selectedItem: PhotosPickerItem? = nil
+    @State private var isUploading = false
+    @State private var errorMessage: String?
+    
     var isLocal: Bool = true        // 로컬 저장 여부 (기본값: 로컬)
+    /// 업로드 실행 클로저: 이미지를 넘겨주면 서버 업로드를 수행 (필수)
+    var onUpload: ((UIImage) async throws -> MealImageResponse)?
+    /// 업로드 성공 후 후처리(선택): 서버 응답 result를 전달
+    var onUploaded: ((MealImageResult) -> Void)?
+
 
     var body: some View {
         VStack {
@@ -28,7 +37,13 @@ struct ImageUploadButton: View {
                         .clipped()
                 } else {
                     VStack(spacing: 16) {
-                        Image("이미지업로드")
+                        if UIImage(named: "이미지업로드") != nil {
+                            Image("이미지업로드")
+                        } else {
+                            Image(systemName: "photo.badge.plus")
+                                .font(.system(size: 40))
+                                .foregroundStyle(.grey03)
+                        }
                         Text("이미지 업로드")
                             .font(.PretendardMedium18)
                             .foregroundColor(.grey03)
@@ -40,20 +55,57 @@ struct ImageUploadButton: View {
                 }
             }
             .photosPicker(isPresented: $showImagePicker, selection: $selectedItem)
-            .onChange(of: selectedItem) {    // iOS 17 스타일
-                if let newItem = selectedItem {
-                    Task {
-                        if let data = try? await newItem.loadTransferable(type: Data.self),
-                           let uiImage = UIImage(data: data) {
-                            self.image = uiImage
-                            print("📷 이미지 선택 완료 (로컬 저장: \(isLocal))")
-                            if !isLocal {
-                                // 서버 업로드 로직 예시
-                                print("서버로 업로드할 예정: \(uiImage)")
-                            }
+            
+            if let msg = errorMessage {
+                Text(msg)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .padding(.top, 6)
+            }
+        }
+        .onChange(of: selectedItem) {    // iOS 17 스타일
+            if let newItem = selectedItem {
+                Task {
+                    if let data = try? await newItem.loadTransferable(type: Data.self),
+                       let uiImage = UIImage(data: data) {
+                        self.image = uiImage
+                        print("📷 이미지 선택 완료 (로컬 저장: \(isLocal))")
+                        if !isLocal {
+                            await performUploadIfNeeded()
                         }
                     }
                 }
+            }
+        }
+    }
+    
+    // 내부 업로드 실행 (isLocal == false에서만 호출)
+    private func performUploadIfNeeded() async {
+        guard !isUploading else { return }
+        guard let img = image else { return }
+        guard let onUpload else {
+            await MainActor.run { self.errorMessage = "업로드 핸들러가 설정되지 않았어요." }
+            return
+        }
+
+        await MainActor.run {
+            isUploading = true
+            errorMessage = nil
+        }
+        defer { Task { @MainActor in isUploading = false } }
+
+        do {
+            let resp = try await onUpload(img)        // ① 서버 업로드
+            guard resp.isSuccess else {
+                throw NSError(domain: "UploadImage", code: -2,
+                              userInfo: [NSLocalizedDescriptionKey: resp.message])
+            }
+            await MainActor.run {
+                onUploaded?(resp.result)              // ② 후처리 콜백
+            }
+        } catch {
+            await MainActor.run {
+                errorMessage = "업로드 실패: \(error.localizedDescription)"
             }
         }
     }

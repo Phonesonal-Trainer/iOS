@@ -61,7 +61,18 @@ struct MealPlanView: View {
         .navigationDestination(for: MealPlanRoute.self) { route in
             switch route {
             case .mealRecord:
-                MealRecordDetailView(mealType: type, selectedDate: selectedDate, path: $path, favoritesStore: favoritesStore)
+                if let model = viewModel.item(for: viewModel.selectedType) {
+                    MealRecordDetailView(
+                        mealType: type,
+                        selectedDate: selectedDate, model: model,
+                        planVM: viewModel,
+                        path: $path,
+                        favoritesStore: favoritesStore
+                    )
+                } else {
+                    // 모델이 없으면 비어있는 상태 보여주기
+                    Text("이 날짜엔 기록이 없어요.")
+                }
             case .foodSearch:
                 FoodSearchView(path: $path, favorites: favoritesStore, selectedDate: selectedDate, mealType: viewModel.selectedType)
             case .manualAdd:
@@ -82,13 +93,13 @@ struct MealPlanView: View {
                 .padding(.top, 25)
             
             HStack {
-                Text("1234 kcal")
+                Text("\(Int(viewModel.actualTotalKcal).formattedWithSeparator) kcal")
                     .font(.PretendardSemiBold22)
                     .foregroundStyle(.grey05)
                 Text("/")
                     .font(.PretendardMedium16)
                     .foregroundStyle(.orange05)
-                Text("1111 kcal")
+                Text("\(Int(viewModel.plannedTotalKcal).formattedWithSeparator) kcal")
                     .font(.PretendardMedium16)
                     .foregroundStyle(.orange05)
             }

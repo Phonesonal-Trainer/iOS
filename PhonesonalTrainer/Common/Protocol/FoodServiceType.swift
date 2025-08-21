@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 protocol FoodServiceType {
     func toggleFavorite(foodId: Int, token: String?) async throws -> Bool
@@ -13,4 +14,6 @@ protocol FoodServiceType {
     func addUserMealFromFood(foodId: Int, date: Date, mealTime: MealType, token: String?) async throws -> UserMealItem
     func addCustomUserMeal(name: String, calorie: Double, carb: Double, protein: Double, fat: Double,
                                date: Date, mealTime: MealType, token: String?) async throws
+    func fetchNutritionSummary(date: String, token: String?) async throws -> NutritionSummaryResponse
+    func uploadMealImage(date: Date, mealTime: String, image: UIImage, token: String?) async throws -> MealImageResponse
 }

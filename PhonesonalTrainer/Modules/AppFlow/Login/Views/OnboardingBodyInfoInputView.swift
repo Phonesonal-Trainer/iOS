@@ -174,7 +174,7 @@ struct OnboardingBodyInfoInputView: View {
                     viewModel.signup { signupSuccess in
                         if signupSuccess {
                             // 회원가입 성공 후 진단 API 호출
-                            viewModel.fetchDiagnosis { diagnosisSuccess in
+                            viewModel.callDiagnosisAPI { diagnosisSuccess in
                                 if diagnosisSuccess {
                                     print("🎯 진단 성공, diagnosisResult: \(String(describing: viewModel.diagnosisResult))")
                                     goToDiagnosis = true

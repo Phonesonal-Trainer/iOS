@@ -4,20 +4,20 @@
 //
 //  Created by Sua Cho on 7/24/25.
 
-
 import SwiftUI
+import UIKit
 
 struct OnboardingBodyRecordView: View {
     @ObservedObject var viewModel: OnboardingViewModel
     @EnvironmentObject var bodyPhoto: BodyPhotoStore // ✅ BodyPhotoStore 주입
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
 
     let currentWeek: Int = 0
     let goalDuration: Duration = .sixMonths
 
     @State private var uploadedImage: UIImage? = nil
     @State private var showDeleteAlert = false
-    @State private var navigateToHome = false
-    @State private var dummyPath: [HomeRoute] = [] // ✅ HomeScreenView용 임시 path
+    @State private var navigateToHome = false   // ← MainTabView로 전환 트리거
 
     // ✅ API 상태 처리용
     @State private var isLoading = false
@@ -30,9 +30,9 @@ struct OnboardingBodyRecordView: View {
                 contentView
                     .navigationBarBackButtonHidden(true)
 
-                // ✅ NavigationLink → Home 이동
+                // ✅ MainTabView로 이동
                 NavigationLink(
-                    destination: HomeScreenView(path: $dummyPath),
+                    destination: MainTabView(),   // ⬅️ 변경: HomeScreenView -> MainTabView
                     isActive: $navigateToHome
                 ) {
                     EmptyView()
@@ -110,15 +110,20 @@ struct OnboardingBodyRecordView: View {
             .multilineTextAlignment(.center)
             .padding(.horizontal)
 
-            if let image = uploadedImage {
+            if uploadedImage != nil {
                 uploadedImagePreview
             } else {
-                ImageUploadButton(image: $uploadedImage, isLocal: true)
+                ImageUploadButton(image: $uploadedImage, isLocal: true, onUpload: nil, onUploaded: nil)
                     .padding(.vertical, 48)
             }
 
             HStack(alignment: .top, spacing: 6) {
-                Image("사진알림")
+                if UIImage(named: "사진알림") != nil {
+                    Image("사진알림")
+                } else {
+                    Image(systemName: "exclamationmark.triangle")
+                        .foregroundStyle(Color.orange05)
+                }
             }
 
             Spacer()
@@ -171,25 +176,16 @@ struct OnboardingBodyRecordView: View {
             ) {
                 if let image = uploadedImage {
                     isLoading = true
-                    
+
                     // ✅ 1단계: 0주차 눈바디 로컬 저장
                     bodyPhoto.saveWeek0(image: image)
                     print("📸 0주차 눈바디 로컬 저장 완료")
-                    
-                    // ✅ 2단계: 회원가입 진행 (기존 로직 유지)
-                    AuthService.shared.signup(with: viewModel, tempToken: viewModel.tempToken) { result in
-                        DispatchQueue.main.async {
-                            isLoading = false
-                            switch result {
-                            case .success:
-                                print("🎉 회원가입 성공 및 0주차 눈바디 저장 완료")
-                                navigateToHome = true
-                            case .failure(let error):
-                                print("❌ 회원가입 실패: \(error.localizedDescription) → 홈으로 이동")
-                                // 회원가입 실패해도 이미지는 저장되었으므로 홈으로 이동
-                                navigateToHome = true
-                            }
-                        }
+
+                    // ✅ 2단계: 회원가입 API는 테스트 동안 생략하고 온보딩 완료로 처리
+                    DispatchQueue.main.async {
+                        self.isLoading = false
+                        self.hasCompletedOnboarding = true
+                        self.navigateToHome = true
                     }
                 }
             }
@@ -207,4 +203,5 @@ struct OnboardingBodyRecordView: View {
 
 #Preview {
     OnboardingBodyRecordView(viewModel: OnboardingViewModel())
+        .environmentObject(BodyPhotoStore())
 }

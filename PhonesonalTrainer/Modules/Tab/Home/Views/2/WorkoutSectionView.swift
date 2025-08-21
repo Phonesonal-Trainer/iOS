@@ -25,10 +25,10 @@ struct WorkoutSectionView: View {
                 goal: home.todayRecommendBurnedCalories
             )
         }
-        .onChange(of: home.todayBurnedCalories) { newVal in
+        .onChange(of: home.todayBurnedCalories) { _, newVal in
             workoutViewModel.apply(kcal: newVal, goal: home.todayRecommendBurnedCalories)
         }
-        .onChange(of: home.todayRecommendBurnedCalories) { newVal in
+        .onChange(of: home.todayRecommendBurnedCalories) { _, newVal in
             workoutViewModel.apply(kcal: home.todayBurnedCalories, goal: newVal)
         }
     }

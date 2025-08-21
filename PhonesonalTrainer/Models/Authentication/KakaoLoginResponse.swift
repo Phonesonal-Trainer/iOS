@@ -16,10 +16,10 @@ struct KakaoLoginResponse: Codable {
 
 // MARK: - result 객체 내부
 struct LoginResult: Codable {
-    let accessToken: String
-    let refreshToken: String
-    let tempToken: String?      // null 가능
-    let user: LoginUser?        // null 가능 
+    let accessToken: String?      // null 가능
+    let refreshToken: String?     // null 가능
+    let tempToken: String?        // null 가능
+    let user: LoginUser?          // null 가능 
     let newUser: Bool
 }
 

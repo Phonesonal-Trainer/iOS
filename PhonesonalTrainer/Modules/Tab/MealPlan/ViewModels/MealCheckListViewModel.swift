@@ -65,7 +65,7 @@ final class MealCheckListViewModel: ObservableObject {
         var req = URLRequest(url: url)
         req.httpMethod = "PATCH"
         req.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        if let token { req.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
+        req.addAuthToken()
 
         let body = PatchCompleteRequest(
             foodId: foodId, date: date, mealTime: mealType.rawValue, complete: status.rawValue

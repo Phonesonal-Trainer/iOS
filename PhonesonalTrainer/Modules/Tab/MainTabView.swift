@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct MainTabView: View {
+    @EnvironmentObject var weightStore: BodyWeightStore
     @State private var selection: Int = 0
     @State private var homePath: [HomeRoute] = []
     @State private var workoutPath: [WorkoutRoutineRoute] = []
@@ -54,6 +55,13 @@ struct MainTabView: View {
             .tag(3)
         }
         .tint(Color("orange05"))
+        .task {
+            // 로그인 직후 userId가 저장되므로 여기서 한 번 더 설정
+            let saved = UserDefaults.standard.integer(forKey: "userId")
+            if saved != 0 {
+                await weightStore.configure(userId: saved)
+            }
+        }
     }
 }
 

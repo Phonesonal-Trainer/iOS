@@ -12,7 +12,7 @@ struct WorkoutRoutineView: View {
     @Binding var path: [WorkoutRoutineRoute]
     
     @State private var selectedDate: Date = Date()                  //  상위로 올린 날짜 상태
-    @StateObject private var listVM = WorkoutListViewModel()
+    @EnvironmentObject var listVM: WorkoutListViewModel
     
     // MARK: - 상수 정의
     fileprivate enum WorkoutRoutineConstants {

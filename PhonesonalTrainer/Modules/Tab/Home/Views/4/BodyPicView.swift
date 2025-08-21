@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct BodyPicView: View {
     @EnvironmentObject var bodyPhoto: BodyPhotoStore
@@ -63,9 +64,16 @@ struct BodyPicView: View {
                 // 오늘 사진 없을 때 업로드 버튼
                 Button(action: { showImagePickerOptions = true }) {
                     HStack(spacing: 5) {
-                        Image("uploadIcon")
-                            .resizable()
-                            .frame(width: 16, height: 16)
+                        if UIImage(named: "uploadIcon") != nil {
+                            Image("uploadIcon")
+                                .resizable()
+                                .frame(width: 16, height: 16)
+                        } else {
+                            Image(systemName: "camera.fill")
+                                .font(.system(size: 14))
+                                .foregroundStyle(.grey03)
+                                .frame(width: 16, height: 16)
+                        }
                         Text("눈바디 업로드")
                             .font(.system(size: 14))
                             .foregroundStyle(.grey05)

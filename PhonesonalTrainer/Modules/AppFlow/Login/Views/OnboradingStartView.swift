@@ -11,7 +11,10 @@ import KakaoSDKUser
 struct OnboardingStartView: View {
     @StateObject private var viewModel = AuthViewModel()
     @State private var navigateToNext = false
+    @State private var navigateToMain = false
     @State private var showKakaoWebView = false
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
+    @AppStorage("accessToken") private var accessToken: String = ""
 
     var body: some View {
         NavigationStack {
@@ -57,6 +60,8 @@ struct OnboardingStartView: View {
 
                         // ✅ 카카오 로그인 버튼 (WebView 방식)
                         Button(action: {
+                            // ✅ 테스트 목적: 로그인 시작 시 온보딩 완료 플래그 초기화
+                            hasCompletedOnboarding = false
                             showKakaoWebView = true
                         }) {
                             Image("카카오로그인")
@@ -78,8 +83,15 @@ struct OnboardingStartView: View {
             .background(Color.grey00)
             .onChange(of: viewModel.isLoggedIn) { loggedIn in
                 if loggedIn {
-                    print("✅ 로그인 성공 → 온보딩 이동")
-                    navigateToNext = true
+                    // ✅ 기존 사용자 vs 신규 사용자 분기
+                    if viewModel.isNewUser {
+                        print("✅ 신규 사용자 로그인 완료 → 온보딩 이동")
+                        navigateToNext = true
+                    } else {
+                        print("✅ 기존 사용자 로그인 완료 → 메인 화면 이동")
+                        hasCompletedOnboarding = true  // 온보딩 완료로 설정
+                        navigateToMain = true
+                    }
                 }
             }
             // ✅ 로그인 성공 시 OnboardingInfoInputView로 이동
@@ -95,15 +107,35 @@ struct OnboardingStartView: View {
             .sheet(isPresented: $showKakaoWebView) {
                 KakaoLoginWebViewScreen(authViewModel: viewModel)
                     .onDisappear {
-                        // WebView 닫힌 후 잠시 기다려서 상태 확인
+                        // ✅ WebView 닫힌 뒤 기존/신규 사용자 분기
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            print("WebView 닫힘 - 로그인 상태: \(viewModel.isLoggedIn)")
-                            if viewModel.isLoggedIn {
-                                print("✅ 지연 후 로그인 확인 → 온보딩 이동")
-                                navigateToNext = true
+                            print("WebView 닫힘 - 로그인 상태: \(viewModel.isLoggedIn), 신규사용자: \(viewModel.isNewUser)")
+                            print("현재 온보딩 상태: \(hasCompletedOnboarding)")
+                            print("현재 accessToken: \(accessToken)")
+                            
+                            // UserDefaults에서 최신 상태 확인
+                            let currentOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
+                            let currentToken = UserDefaults.standard.string(forKey: "accessToken") ?? ""
+                            
+                            print("UserDefaults 온보딩 상태: \(currentOnboarding)")
+                            print("UserDefaults accessToken: \(currentToken)")
+                            
+                            if viewModel.isLoggedIn || !currentToken.isEmpty {
+                                if viewModel.isNewUser || !currentOnboarding {
+                                    print("→ 신규 사용자 또는 온보딩 미완료: 온보딩 이동")
+                                    navigateToNext = true
+                                } else {
+                                    print("→ 기존 사용자: 메인 화면 이동")
+                                    hasCompletedOnboarding = true
+                                    navigateToMain = true
+                                }
                             }
                         }
                     }
+            }
+            // 기존 사용자 메인 이동
+            .navigationDestination(isPresented: $navigateToMain) {
+                MainTabView()
             }
         }
     }
@@ -111,4 +143,5 @@ struct OnboardingStartView: View {
 
 #Preview {
     OnboardingStartView()
+        .environmentObject(WorkoutListViewModel())
 }

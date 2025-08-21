@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 struct TrainerCommentView: View {
     var comment: String = "어쩌구저쩌구코멘트" //더미 
 
@@ -13,13 +14,10 @@ struct TrainerCommentView: View {
         HStack {
             VStack(alignment: .leading, spacing: 5) { // 간격 5
                            HStack(spacing: 4) {
-                    Image("trainercomment")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 18, height: 18)
-                    Text("폰스널트레이너의 코멘트")
-                        .font(.system(size: 14))
-                        .foregroundStyle(.orange05)
+                               Image("Frame 1262")
+                                       .resizable()
+                                       .aspectRatio(contentMode: .fit)
+                                       .frame(width: 159, height: 18)
                 }
 
                 Text(comment)

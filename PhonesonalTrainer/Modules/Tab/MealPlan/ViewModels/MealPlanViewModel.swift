@@ -6,38 +6,77 @@
 //
 
 import Foundation
+import SwiftUI
 
+@MainActor
 class MealPlanViewModel: ObservableObject {
-    var selectedDate: Date = .now
-    // 초기 설정
+    @Published var selectedDate: Date = .now
     @Published var selectedType: MealType = .breakfast
-    
-    // 식사 종류별 기록 상태를 딕셔너리로 관리
-    @Published var mealRecordStates: [MealType: MealRecordState] = [
-        .breakfast: .none,
-        .lunch: .none,
-        .dinner: .none,
-        .snack: .none
-    ]
-    
-    func fetchMealRecord(for type: MealType) {
-        // 서버 응답 기반으로 처리할 것 (예시로 임시 로직 작성)
-        let hasRecord = true // ← 백엔드 응답 결과에 따라
-        let hasImage = true // ← 백엔드 응답 결과에 따라
-        
-        if hasRecord {
-            if hasImage {
-                mealRecordStates[type] = .withImage
-            } else {
-                mealRecordStates[type] = .noImage
-            }
-        } else {
-            mealRecordStates[type] = MealRecordState.none
+    @Published var items: [NutrientInfoModel] = []
+    @Published var isLoading = false
+    @Published var errorMessage: String?
+    @Published var plannedTotalKcal: Double = 0
+    @Published var actualTotalKcal: Double = 0
+
+    private let service: FoodServiceType
+    init(service: FoodServiceType = FoodService()) {
+        self.service = service
+    }
+
+    func load() async {
+        isLoading = true
+        errorMessage = nil
+        defer { isLoading = false }
+
+        let dateString = DateFormatter.dateOnly.string(from: selectedDate)
+
+        do {
+            let res = try await service.fetchNutritionSummary(
+                date: dateString,
+                token: nil  // 서비스가 addAuthToken() 쓰므로 nil 고정
+            )
+            // 합계 칼로리 세팅
+            self.plannedTotalKcal = res.plannedTotalCalorie
+            self.actualTotalKcal  = res.actualTotalCalorie
+            
+            items = mapToUI(res)
+        } catch {
+            errorMessage = "불러오기 실패: \(error.localizedDescription)"
+            items = []
+            plannedTotalKcal = 0
+            actualTotalKcal = 0
         }
     }
-    
-    func mealRecordState(for type: MealType) -> MealRecordState {
-        return mealRecordStates[type] ?? .none
+
+    private func mapToUI(_ res: NutritionSummaryResponse) -> [NutrientInfoModel] {
+        [
+            .init(mealType: "아침",  from: res.summary.breakfast),
+            .init(mealType: "점심",  from: res.summary.lunch),
+            .init(mealType: "간식",  from: res.summary.snack),
+            .init(mealType: "저녁",  from: res.summary.dinner)
+        ]
     }
 
+    func state(for type: MealType) -> MealRecordState {
+        guard let item = item(for: type) else { return .none }
+        switch item.status {
+        case .none: return .none
+        case .noImage: return .noImage
+        case .withImage: return .withImage
+        }
+    }
+
+    func item(for type: MealType) -> NutrientInfoModel? {
+        let key = label(for: type)
+        return items.first { $0.mealType == key }
+    }
+
+    private func label(for type: MealType) -> String {
+        switch type {
+        case .breakfast: return "아침"
+        case .lunch:     return "점심"
+        case .snack:     return "간식"
+        case .dinner:    return "저녁"
+        }
+    }
 }

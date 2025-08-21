@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct ManualAddWorkoutView: View {
     // MARK: - Property
@@ -28,6 +29,12 @@ struct ManualAddWorkoutView: View {
     private var kcalBurnedValue: Double? {
         Double(kcalBurned)
     }
+    
+    /// 운동명 조건
+    @State private var lastValidWorkoutName: String = ""
+    @State private var shakeCount: Int = 0
+    private let allowedPattern = #"^[\p{Hangul}a-zA-Z\s]*$"#
+    private let maxWorkoutNameLength = 20
     
     // MARK: - 상수 정의
     fileprivate enum ManualAddWorkoutConstants {
@@ -101,6 +108,7 @@ struct ManualAddWorkoutView: View {
                 }
             }
         }
+        .background(Color.background)
     }
     
     // MARK: - NavigationBar
@@ -125,6 +133,21 @@ struct ManualAddWorkoutView: View {
                 .foregroundStyle(Color.orange05)
         }, placeholder: "운동명을 입력하세요.", text: $workoutName)
         .focused($focusedField, equals: .workoutName)
+        // 🔽 입력 검증: 허용 외 입력 또는 길이 초과 시 "되돌리기 + 흔들림 + 햅틱"
+        .onChange(of: workoutName) { newValue in        // ← iOS16/17 모두 동작(단일 파라미터)
+            let okChars = newValue.range(of: allowedPattern, options: .regularExpression) != nil
+            let okLength = newValue.count <= maxWorkoutNameLength
+
+            if okChars && okLength {
+                lastValidWorkoutName = newValue
+            } else {
+                workoutName = lastValidWorkoutName  // 되돌리기
+                shakeCount += 1                     // 흔들기
+                errorHaptic()                       // 햅틱
+            }
+        }
+        .modifier(ShakeEffect(animatableData: CGFloat(shakeCount))) // 🔶 살짝 흔들기
+        
     }
     
     // MARK: - '칼로리 소모량'
@@ -161,6 +184,24 @@ struct ManualAddWorkoutView: View {
             .resizable()
             .frame(width: ManualAddWorkoutConstants.baseWidth, height: ManualAddWorkoutConstants.noticeHeight)
     }
+}
+
+// 흔들림 효과
+struct ShakeEffect: GeometryEffect {
+    var amount: CGFloat = 8
+    var shakesPerUnit: CGFloat = 3
+    var animatableData: CGFloat
+
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        let translation = amount * sin(animatableData * .pi * shakesPerUnit)
+        return ProjectionTransform(CGAffineTransform(translationX: translation, y: 0))
+    }
+}
+
+// 에러 햅틱
+func errorHaptic() {
+    let gen = UINotificationFeedbackGenerator()
+    gen.notificationOccurred(.error)
 }
 
 #Preview {
