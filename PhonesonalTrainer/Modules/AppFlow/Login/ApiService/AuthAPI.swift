@@ -12,6 +12,19 @@ class AuthAPI {
     static let shared = AuthAPI()
     private init() {}
     
+    private func formURLEncodedData(_ params: [String: String]) -> Data {
+        // RFC 3986 기준으로 &,=,+ 는 반드시 이스케이프
+        var allowed = CharacterSet.urlQueryAllowed
+        allowed.remove(charactersIn: "+&=")
+
+        let pairs = params.map { key, value -> String in
+            let k = key.addingPercentEncoding(withAllowedCharacters: allowed) ?? key
+            let v = value.addingPercentEncoding(withAllowedCharacters: allowed) ?? value
+            return "\(k)=\(v)"
+        }
+        return Data(pairs.joined(separator: "&").utf8)
+    }
+    
     private let baseURL = "http://43.203.60.2:8080"
     
     func signup(request: SignupRequest) -> AnyPublisher<SignupResponse, Error> {
@@ -28,40 +41,32 @@ class AuthAPI {
         
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
-        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        // JSON 데이터 생성 (tempToken은 query parameter로 전송하므로 body에서 제외)
-        var jsonBody: [String: Any] = [
-            "nickname": request.nickname,
-            "age": request.age,
-            "gender": request.gender,
-            "purpose": request.purpose,
-            "deadline": request.deadline,
-            "height": request.height,
-            "weight": request.weight
-        ]
-        
-        // 옵셔널 필드 추가
-        if let bodyFatRate = request.bodyFatRate {
-            jsonBody["bodyFatRate"] = bodyFatRate
-        }
-        
-        if let muscleMass = request.muscleMass {
-            jsonBody["muscleMass"] = muscleMass
-        }
-        
-        do {
-            urlRequest.httpBody = try JSONSerialization.data(withJSONObject: jsonBody)
-        } catch {
-            return Fail(error: error).eraseToAnyPublisher()
-        }
+        // ✅ JSON 아님! 폼 파라미터로 보냄
+            urlRequest.setValue("application/x-www-form-urlencoded; charset=utf-8",
+                                forHTTPHeaderField: "Content-Type")
+
+            // 폼 파라미터 구성
+            var params: [String: String] = [
+                "nickname": request.nickname,
+                "age": String(request.age),
+                "gender": request.gender,      // "FEMALE"
+                "purpose": request.purpose,    // 서버 enum이면 매핑 필요: 예) "BULK_UP"
+                "deadline": String(request.deadline),
+                "height": String(request.height),
+                "weight": String(request.weight)
+            ]
+            if let v = request.bodyFatRate { params["bodyFatRate"] = String(v) }
+            if let v = request.muscleMass { params["muscleMass"] = String(v) }
+
+            urlRequest.httpBody = formURLEncodedData(params)
+
         
         // 디버깅을 위한 로깅
         print("🚀 Signup Request URL: \(url)")
         print("🚀 HTTP Method: \(urlRequest.httpMethod ?? "Unknown")")
         print("🚀 Headers: \(urlRequest.allHTTPHeaderFields ?? [:])")
         print("🚀 Query Parameters: tempToken=\(request.tempToken)")
-        print("🚀 JSON Body: \(jsonBody)")
+        print("🚀 Form Body: \(params)")
         if let bodyData = urlRequest.httpBody {
             print("🚀 Body Data Size: \(bodyData.count) bytes")
         }
@@ -69,34 +74,22 @@ class AuthAPI {
         return URLSession.shared.dataTaskPublisher(for: urlRequest)
             .tryMap { output in
                 // HTTP 응답 상태 코드 확인
-                if let httpResponse = output.response as? HTTPURLResponse {
-                    print("📡 HTTP Status Code: \(httpResponse.statusCode)")
-                    print("📡 Response Headers: \(httpResponse.allHeaderFields)")
+                if let http = output.response as? HTTPURLResponse {
+                    print("📡 HTTP Status Code: \(http.statusCode)")
+                    print("📡 Response Headers: \(http.allHeaderFields)")
                     
-                    // 응답 데이터 로깅 (상태코드와 상관없이)
-                    if let responseString = String(data: output.data, encoding: .utf8) {
-                        print("📡 API Response Body: \(responseString)")
-                        print("📡 Response Length: \(responseString.count) characters")
-                        
-                        // JSON인지 HTML인지 확인
-                        if responseString.trimmingCharacters(in: .whitespaces).hasPrefix("{") {
-                            print("📡 Response Format: JSON ✅")
-                        } else if responseString.trimmingCharacters(in: .whitespaces).hasPrefix("<") {
-                            print("📡 Response Format: HTML ❌")
-                        } else {
-                            print("📡 Response Format: Unknown")
-                        }
-                    } else {
-                        print("📡 API Response: [No readable content]")
-                    }
-                    
-                    // 4xx, 5xx 에러 상태 코드 처리
-                    if httpResponse.statusCode >= 400 {
-                        let errorMessage = String(data: output.data, encoding: .utf8) ?? "Server Error"
-                        throw NSError(domain: "ServerError", code: httpResponse.statusCode, userInfo: [
-                            NSLocalizedDescriptionKey: "서버 오류가 발생했습니다. (코드: \(httpResponse.statusCode))"
-                        ])
-                    }
+                    let respStr = String(data: output.data, encoding: .utf8) ?? ""
+                                    print("📡 API Response Body: \(respStr)")
+                                    if http.statusCode >= 400 {
+                                        // problem+json의 detail을 에러 메시지에 반영
+                                        if let obj = try? JSONSerialization.jsonObject(with: output.data) as? [String: Any],
+                                           let detail = obj["detail"] as? String {
+                                            throw NSError(domain: "ServerError", code: http.statusCode,
+                                                          userInfo: [NSLocalizedDescriptionKey: detail])
+                                        }
+                                        throw NSError(domain: "ServerError", code: http.statusCode,
+                                                      userInfo: [NSLocalizedDescriptionKey: "서버 오류가 발생했습니다. (코드: \(http.statusCode))"])
+                                    }
                 } else {
                     print("📡 No HTTP Response received")
                 }
