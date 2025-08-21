@@ -233,7 +233,7 @@ final class OnboardingViewModel: ObservableObject {
         return allSucceeded
     }
     
-    // ✅ 기존 사용자를 위한 전체 프로필 저장 (진단 API를 위해 필요)
+    // MARK: - 기존 사용자 전체 프로필 업데이트 (진단 API를 위해)
     @MainActor
     private func callAuthAPISignupForExistingUser() async {
         // tempToken이 없으므로 빈 문자열 또는 "existing_user" 처리
@@ -291,8 +291,8 @@ final class OnboardingViewModel: ObservableObject {
         }
     }
     
-    // ✅ 진단 API 호출
-    func fetchDiagnosis(completion: @escaping (Bool) -> Void) {
+    // MARK: - 진단 API 호출
+    func callDiagnosisAPI(completion: @escaping (Bool) -> Void) {
         isDiagnosisLoading = true
         errorMessage = nil
         
@@ -398,83 +398,13 @@ final class OnboardingViewModel: ObservableObject {
         }.resume()
     }
     
-    // ✅ 운동 추천 생성 API 호출
+    // ✅ 운동 추천 생성 API 호출 - RecommendationAPI 사용
     func generateExerciseRecommendation(completion: @escaping (Bool) -> Void) {
-        // API 엔드포인트
-        guard let url = URL(string: "http://43.203.60.2:8080/exercises-recommandtion/generate") else {
-            print("❌ 운동 추천 API URL 생성 실패")
-            completion(false)
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        // Authorization 헤더 추가
-        if let accessToken = UserDefaults.standard.string(forKey: "accessToken") {
-            request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-            print("🔑 운동 추천 API Authorization 헤더 추가: Bearer \(accessToken)")
-        } else {
-            print("⚠️ accessToken이 없어서 Authorization 헤더 미추가")
-        }
-        
-        print("🚀 운동 추천 API 요청 시작")
-        print("🚀 URL: \(url)")
-        
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            DispatchQueue.main.async {
-                if let error = error {
-                    print("❌ 운동 추천 API 네트워크 에러: \(error)")
-                    completion(false)
-                    return
-                }
-                
-                guard let data = data else {
-                    print("❌ 운동 추천 API 데이터 없음")
-                    completion(false)
-                    return
-                }
-                
-                // HTTP 상태 코드 확인
-                if let httpResponse = response as? HTTPURLResponse {
-                    if httpResponse.statusCode >= 400 {
-                        print("❌ 운동 추천 API HTTP \(httpResponse.statusCode) 에러")
-                        if let responseString = String(data: data, encoding: .utf8) {
-                            print("📡 에러 응답: \(responseString)")
-                        }
-                        completion(false)
-                        return
-                    }
-                }
-                
-                // 응답이 HTML인지 확인
-                if let responseString = String(data: data, encoding: .utf8),
-                   responseString.trimmingCharacters(in: .whitespaces).hasPrefix("<") {
-                    print("⚠️ 운동 추천 API 응답이 HTML → 인증 문제")
-                    completion(false)
-                    return
-                }
-                
-                if let responseString = String(data: data, encoding: .utf8) {
-                    print("📡 운동 추천 API 응답: \(responseString)")
-                }
-                
-                do {
-                    let exerciseResponse = try JSONDecoder().decode(ExerciseRecommendationResponse.self, from: data)
-                    
-                    if exerciseResponse.isSuccess {
-                        print("✅ 운동 추천 API 성공: \(exerciseResponse.result)")
-                        completion(true)
-                    } else {
-                        print("❌ 운동 추천 API 실패: \(exerciseResponse.message)")
-                        completion(false)
-                    }
-                } catch {
-                    print("❌ 운동 추천 API JSON 파싱 실패: \(error)")
-                    completion(false)
-                }
+        Task {
+            let result = await RecommendationAPI.generateExerciseRecommendation()
+            await MainActor.run {
+                completion(result)
             }
-        }.resume()
+        }
     }
 }

@@ -18,84 +18,6 @@ struct OnboradingDiagnosisView: View {
     @State private var isStarting = false
     @State private var showError = false
     
-    // ✅ 운동 추천 생성 API 호출 함수
-    private func generateExerciseRecommendation(completion: @escaping (Bool) -> Void) {
-        guard let url = URL(string: "http://43.203.60.2:8080/exercises-recommandtion/generate") else {
-            print("❌ 운동 추천 API URL 생성 실패")
-            completion(false)
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        // Authorization 헤더 추가
-        if let accessToken = UserDefaults.standard.string(forKey: "accessToken") {
-            request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-            print("🔑 운동 추천 API Authorization 헤더 추가")
-        } else {
-            print("⚠️ accessToken이 없어서 Authorization 헤더 미추가")
-        }
-        
-        print("🚀 운동 추천 API 요청 시작")
-        print("🚀 URL: \(url)")
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            DispatchQueue.main.async {
-                if let error = error {
-                    print("❌ 운동 추천 API 네트워크 에러: \(error)")
-                    completion(false)
-                    return
-                }
-                
-                guard let data = data else {
-                    print("❌ 운동 추천 API 데이터 없음")
-                    completion(false)
-                    return
-                }
-                
-                // HTTP 상태 코드 확인
-                if let httpResponse = response as? HTTPURLResponse {
-                    if httpResponse.statusCode >= 400 {
-                        print("❌ 운동 추천 API HTTP \(httpResponse.statusCode) 에러")
-                        if let responseString = String(data: data, encoding: .utf8) {
-                            print("📡 에러 응답: \(responseString)")
-                        }
-                        completion(false)
-                        return
-                    }
-                }
-                
-                // 응답이 HTML인지 확인
-                if let responseString = String(data: data, encoding: .utf8),
-                   responseString.trimmingCharacters(in: .whitespaces).hasPrefix("<") {
-                    print("⚠️ 운동 추천 API 응답이 HTML → 인증 문제")
-                    completion(false)
-                    return
-                }
-                
-                if let responseString = String(data: data, encoding: .utf8) {
-                    print("📡 운동 추천 API 응답: \(responseString)")
-                }
-                
-                do {
-                    let exerciseResponse = try JSONDecoder().decode(ExerciseRecommendationResponse.self, from: data)
-                    if exerciseResponse.isSuccess {
-                        print("✅ 운동 추천 API 성공: \(exerciseResponse.result)")
-                        completion(true)
-                    } else {
-                        print("❌ 운동 추천 API 실패: \(exerciseResponse.message)")
-                        completion(false)
-                    }
-                } catch {
-                    print("❌ 운동 추천 API JSON 파싱 실패: \(error)")
-                    completion(false)
-                }
-            }
-        }.resume()
-    }
-    
     private var metrics: [(String, MetricChange)] {
         [
             ("몸무게", diagnosis.weightChange),
@@ -119,7 +41,7 @@ struct OnboradingDiagnosisView: View {
                                 .foregroundStyle(Color.grey05)
                         }
                     }
-
+                    
                     ScrollView(showsIndicators: false) {
                         VStack(alignment: .leading, spacing: 24) {
                             PageIndicator(totalPages: 4, currentPage: 3, activeColor: .orange05, inactiveColor: .grey01)
@@ -223,7 +145,6 @@ struct OnboradingDiagnosisView: View {
                                 }
                                 .padding(.horizontal, 28)
                             }
-                            .padding(.horizontal)
                         }
                         .padding(.top)
                         .padding(.bottom, 32)
@@ -235,17 +156,8 @@ struct OnboradingDiagnosisView: View {
                         
                         // 운동 추천과 식단 추천 API 동시 호출
                         Task {
-                            // 운동 추천 API 호출
-                            await withCheckedContinuation { continuation in
-                                generateExerciseRecommendation { exerciseSuccess in
-                                    print("🏋️ 운동 추천: \(exerciseSuccess ? "성공" : "실패")")
-                                    continuation.resume()
-                                }
-                            }
-                            
-                            // 식단 추천 API 호출
-                            let dietSuccess = await DietPlanAPI.generateDietRecommendation()
-                            print("🍽️ 식단 추천: \(dietSuccess ? "성공" : "실패")")
+                            // 통합 추천 API 사용
+                            let results = await RecommendationAPI.generateAllRecommendations()
                             
                             // API 호출 완료 후 다음 단계로 이동
                             await MainActor.run {

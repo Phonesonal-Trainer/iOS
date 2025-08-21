@@ -30,21 +30,9 @@ class WorkoutListViewModel: ObservableObject {
         return Dictionary(grouping: filtered, by: { $0.category })
     }
     
-    // MARK: - 운동 추천 생성 ai API 연동
+    // MARK: - 운동 추천 생성 API - RecommendationAPI 사용
     func generateRecommendations() async -> Bool {
-        do {
-            var req = URLRequest(url: URL(string: "http://43.203.60.2:8080/exercise-recommendation/generate")!)
-            req.httpMethod = "POST"
-            req.addAuthToken()
-
-            let (data, resp) = try await URLSession.shared.data(for: req)
-            guard let http = resp as? HTTPURLResponse, (200...299).contains(http.statusCode) else { return false }
-            let decoded = try JSONDecoder().decode(GenerateWorkoutRecommendationResponse.self, from: data)
-            return decoded.isSuccess
-        } catch {
-            print("❌ 추천 생성 실패:", error)
-            return false
-        }
+        return await RecommendationAPI.generateWorkoutRecommendation()
     }
 
     // MARK: - API 연동
