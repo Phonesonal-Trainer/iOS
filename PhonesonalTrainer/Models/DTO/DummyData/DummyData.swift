@@ -221,7 +221,7 @@ struct DummyData {
             amount: 150,
             kcal: 250.0,
             imageURL: "https://example.com/chicken.jpg",
-            isComplete: true
+            isComplete: true, carb: 0, protein: 42, fat: 3
         ),
         MealModel(
             foodId: 2,
@@ -229,7 +229,7 @@ struct DummyData {
             amount: 100,
             kcal: 120.0,
             imageURL: "https://example.com/rice.jpg",
-            isComplete: true
+            isComplete: true, carb: 25, protein: 2.5, fat: 0.9
         ),
         MealModel(
             foodId: 3,
@@ -237,7 +237,7 @@ struct DummyData {
             amount: 80,
             kcal: 45.0,
             imageURL: "https://example.com/broccoli.jpg",
-            isComplete: false
+            isComplete: false, carb: 6, protein: 3, fat: 0.5
         )
     ]
     
