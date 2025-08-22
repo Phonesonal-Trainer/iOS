@@ -1,4 +1,3 @@
-//
 //  MainBarView.swift
 //  PhonesonalTrainer
 //
@@ -14,9 +13,9 @@ struct MainTabView: View {
     @State private var workoutPath: [WorkoutRoutineRoute] = []
     @State private var mealPath: [MealPlanRoute] = []
     @State private var reportPath: [ReportRoute] = []
-    
+
     var body: some View {
-        TabView(selection : $selection){
+        TabView(selection: $selection) {
             /// 홈
             NavigationStack(path: $homePath) {
                 HomeScreenView(path: $homePath)
@@ -26,8 +25,9 @@ struct MainTabView: View {
                 Text("홈")
             }
             .tag(0)
+
             /// 운동 루틴
-            NavigationStack(path: $workoutPath){
+            NavigationStack(path: $workoutPath) {
                 WorkoutRoutineView(path: $workoutPath)
             }
             .tabItem {
@@ -35,8 +35,9 @@ struct MainTabView: View {
                 Text("운동 루틴")
             }
             .tag(1)
+
             /// 식단 플랜
-            NavigationStack(path: $mealPath){
+            NavigationStack(path: $mealPath) {
                 MealPlanView(path: $mealPath)
             }
             .tabItem {
@@ -44,8 +45,9 @@ struct MainTabView: View {
                 Text("식단 플랜")
             }
             .tag(2)
+
             /// 리포트
-            NavigationStack(path: $reportPath){
+            NavigationStack(path: $reportPath) {
                 ReportView(path: $reportPath)
             }
             .tabItem {
@@ -56,17 +58,19 @@ struct MainTabView: View {
         }
         .tint(Color("orange05"))
         .task {
-            // 로그인 직후 userId가 저장되므로 여기서 한 번 더 설정
+            // ✅ @EnvironmentObject에는 $ 없음. 그냥 인스턴스 호출
             let saved = UserDefaults.standard.integer(forKey: "userId")
             if saved != 0 {
-                await weightStore.configure(userId: saved)
+                // 여기서 userId를 내부에 반영하는 로직이 필요하다면,
+                // BodyWeightStore 쪽에서 처리(예: App 시작 시 주입)하는 것을 권장.
+                // 안전하게 최신값만 갱신:
+                await weightStore.refresh()
             }
         }
     }
 }
 
-
-
+// ====== Report ======
 struct ReportView: View {
     @Binding var path: [ReportRoute]
     var body: some View {
@@ -77,15 +81,15 @@ struct ReportView: View {
 struct ReportScreenWrapper: View {
     @Binding var path: [ReportRoute]
     @StateObject private var viewModel = ReportViewModel(apiService: MockReportAPIService())
-    
+
     var body: some View {
         ReportScreen(viewModel: viewModel)
     }
 }
 
-#Preview {
-    MainTabView()
-        .environmentObject(MyPageViewModel())  // ✅ 새로 추가된 전역
-        .environmentObject(BodyWeightStore())  // 이미 쓰고 있으면 필요
-        .environmentObject(BodyPhotoStore())   // 이미 쓰고 있으면 필요
-}
+//#Preview {
+  //  MainTabView()
+        // ✅ 실제로 사용하는 전역만 넣기
+    //    .environmentObject(BodyWeightStore(userId: 1, goalWeight: 60))
+      //  .environmentObject(BodyPhotoStore())
+//}

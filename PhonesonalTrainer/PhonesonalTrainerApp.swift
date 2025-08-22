@@ -1,10 +1,3 @@
-//
-//  PhonesonalTrainerApp.swift
-//  PhonesonalTrainer
-//
-//  Created by 강리현 on 7/8/25.
-//
-
 import SwiftUI
 
 @main
@@ -58,10 +51,9 @@ struct PhonesonalTrainerApp: App {
             .environmentObject(bodyPhoto) // ✅ BodyPhotoStore 주입
             .environmentObject(workoutListVM)
             .task {
-                // 저장된 userId가 있으면 몸무게 스토어 설정
                 let saved = UserDefaults.standard.integer(forKey: "userId")
                 if saved != 0 {
-                    await weightStore.configure(userId: saved)
+                    weightStore.configure(userId: saved)   // ✅ 에러 안 남
                 }
             }
         }

@@ -1,3 +1,4 @@
+//
 //  HomeView.swift
 //  PhonesonalTrainer
 //
@@ -12,7 +13,7 @@ struct HomeScreenView: View {
     // 전역 스토어들 (App에서 environmentObject 주입 필요)
     @EnvironmentObject var weightStore: BodyWeightStore
     @EnvironmentObject var bodyPhoto: BodyPhotoStore
-    @EnvironmentObject var my: MyPageViewModel     // ⬅️ 추가
+    @EnvironmentObject var my: MyPageViewModel
 
     // 팝업 상태
     @State private var showWeightPopup = false
@@ -41,9 +42,8 @@ struct HomeScreenView: View {
                             .environmentObject(vm)
 
                         // ✅ 오늘 상태 (WeightInfoView 포함)
+                        // DailyStatusView의 currentWeight와 goalWeight 매개변수를 삭제합니다.
                         DailyStatusView(
-                            currentWeight: weightStore.currentWeight,
-                            goalWeight: weightStore.goalWeight,
                             todayCalories: vm.todayCalories,
                             targetCalories: vm.targetCalories,
                             onWeightTap: {
@@ -74,7 +74,7 @@ struct HomeScreenView: View {
                     onCancel: { showWeightPopup = false },
                     onSave: { newWeight in
                         Task { @MainActor in
-                            let ok = await weightStore.save(newWeight)   // 서버 저장(비동기)
+                            let ok = await weightStore.save(newWeight)  // 서버 저장(비동기)
                             if ok {
                                 // UI 상태 업데이트
                                 weightText = ""
@@ -118,6 +118,6 @@ struct HomeScreenView: View {
         HomeScreenView(path: path)
             .environmentObject(BodyWeightStore())
             .environmentObject(BodyPhotoStore())
-            .environmentObject(MyPageViewModel()) // ⬅️ 교체: UserProfileViewModel() → MyPageViewModel()
+            .environmentObject(MyPageViewModel())
     }
 }

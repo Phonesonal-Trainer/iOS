@@ -7,8 +7,9 @@
 import SwiftUI
 
 struct DailyStatusView: View {
-    let currentWeight: Double
-    let goalWeight: Double
+    // BodyWeightStore를 EnvironmentObject로 주입받아 직접 사용합니다.
+    @EnvironmentObject var weightStore: BodyWeightStore
+
     let todayCalories: Int
     let targetCalories: Int
     let onWeightTap: () -> Void
@@ -20,12 +21,13 @@ struct DailyStatusView: View {
                 .font(.system(size: 20))
                 .foregroundStyle(.grey05)
                 .frame(maxWidth: .infinity, alignment: .leading)
-
+            
             // 나란히 배치
             HStack(spacing: 20) {
                 WeightInfoView(
-                    currentWeight: currentWeight,
-                    goalWeight: goalWeight,
+                    // weightStore에서 직접 currentWeight와 goalWeight 값을 가져옵니다.
+                    currentWeight: weightStore.currentWeight,
+                    goalWeight: weightStore.goalWeight,
                     onTap: onWeightTap
                 )
                 TotalCalorieView(
@@ -37,14 +39,14 @@ struct DailyStatusView: View {
         .frame(width: 341.11, height: 169)
     }
 }
+
 #Preview {
     DailyStatusView(
-        currentWeight: 65.3,
-        goalWeight: 60.0,
         todayCalories: 1450,
         targetCalories: 1800,
         onWeightTap: {
-            print("몸무게 팝업 띄우기")  // 실제 앱에서는 팝업 띄우는 로직 연결
+            print("몸무게 팝업 띄우기")
         }
     )
+    .environmentObject(BodyWeightStore())
 }
