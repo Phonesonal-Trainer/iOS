@@ -11,7 +11,27 @@ struct UserExerciseResponse: Decodable {
     let isSuccess: Bool
     let code: String
     let message: String
-    let result: [UserExercise]
+    let result: UserExerciseResult
+}
+
+struct UserExerciseResult: Decodable {
+    let userExercises: [UserExercise]?
+    
+    enum CodingKeys: String, CodingKey {
+        case userExercises
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        // 배열로 직접 반환되는 경우
+        if let exercises = try? container.decode([UserExercise].self, forKey: .userExercises) {
+            self.userExercises = exercises
+        } else {
+            // 다른 형태로 반환되는 경우를 위한 fallback
+            self.userExercises = []
+        }
+    }
 }
 
 struct ExerciseSet: Decodable {

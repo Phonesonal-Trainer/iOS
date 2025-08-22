@@ -32,7 +32,7 @@ class WorkoutListViewModel: ObservableObject {
     
     // MARK: - 운동 추천 생성 API - RecommendationAPI 사용
     func generateRecommendations() async -> Bool {
-        return await RecommendationAPI.generateWorkoutRecommendation()
+        return await RecommendationAPI.generateExerciseRecommendation()
     }
 
     // MARK: - API 연동
@@ -94,8 +94,11 @@ class WorkoutListViewModel: ObservableObject {
 
             var resultModels: [WorkoutModel] = []
 
+            // 새로운 구조에 맞게 수정
+            let exercises = decoded.result.userExercises ?? []
+            
             try await withThrowingTaskGroup(of: WorkoutModel?.self) { group in
-                for userExercise in decoded.result {
+                for userExercise in exercises {
                     group.addTask {
                         do {
                             let detail = try await self.fetchExerciseDetail(id: userExercise.exerciseId)
