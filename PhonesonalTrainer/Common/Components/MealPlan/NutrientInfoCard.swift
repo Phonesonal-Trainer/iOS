@@ -9,6 +9,7 @@ import SwiftUI
 
 struct NutrientInfoCard: View {
     let Nutrient: NutrientInfoModel
+    let showsImage: Bool   // ← 기본은 보이게, 화면별로 끌 수 있음
     
     // MARK: - 상수 정의
     fileprivate enum NutrientInfoConstants {
@@ -21,6 +22,7 @@ struct NutrientInfoCard: View {
         static let cardWidth: CGFloat = 340
         static let cardHeight: CGFloat = 118 // 이미지 없는 기록 높이
     }
+    
     
     // MARK: - Body
     var body: some View {
@@ -83,7 +85,9 @@ struct NutrientInfoCard: View {
     
     // MARK: - Helpers
     private var shouldShowImage: Bool {
-        Nutrient.status == .withImage && (Nutrient.imageUrl?.isEmpty == false)
+        showsImage
+        && Nutrient.status == .withImage
+        && (Nutrient.imageUrl?.isEmpty == false)
     }
 
     // 카드 높이를 이미지 유무에 따라 늘리기

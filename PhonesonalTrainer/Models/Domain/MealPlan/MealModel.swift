@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct MealModel : Identifiable {
+struct MealModel : Identifiable, Hashable, Codable {
     var id = UUID()
     let foodId: Int
     let name : String    // ex) "소고기"
@@ -16,7 +16,12 @@ struct MealModel : Identifiable {
     let imageURL : String
     var isComplete : Bool
     
-    init(id: UUID = UUID(), foodId: Int, name: String, amount: Int, kcal: Double? = nil, imageURL: String, isComplete: Bool = false) {
+    // ⬇️ 추가
+    var carb: Double? = nil     // g
+    var protein: Double? = nil  // g
+    var fat: Double? = nil      // g
+    
+    init(id: UUID = UUID(), foodId: Int, name: String, amount: Int, kcal: Double? = nil, imageURL: String, isComplete: Bool = false, carb: Double? = nil, protein: Double? = nil, fat: Double? = nil) {
         self.id = id
         self.foodId = foodId
         self.name = name
@@ -24,6 +29,9 @@ struct MealModel : Identifiable {
         self.kcal = kcal
         self.imageURL = imageURL
         self.isComplete = isComplete
+        self.carb = carb
+        self.protein = protein
+        self.fat = fat
     }
     // 이게 필요할까..?
     // init(foodId: Int, name: String, amount: Int, kcal: Double? = nil, imageURL: String, isComplete: Bool ) {
@@ -40,6 +48,7 @@ extension MealModel {
         self.kcal = api.calories
         self.imageURL = api.imageUrl ?? ""
         self.isComplete = (api.complete == "COMPLETE")
+       
     }
 }
 
@@ -55,6 +64,8 @@ extension MealModel {
         self.kcal = dto.calorie
         self.imageURL = dto.imageUrl ?? ""
         self.isComplete = false
+        
+    
     }
 }
     

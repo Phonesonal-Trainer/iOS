@@ -15,7 +15,7 @@ struct MealCheckListView: View {
     let mealType: MealType
     
     @StateObject private var listVM = MealListViewModel()
-    @StateObject private var checkVM = MealCheckListViewModel()
+    @ObservedObject var checkVM : MealCheckListViewModel
     
     // 숨김 여부
     private var shouldHide: Bool {

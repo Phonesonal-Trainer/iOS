@@ -15,6 +15,7 @@ struct MealRecordDetailView: View {
     // 로컬 상태
     @State private var uploadedImage: UIImage? = nil  // 이미지 업로드
     @StateObject private var viewModel = AddedMealViewModel()
+    @StateObject private var checkVM = MealCheckListViewModel()
     @Environment(\.dismiss) private var dismiss // 뒤로가기 액션
     //상위에서 주입
     @ObservedObject var planVM: MealPlanViewModel
@@ -61,7 +62,7 @@ struct MealRecordDetailView: View {
                         ImageUploadButton(image: $uploadedImage,
                                           isLocal: false,
                                           onUpload: { img in
-                                              try await (foodService as! FoodService).uploadMealImage(
+                                              try await foodService.uploadMealImage(
                                                   date: selectedDate,
                                                   mealTime: mealType.rawValue,
                                                   image: img,
@@ -82,11 +83,11 @@ struct MealRecordDetailView: View {
                                 .frame(width: MealRecordDetailConstant.basicWidth, height: MealRecordDetailConstant.recordInfoHeight)
                                 .shadow(color: Color.black.opacity(0.1), radius: 2)
                             
-                            NutrientInfoCard(Nutrient: model)
+                            NutrientInfoCard(Nutrient: displayModel, showsImage: false)
                         }
                         
                         if mealType != .snack {
-                            MealCheckListView(selectedDate: .constant(selectedDate), mealType: mealType)
+                            MealCheckListView(selectedDate: Binding.constant(selectedDate), mealType: mealType, checkVM: checkVM)
                         }
                         
                         
@@ -136,6 +137,21 @@ struct MealRecordDetailView: View {
             }
         }
     }
+    // 표시 전용 모델: 기존 서버 카드 수치 + 체크 합계
+    private var displayModel: NutrientInfoModel {
+        NutrientInfoModel(
+            id: model.id,
+            mealType: model.mealType,
+            kcal: model.kcal + checkVM.totals.kcal,
+            carb: model.carb + checkVM.totals.carb,
+            protein: model.protein + checkVM.totals.protein,
+            fat: model.fat + checkVM.totals.fat,
+            imageUrl: model.imageUrl,
+            status: model.status
+        )
+    }
+
+
     /// 낙관적 업데이트: planVM.items에서 현재 끼 항목에 imageUrl/상태만 즉시 반영
     @MainActor
     private func applyOptimisticImage(url: String) {

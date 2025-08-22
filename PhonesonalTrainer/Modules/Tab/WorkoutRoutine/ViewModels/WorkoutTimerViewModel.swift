@@ -9,12 +9,18 @@ import Foundation
 import SwiftUI
 import Combine
 import AVFoundation
+import AudioToolbox
 
 final class WorkoutTimerViewModel: ObservableObject {
     // MARK: - Input
     let workoutId: Int
     @Published var type: WorkoutType
     private let service: WorkoutTimerService
+    
+    // ⬇️ 추가: 타이밍 상수
+    private let PREP_SECONDS = 10
+    private let REST_SECONDS = 10
+    private let SECONDS_PER_REP = 3.0    // 1회(틱) 간격 3초
     
     // 현재 세트의 setId
     private var currentSetId: Int? {
@@ -71,15 +77,15 @@ final class WorkoutTimerViewModel: ObservableObject {
     private var totalSecondsForPhase: Int = 60      // 단계 총 길이(초). 준비/휴식=60, 세트=setDurationSec
     
     // 세트 시간 = 5초 * 동작 수
-    private var setDurationSec: Int { 5 * max(targetReps, 1) }
+    private var setDurationSec: Int { Int(SECONDS_PER_REP * Double(max(targetReps, 1))) }
     
     // 메트로놈 (1박자 = setDurationSec/targetReps)
-    private var repInterval: Double { max(0.5, Double(setDurationSec) / Double(max(targetReps, 1))) }
+    private var repInterval: Double { max(0.3, Double(setDurationSec) / Double(max(targetReps, 1))) }
     private var nextBeatTime: TimeInterval = 0        // 경과 기준(초)로 비교
 
     
     // 소리
-    private let player = SystemBeep()
+    private let player = SystemTick()
     
     // 콜백(상위 라우팅)
     var onRequestNextExercise: (() -> Void)?
@@ -166,7 +172,7 @@ final class WorkoutTimerViewModel: ObservableObject {
                 _ = try? await service.startUserExercise(userExerciseId: self.workoutId)
             }
         }
-        configurePhase(total: 60, phase: .preparation)
+        configurePhase(total: PREP_SECONDS, phase: .preparation)
     }
 
     func enterSet() {
@@ -176,7 +182,7 @@ final class WorkoutTimerViewModel: ObservableObject {
     }
     
     func enterRest() {
-        configurePhase(total: 60, phase: .rest)
+        configurePhase(total: REST_SECONDS, phase: .rest)
     }
     
     private func configurePhase(total: Int, phase: Phase) {
@@ -268,7 +274,7 @@ final class WorkoutTimerViewModel: ObservableObject {
         // 세트 중일 때만 ‘빕’/햅틱/카운트
         if phase == .setActive, elapsed >= nextBeatTime {
             nextBeatTime += repInterval
-            if soundOn { player.beep() }
+            if soundOn { player.tick() }
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
             currentReps = min(targetReps, currentReps + 1)
         }
@@ -330,10 +336,27 @@ final class WorkoutTimerViewModel: ObservableObject {
 }
 
 // 간단 비프 사운드(시스템 소리)
-final class SystemBeep {
+
+final class SystemTick {
     private var player: AVAudioPlayer?
-    func beep() {
-        // 번들에 짧은 beep.wav 둔다거나, 시스템 사운드 사용
-        AudioServicesPlaySystemSound(1104) // 키보드 탭 같은 클릭음
+
+    init() {
+        // 번들에 tick.caf / tick.wav가 있으면 사용
+        if let url = Bundle.main.url(forResource: "tick", withExtension: "caf")
+            ?? Bundle.main.url(forResource: "tick", withExtension: "wav") {
+            player = try? AVAudioPlayer(contentsOf: url)
+            player?.prepareToPlay()
+        }
+    }
+
+    func tick() {
+        if let p = player {
+            if p.isPlaying { p.stop() }
+            p.currentTime = 0
+            p.play()
+        } else {
+            // 시스템 클릭류 사운드 (짧고 단일음)
+            AudioServicesPlaySystemSound(1057) // 폴백: 'Tink' 류
+        }
     }
 }

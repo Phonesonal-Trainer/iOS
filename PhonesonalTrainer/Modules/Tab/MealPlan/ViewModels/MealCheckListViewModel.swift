@@ -25,10 +25,16 @@ final class MealCheckListViewModel: ObservableObject {
     @Published var selectedMealIDs: Set<UUID> = []   // UI 선택표시(로컬)
     @Published var inFlight: Set<Int> = []           // 패치 진행중 foodId
     @Published var errorMessage: String?
+    
+    @Published private(set) var totals = NutrientTotals()
+    
+    private var latestItems: [MealModel] = []
 
     // 초기 체크표시 상태 세팅 (API의 isComplete 기반)
-    func syncSelection(from items: [MealModel]) {
+    @MainActor func syncSelection(from items: [MealModel]) {
+        latestItems = items
         selectedMealIDs = Set(items.filter { $0.isComplete }.map { $0.id })
+        recalcTotals()
     }
 
     func isSelected(_ meal: MealModel) -> Bool {
@@ -36,10 +42,12 @@ final class MealCheckListViewModel: ObservableObject {
     }
 
     // 토글 + PATCH
+    @MainActor
     func toggle(meal: MealModel, date: Date, mealType: MealType, token: String? = nil) async {
         let willSelect = !isSelected(meal)
         // 낙관적 업데이트
         if willSelect { selectedMealIDs.insert(meal.id) } else { selectedMealIDs.remove(meal.id) }
+        recalcTotals()
         inFlight.insert(meal.foodId)
 
         do {
@@ -53,6 +61,7 @@ final class MealCheckListViewModel: ObservableObject {
         } catch {
             // 실패 → 롤백
             if willSelect { selectedMealIDs.remove(meal.id) } else { selectedMealIDs.insert(meal.id) }
+            recalcTotals()
             errorMessage = "상태 저장 실패: \(error.localizedDescription)"
         }
 
@@ -73,5 +82,17 @@ final class MealCheckListViewModel: ObservableObject {
         req.httpBody = try JSONEncoder().encode(body)
 
         _ = try await URLSession.shared.data(for: req)  // 필요하면 응답 디코딩 추가
+    }
+    
+    @MainActor
+    private func recalcTotals() {
+        var sum = NutrientTotals()
+        for m in latestItems where selectedMealIDs.contains(m.id) {
+            sum.kcal    += m.kcal ?? 0
+            sum.carb    += m.carb ?? 0
+            sum.protein += m.protein ?? 0
+            sum.fat     += m.fat ?? 0
+        }
+        totals = sum
     }
 }

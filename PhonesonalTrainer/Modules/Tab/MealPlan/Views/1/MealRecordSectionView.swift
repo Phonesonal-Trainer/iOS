@@ -50,7 +50,7 @@ struct MealRecordSectionView: View {
                     EmptyMealRecordView()
                 } else if let model = viewModel.item(for: type) {
                     // 이미지 유무는 카드 내부에서 판단
-                    NutrientInfoCard(Nutrient: model)
+                    NutrientInfoCard(Nutrient: model, showsImage: true)
                 } else {
                     EmptyMealRecordView()
                 }
