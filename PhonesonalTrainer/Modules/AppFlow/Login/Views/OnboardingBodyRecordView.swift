@@ -181,15 +181,25 @@ struct OnboardingBodyRecordView: View {
                     bodyPhoto.saveWeek0(image: image)
                     print("📸 0주차 눈바디 로컬 저장 완료")
 
-                    // ✅ 2단계: 회원가입 API는 테스트 동안 생략하고 온보딩 완료로 처리
-                    DispatchQueue.main.async {
-                        self.isLoading = false
-                        self.hasCompletedOnboarding = true
-                        self.navigateToHome = true
+                    // ✅ 2단계: 실제 회원가입 API 호출
+                    viewModel.signup { signupSuccess in
+                        DispatchQueue.main.async {
+                            self.isLoading = false
+                            
+                            if signupSuccess {
+                                print("✅ 회원가입 성공, 온보딩 완료")
+                                self.hasCompletedOnboarding = true
+                                self.navigateToHome = true
+                            } else {
+                                print("❌ 회원가입 실패")
+                                self.showError = true
+                                self.errorMessage = viewModel.errorMessage ?? "회원가입 중 오류가 발생했습니다."
+                            }
+                        }
                     }
                 }
             }
-            .disabled(uploadedImage == nil)
+            .disabled(uploadedImage == nil || isLoading)
             .padding(.horizontal)
             .padding(.bottom, 20)
         }

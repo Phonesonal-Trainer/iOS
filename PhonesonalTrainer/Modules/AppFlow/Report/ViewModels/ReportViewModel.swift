@@ -44,7 +44,7 @@ final class ReportViewModel: ObservableObject {
     private let apiService: ReportAPIServicing
 
     init(repository: ReportRepositorying = ReportRepository(), 
-         apiService: ReportAPIServicing = ReportAPIService()) {
+         apiService: ReportAPIServicing = MockReportAPIService()) {
         self.repository = repository
         self.apiService = apiService
         self.currentWeek = 0
@@ -158,6 +158,8 @@ final class ReportViewModel: ObservableObject {
         let bounds = date.weekBounds()
         periodText = Date.formattedWeekPeriod(from: bounds.start, to: bounds.end, style: .yyyyMMdd)
     }
+    
+
     
     // MARK: - Week Title Update
     private func updateWeekTitle() {

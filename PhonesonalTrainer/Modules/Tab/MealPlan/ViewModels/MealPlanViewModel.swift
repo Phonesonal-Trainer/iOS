@@ -41,10 +41,17 @@ class MealPlanViewModel: ObservableObject {
             
             items = mapToUI(res)
         } catch {
-            errorMessage = "불러오기 실패: \(error.localizedDescription)"
-            items = []
-            plannedTotalKcal = 0
-            actualTotalKcal = 0
+            print("❌ 식단 플랜 API 실패: \(error)")
+            print("🔄 더미 데이터로 대체")
+            
+            // 더미 데이터로 대체
+            let dummyData = DummyData.nutritionSummary
+            self.plannedTotalKcal = dummyData.plannedTotalCalorie
+            self.actualTotalKcal = dummyData.actualTotalCalorie
+            items = mapToUI(dummyData)
+            
+            // 에러 메시지 제거
+            errorMessage = nil
         }
     }
 

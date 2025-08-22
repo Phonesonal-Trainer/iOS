@@ -10,6 +10,7 @@ import SwiftUI
 struct OnboradingDiagnosisView: View {
     let nickname: String
     let diagnosis: DiagnosisInputModel  // 수정된 모델 사용
+    @ObservedObject var viewModel: OnboardingViewModel  // viewModel 추가
     
     @Environment(\.dismiss) private var dismiss
     @StateObject private var workoutListVM = WorkoutListViewModel()
@@ -183,7 +184,7 @@ struct OnboradingDiagnosisView: View {
                         Text("네트워크 상태를 확인하고 다시 시도해 주세요.")
                     }
                     .navigationDestination(isPresented: $goToBodyRecord) {
-                        OnboardingBodyRecordView(viewModel: OnboardingViewModel())
+                        OnboardingBodyRecordView(viewModel: viewModel)
                     }
                 }
             }
@@ -250,6 +251,7 @@ struct MetricRow: View {
                 DietGoal(key: "탄수화물", value: "200g"),
                 DietGoal(key: "단백질", value: "100g")
             ]
-        )
+        ),
+        viewModel: OnboardingViewModel()
     )
 }

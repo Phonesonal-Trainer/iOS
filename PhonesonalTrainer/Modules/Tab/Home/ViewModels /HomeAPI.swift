@@ -52,6 +52,15 @@ enum HomeAPI {
                 // 500 에러인 경우 더 자세한 로그
                 if http.statusCode == 500 {
                     print("🔍 500 에러 상세: userDetails null 문제로 추정")
+                    // 500 에러의 경우 특별 처리 - 빈 데이터로 반환하여 앱 크래시 방지
+                    if let errorResponse = try? JSONDecoder().decode(APIResponse<String>.self, from: data) {
+                        print("📡 500 에러 메시지: \(errorResponse.message ?? "알 수 없는 오류")")
+                        // 운동 데이터가 없는 경우 빈 데이터로 처리
+                        if errorResponse.message?.contains("등록된 운동이 없습니다") == true {
+                            throw NSError(domain: "HomeAPI", code: 500,
+                                          userInfo: [NSLocalizedDescriptionKey: "오늘 등록된 운동이 없습니다. 운동을 추가해보세요!"])
+                        }
+                    }
                 }
                 
                 // 에러 응답을 JSON으로 파싱 시도
@@ -71,8 +80,15 @@ enum HomeAPI {
         } catch {
             print("❌ 홈 API JSON 파싱 실패: \(error)")
             print("📄 응답 데이터: \(String(data: data, encoding: .utf8) ?? "인코딩 실패")")
-            throw NSError(domain: "HomeAPI", code: -1,
-                          userInfo: [NSLocalizedDescriptionKey: "응답 데이터 파싱 실패"])
+            print("🔄 더미 데이터로 대체")
+            
+            // 더미 데이터로 대체
+            return HomeMainResponse(
+                isSuccess: true,
+                code: "DUMMY200",
+                message: "더미 데이터",
+                result: DummyData.homeMainResult
+            )
         }
     }
 }

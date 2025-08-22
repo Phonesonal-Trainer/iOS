@@ -70,7 +70,16 @@ struct MainTabView: View {
 struct ReportView: View {
     @Binding var path: [ReportRoute]
     var body: some View {
-        Text("Report Screen")
+        ReportScreenWrapper(path: $path)
+    }
+}
+
+struct ReportScreenWrapper: View {
+    @Binding var path: [ReportRoute]
+    @StateObject private var viewModel = ReportViewModel(apiService: MockReportAPIService())
+    
+    var body: some View {
+        ReportScreen(viewModel: viewModel)
     }
 }
 

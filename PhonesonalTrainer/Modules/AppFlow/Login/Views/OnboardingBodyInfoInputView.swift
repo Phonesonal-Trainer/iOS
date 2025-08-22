@@ -170,23 +170,16 @@ struct OnboardingBodyInfoInputView: View {
                 textColor: isFormFilled ? .white : .grey02
             ) {
                 if isHeightValid && isWeightValid {
-                    // 회원가입 및 진단 API 호출
-                    viewModel.signup { signupSuccess in
-                        if signupSuccess {
-                            // 회원가입 성공 후 진단 API 호출
-                            viewModel.callDiagnosisAPI { diagnosisSuccess in
-                                if diagnosisSuccess {
-                                    print("🎯 진단 성공, diagnosisResult: \(String(describing: viewModel.diagnosisResult))")
-                                    goToDiagnosis = true
-                                } else {
-                                    // 진단 실패 시에도 다음 화면으로 이동 (기본 데이터로)
-                                    print("⚠️ 진단 API 실패, 기본 데이터로 진행")
-                                    print("🎯 기본 데이터: \(viewModel.toDiagnosisModel())")
-                                    goToDiagnosis = true
-                                }
-                            }
+                    // 진단 API만 호출 (회원가입은 눈바디 이미지 업로드 시점에)
+                    viewModel.callDiagnosisAPI { diagnosisSuccess in
+                        if diagnosisSuccess {
+                            print("🎯 진단 성공, diagnosisResult: \(String(describing: viewModel.diagnosisResult))")
+                            goToDiagnosis = true
                         } else {
-                            showErrorAlert = true
+                            // 진단 실패 시에도 다음 화면으로 이동 (기본 데이터로)
+                            print("⚠️ 진단 API 실패, 기본 데이터로 진행")
+                            print("🎯 기본 데이터: \(viewModel.toDiagnosisModel())")
+                            goToDiagnosis = true
                         }
                     }
                 } else {
@@ -206,7 +199,7 @@ struct OnboardingBodyInfoInputView: View {
                     }
                 }
             }
-            .disabled(!isFormFilled || viewModel.isLoading)
+            .disabled(!isFormFilled || viewModel.isLoading || viewModel.isDiagnosisLoading)
             .padding(.horizontal)
             .padding(.bottom, 20)
         }
@@ -215,7 +208,8 @@ struct OnboardingBodyInfoInputView: View {
         .navigationDestination(isPresented: $goToDiagnosis) {
             OnboradingDiagnosisView(
                 nickname: viewModel.nickname,
-                diagnosis: viewModel.diagnosisResult ?? viewModel.toDiagnosisModel()
+                diagnosis: viewModel.diagnosisResult ?? viewModel.toDiagnosisModel(),
+                viewModel: viewModel
             )
         }
         .alert("회원가입 오류", isPresented: $showErrorAlert) {

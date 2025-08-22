@@ -95,8 +95,13 @@ class FoodSearchViewModel: ObservableObject {
             self.allFoods = foods
             self.currentPage = 1
         } catch {
-            self.allFoods = []
-            self.errorMessage = "식단 검색 실패: \(error.localizedDescription)"
+            print("❌ 식단 검색 API 실패: \(error)")
+            print("🔄 더미 데이터로 대체")
+            
+            // 더미 데이터로 대체
+            self.allFoods = DummyData.searchFoods
+            self.currentPage = 1
+            self.errorMessage = nil
         }
     }
 
