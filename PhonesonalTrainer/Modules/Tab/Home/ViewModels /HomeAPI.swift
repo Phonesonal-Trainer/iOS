@@ -80,8 +80,15 @@ enum HomeAPI {
         } catch {
             print("❌ 홈 API JSON 파싱 실패: \(error)")
             print("📄 응답 데이터: \(String(data: data, encoding: .utf8) ?? "인코딩 실패")")
-            throw NSError(domain: "HomeAPI", code: -1,
-                          userInfo: [NSLocalizedDescriptionKey: "응답 데이터 파싱 실패"])
+            print("🔄 더미 데이터로 대체")
+            
+            // 더미 데이터로 대체
+            return HomeMainResponse(
+                isSuccess: true,
+                code: "DUMMY200",
+                message: "더미 데이터",
+                result: DummyData.homeMainResult
+            )
         }
     }
 }

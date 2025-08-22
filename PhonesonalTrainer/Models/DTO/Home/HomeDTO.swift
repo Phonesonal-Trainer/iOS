@@ -65,6 +65,17 @@ struct HomeExerciseBlock: Decodable {
         focusedBodyPart       = try c.decode(String.self, forKey: .focusedBodyPart)
         exerciseStatus        = try c.decode(String.self, forKey: .exerciseStatus)
     }
+    
+    // 더미 데이터용 기본 초기화자
+    init(todayBurnedCalories: Int, todayRecommendBurnedCalories: Int, anaerobicExerciseTime: Int, aerobicExerciseTime: Int, exercisePercentage: Int, focusedBodyPart: String, exerciseStatus: String) {
+        self.todayBurnedCalories = todayBurnedCalories
+        self.todayRecommendBurnedCalories = todayRecommendBurnedCalories
+        self.anaerobicExerciseTime = anaerobicExerciseTime
+        self.aerobicExerciseTime = aerobicExerciseTime
+        self.exercisePercentage = exercisePercentage
+        self.focusedBodyPart = focusedBodyPart
+        self.exerciseStatus = exerciseStatus
+    }
 }
 
 struct HomeMealBlock: Decodable {

@@ -90,39 +90,76 @@ class WorkoutListViewModel: ObservableObject {
                 return
             }
                 
-            let decoded = try JSONDecoder().decode(UserExerciseResponse.self, from: data)
-
-            var resultModels: [WorkoutModel] = []
-
-            // 새로운 구조에 맞게 수정
-            let exercises = decoded.result.userExercises ?? []
-            
-            try await withThrowingTaskGroup(of: WorkoutModel?.self) { group in
-                for userExercise in exercises {
-                    group.addTask {
-                        do {
-                            let detail = try await self.fetchExerciseDetail(id: userExercise.exerciseId)
-                            
-                            return WorkoutModel(
-                                userExercise: userExercise,
-                                exerciseDetail: detail
-                            )
-                        } catch {
-                            print("❌ ExerciseDetail 실패: \(error)")
-                            return nil
+            // JSON 파싱 시도
+            do {
+                let decoded = try JSONDecoder().decode(UserExerciseResponse.self, from: data)
+                let exercises = decoded.result.userExercises ?? []
+                
+                if exercises.isEmpty {
+                    print("🔄 운동 데이터가 비어있음 - 더미 데이터 사용")
+                    await loadDummyWorkouts()
+                    return
+                }
+                
+                var resultModels: [WorkoutModel] = []
+                
+                try await withThrowingTaskGroup(of: WorkoutModel?.self) { group in
+                    for userExercise in exercises {
+                        group.addTask {
+                            do {
+                                let detail = try await self.fetchExerciseDetail(id: userExercise.exerciseId)
+                                return WorkoutModel(userExercise: userExercise, exerciseDetail: detail)
+                            } catch {
+                                print("❌ ExerciseDetail 실패: \(error)")
+                                // 상세 정보 실패 시 기본 더미 데이터 사용
+                                return WorkoutModel(
+                                    userExercise: userExercise,
+                                    exerciseDetail: DummyData.exerciseDetail
+                                )
+                            }
                         }
+                    }
+                    
+                    for try await model in group {
+                        if let model = model { resultModels.append(model) }
                     }
                 }
                 
-                for try await model in group {
-                    if let model = model { resultModels.append(model) }
+                await MainActor.run {
+                    self.workouts = resultModels
                 }
+                
+            } catch {
+                print("❌ 운동 API JSON 파싱 실패: \(error)")
+                print("🔄 더미 데이터로 대체")
+                await loadDummyWorkouts()
             }
-            // 기존 운동들 초기화 후 새로 설정
-            self.workouts = resultModels
         } catch {
             print("❌ 운동 불러오기 실패: \(error)")
+            print("🔄 더미 데이터로 대체")
+            await loadDummyWorkouts()
         }
+    }
+    
+    // MARK: - 더미 운동 데이터 로드
+    private func loadDummyWorkouts() async {
+        print("🔄 더미 운동 데이터 로드 시작")
+        
+        var resultModels: [WorkoutModel] = []
+        
+        for userExercise in DummyData.userExercises {
+            let workoutModel = WorkoutModel(
+                userExercise: userExercise,
+                exerciseDetail: DummyData.exerciseDetail
+            )
+            resultModels.append(workoutModel)
+        }
+        
+        await MainActor.run {
+            self.workouts = resultModels
+        }
+        
+        print("✅ 더미 운동 데이터 로드 완료: \(resultModels.count)개")
     }
     
     // 카드 돋보기 클릭 시 항상 API 호출

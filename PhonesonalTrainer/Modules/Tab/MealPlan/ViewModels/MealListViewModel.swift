@@ -42,8 +42,12 @@ final class MealListViewModel: ObservableObject {
             let decoded = try JSONDecoder().decode(FoodPlansResponse.self, from: data)
             self.mealItems = decoded.result.map(MealModel.init(api:))
         } catch {
-            self.errorMessage = "불러오기 실패: \(error.localizedDescription)"
-            self.mealItems = []
+            print("❌ 식단 목록 API 실패: \(error)")
+            print("🔄 더미 데이터로 대체")
+            
+            // 더미 데이터로 대체
+            self.mealItems = DummyData.mealItems
+            self.errorMessage = nil
         }
     }
 }

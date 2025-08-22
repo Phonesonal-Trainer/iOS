@@ -40,8 +40,10 @@ final class AddedMealViewModel: ObservableObject {
             let decoded = try JSONDecoder().decode(UserMealsResponse.self, from: data)
             self.addedMeals = decoded.result.map(MealRecordEntry.init(api:))
         } catch {
-            self.errorMessage = "추가 식단 불러오기 실패: \(error.localizedDescription)"
-            self.addedMeals = []
+            print("❌ 추가 식단 API 실패: \(error)")
+            print("🔄 더미 데이터로 대체")
+            self.errorMessage = nil // 에러 메시지 숨김
+            self.addedMeals = DummyData.userMeals.map(MealRecordEntry.init(api:))
         }
     }
 

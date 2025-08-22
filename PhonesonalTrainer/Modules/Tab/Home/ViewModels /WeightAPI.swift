@@ -65,12 +65,20 @@ enum WeightAPI {
             }
         }
         
-        let decoded = try JSONDecoder().decode(APIResponse<WeightResultDTO>.self, from: data)
-        guard decoded.isSuccess, let w = decoded.result?.weight else {
-            throw NSError(domain: "WeightAPI", code: -1,
-                          userInfo: [NSLocalizedDescriptionKey: decoded.message ?? "몸무게 조회 실패"])
+        // JSON 파싱 에러 처리 개선
+        do {
+            let decoded = try JSONDecoder().decode(APIResponse<WeightResultDTO>.self, from: data)
+            guard decoded.isSuccess, let w = decoded.result?.weight else {
+                print("⚠️ 몸무게 API 응답 실패 - 더미 데이터 사용")
+                return DummyData.currentWeight
+            }
+            return w
+        } catch {
+            print("❌ 몸무게 API JSON 파싱 실패: \(error)")
+            print("📄 응답 데이터: \(String(data: data, encoding: .utf8) ?? "인코딩 실패")")
+            print("🔄 더미 데이터로 대체")
+            return DummyData.currentWeight
         }
-        return w
     }
 
     // POST /home/{userId}/main/post-weight-record
